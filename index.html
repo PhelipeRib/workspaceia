@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Virtual Office 2D - Agentes Autônomos</title>
+    <!-- Tailwind CSS CDN para UI de Overlay -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+        .font-pixel { font-family: 'Press Start 2P', cursive; }
+        .font-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e1e2e; }
+        ::-webkit-scrollbar-thumb { background: #45475a; border-radius: 3px; }
+
+        canvas { image-rendering: pixelated; crisp-edges; }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 0.4; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .pulse-active { animation: pulse-ring 2s infinite ease-in-out; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans h-screen overflow-hidden flex flex-col select-none">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between z-20">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600/20 border border-indigo-500/40 p-2 rounded-lg text-indigo-400">
+                <i data-lucide="bot" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="font-pixel text-xs text-indigo-400 tracking-wide">AI-OFFICE // 2D VIRTUAL HUB</h1>
+                <p class="text-xs text-slate-400">Escritório Interativo de Agentes de IA & Meeting Room</p>
+            </div>
+        </div>
+
+        <!-- Controls & Status Bar -->
+        <div class="flex items-center gap-3">
+            <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 flex items-center gap-2 text-xs">
+                <span id="connection-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="connection-status-text" class="text-slate-300 font-medium">Motor de IA: Local / Simulação</span>
+            </div>
+
+            <button id="btn-settings" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition">
+                <i data-lucide="settings" class="w-4 h-4"></i> Configurar Chaves/APIs
+            </button>
+
+            <button id="btn-reset-cache" class="bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/50 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Limpar Cache Local">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Resetar
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Game Canvas + Overlay Container -->
+    <div class="relative flex-1 bg-slate-900 overflow-hidden flex">
+
+        <!-- Canvas Container -->
+        <div id="game-container" class="relative flex-1 flex items-center justify-center bg-slate-950">
+            <canvas id="officeCanvas" class="rounded-xl border border-slate-800 shadow-2xl cursor-crosshair"></canvas>
+
+            <!-- Instructions Bar -->
+            <div class="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur border border-slate-800 px-4 py-2 rounded-lg text-xs text-slate-300 flex items-center gap-4 shadow-lg pointer-events-none">
+                <div class="flex items-center gap-1">
+                    <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">W A S D</span> /
+                    <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">Setas</span>
+                    <span class="ml-1">Mover Avatar</span>
+                </div>
+                <div class="w-px h-3 bg-slate-700"></div>
+                <div>Aproxime-se dos Agentes para iniciar reuniões ou pedir status!</div>
+            </div>
+
+            <!-- Active Proximity Indicator Badge -->
+            <div id="proximity-badge" class="hidden absolute top-6 left-1/2 -translate-x-1/2 bg-indigo-600/90 text-white px-4 py-2 rounded-full font-medium text-xs shadow-xl border border-indigo-400/50 flex items-center gap-2 transition-all">
+                <i data-lucide="radio" class="w-4 h-4 animate-spin text-indigo-200"></i>
+                <span id="proximity-text">Você entrou no alcance do Agente!</span>
+            </div>
+        </div>
+
+        <!-- Sidebar Panel: Agent Roster -->
+        <aside class="w-80 bg-slate-900/95 border-l border-slate-800 flex flex-col z-10">
+            <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i> Agentes na Sala
+                </h2>
+                <span id="agent-count-badge" class="bg-slate-800 text-indigo-400 text-xs px-2 py-0.5 rounded-full font-mono">4</span>
+            </div>
+
+            <div id="agents-list" class="flex-1 overflow-y-auto p-3 space-y-2.5">
+                <!-- Injetado dinamicamente -->
+            </div>
+
+            <div class="p-3 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-400">
+                <div class="flex justify-between items-center mb-1">
+                    <span>Espaço Atual:</span>
+                    <span class="text-indigo-400 font-medium">Main Coworking Zone</span>
+                </div>
+                <div class="flex justify-between items-center text-[11px] text-slate-500">
+                    <span>Protocolo:</span>
+                    <span>REST / WebSockets / MCP Ready</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Agent Dialogue / Meeting Modal -->
+    <div id="chat-modal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[600px]">
+            
+            <!-- Modal Header -->
+            <div class="bg-slate-800/80 px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div id="modal-agent-avatar" class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-xl">
+                        🤖
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 id="modal-agent-name" class="font-bold text-slate-100 text-base">Agente Dev Lead</h3>
+                            <span id="modal-agent-role" class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Dev Ops</span>
+                        </div>
+                        <p id="modal-agent-desc" class="text-xs text-slate-400">Especialista em revisão de código e arquitetura.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="btn-toggle-tts" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 border border-slate-600 text-xs flex items-center gap-1 transition" title="Ativar/Desativar Resposta por Voz">
+                        <i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i> Voz: ON
+                    </button>
+                    <button id="btn-close-modal" class="p-2 rounded-lg bg-slate-700/50 hover:bg-rose-900/60 text-slate-400 hover:text-rose-200 border border-slate-600 transition">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dialogue History -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/40 font-sans"></div>
+
+            <!-- Quick Action Chips -->
+            <div id="command-chips" class="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto text-xs"></div>
+
+            <!-- Input Bar -->
+            <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
+                <button id="btn-voice-input" class="p-3 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-xl border border-slate-700 transition shrink-0" title="Falar por Voz (Microfone)">
+                    <i data-lucide="mic" class="w-5 h-5"></i>
+                </button>
+
+                <input id="chat-input" type="text" placeholder="Escreva uma instrução ou pergunta para o agente..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition">
+
+                <button id="btn-send-message" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-3 rounded-xl transition flex items-center gap-2 shrink-0">
+                    <span>Enviar</span>
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-5">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-slate-100 text-lg flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-5 h-5 text-indigo-400"></i> Configurações do Sistema
+                </h3>
+                <button id="btn-close-settings" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Modo de Operação de IA:</label>
+                    <select id="setting-ai-mode" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                        <option value="simulated">Modo Simulado / Demonstrativo (Offline)</option>
+                        <option value="claude-api">Claude API Direct (Anthropic)</option>
+                        <option value="custom-webhook">Custom Webhook / MCP Server (Seu Backend)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Chave de API do Claude (opcional):</label>
+                    <input id="setting-api-key" type="password" placeholder="sk-ant-api03-..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">URL Endpoint do Webhook (Seu Backend):</label>
+                    <input id="setting-webhook-url" type="text" placeholder="https://api.suaempresa.com/v1/agent-chat" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button id="btn-save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-lg text-xs transition">
+                    Salvar Alterações
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Principal -->
+    <script>
+        const DEFAULT_AGENTS = [
+            {
+                id: 'agent-dev',
+                name: 'Alex (Dev Lead)',
+                role: 'Tech Lead / Code Reviewer',
+                desc: 'Especialista em arquitetura, CI/CD, revisão de PRs e relatórios de código.',
+                avatar: '👨‍💻',
+                color: '#6366f1',
+                x: 180, y: 180,
+                skills: ['Review de PRs', 'Status da Sprint', 'Arquitetura Cloud'],
+                history: [{ sender: 'agent', text: 'Olá! Sou o Alex. Como posso ajudar na engenharia ou status da sprint hoje?' }]
+            },
+            {
+                id: 'agent-pm',
+                name: 'Sophia (Product Manager)',
+                role: 'PM & Agile Specialist',
+                desc: 'Organiza backlog, métricas de roadmap, priorização de features e OKRs.',
+                avatar: '👩‍💼',
+                color: '#ec4899',
+                x: 480, y: 180,
+                skills: ['Roadmap 2026', 'Priorizar Backlog', 'Métricas de OKR'],
+                history: [{ sender: 'agent', text: 'Oi! Tudo bem? Quer alinhar os entregáveis ou rodar uma reunião de priorização?' }]
+            },
+            {
+                id: 'agent-data',
+                name: 'Carlos (Data Scientist)',
+                role: 'Analytics & BI',
+                desc: 'Executa queries em SQL, gera gráficos de ROI e relatórios de métricas do produto.',
+                avatar: '📊',
+                color: '#10b981',
+                x: 180, y: 380,
+                skills: ['Relatório de Churn', 'Consultar SQL', 'Métricas CAC/LTV'],
+                history: [{ sender: 'agent', text: 'E aí! Os dashboards estão atualizados. O que você gostaria de analisar agora?' }]
+            },
+            {
+                id: 'agent-hr',
+                name: 'Beatriz (People & Ops)',
+                role: 'HR & Work Culture',
+                desc: 'Gerencia onboarding, agendamento de reuniões de time e clima organizacional.',
+                avatar: '🤝',
+                color: '#f59e0b',
+                x: 480, y: 380,
+                skills: ['Onboarding Time', 'Agendar All-Hands', 'Políticas Internas'],
+                history: [{ sender: 'agent', text: 'Boas-vindas ao escritório virtual! Como posso te ajudar com a equipe hoje?' }]
+            }
+        ];
+
+        let agents = [];
+        let player = { x: 330, y: 280, radius: 14, speed: 3.5 };
+        let activeAgent = null;
+        let keys = {};
+        let ttsEnabled = true;
+        let isListeningVoice = false;
+        let recognition = null;
+        let appSettings = { aiMode: 'simulated', apiKey: '', webhookUrl: '' };
+
+        const canvas = document.getElementById('officeCanvas');
+        const ctx = canvas.getContext('2d');
+        const CANVAS_WIDTH = 660, CANVAS_HEIGHT = 520;
+        canvas.width = CANVAS_WIDTH; canvas.height = CANVAS_HEIGHT;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            loadStateFromStorage();
+            renderAgentRoster();
+            setupControls();
+            setupSpeechRecognition();
+            requestAnimationFrame(gameLoop);
+        });
+
+        function loadStateFromStorage() {
+            const savedSettings = localStorage.getItem('ai_office_settings');
+            if (savedSettings) {
+                appSettings = JSON.parse(savedSettings);
+                document.getElementById('setting-ai-mode').value = appSettings.aiMode || 'simulated';
+                document.getElementById('setting-api-key').value = appSettings.apiKey || '';
+                document.getElementById('setting-webhook-url').value = appSettings.webhookUrl || '';
+            }
+            const savedAgents = localStorage.getItem('ai_office_agents_data');
+            agents = savedAgents ? JSON.parse(savedAgents) : JSON.parse(JSON.stringify(DEFAULT_AGENTS));
+            updateStatusIndicator();
+        }
+
+        function saveStateToStorage() {
+            localStorage.setItem('ai_office_agents_data', JSON.stringify(agents));
+            localStorage.setItem('ai_office_settings', JSON.stringify(appSettings));
+        }
+
+        function updateStatusIndicator() {
+            const dot = document.getElementById('connection-status-dot');
+            const text = document.getElementById('connection-status-text');
+            if (appSettings.aiMode === 'claude-api') {
+                dot.className = "w-2 h-2 rounded-full bg-indigo-400 animate-pulse";
+                text.innerText = "Motor: Claude API Direct";
+            } else if (appSettings.aiMode === 'custom-webhook') {
+                dot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+                text.innerText = "Motor: Custom Webhook Server";
+            } else {
+                dot.className = "w-2 h-2 rounded-full bg-amber-400";
+                text.innerText = "Motor: Simulação Local (Offline)";
+            }
+        }
+
+        function renderAgentRoster() {
+            const container = document.getElementById('agents-list');
+            container.innerHTML = '';
+            agents.forEach(agent => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 p-3 rounded-xl transition cursor-pointer flex items-center gap-3";
+                card.onclick = () => { player.x = agent.x + 35; player.y = agent.y + 35; openChatModal(agent); };
+                card.innerHTML = `
+                    <div class="w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0" style="background-color: ${agent.color}25; border: 1px solid ${agent.color}50;">
+                        ${agent.avatar}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-slate-200 truncate">${agent.name}</h4>
+                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 truncate">${agent.role}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            document.getElementById('agent-count-badge').innerText = agents.length;
+        }
+
+        function setupControls() {
+            window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; keys[e.code] = true; });
+            window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; keys[e.code] = false; });
+
+            document.getElementById('btn-settings').onclick = () => document.getElementById('settings-modal').classList.remove('hidden');
+            document.getElementById('btn-close-settings').onclick = () => document.getElementById('settings-modal').classList.add('hidden');
+            document.getElementById('btn-save-settings').onclick = () => {
+                appSettings.aiMode = document.getElementById('setting-ai-mode').value;
+                appSettings.apiKey = document.getElementById('setting-api-key').value;
+                appSettings.webhookUrl = document.getElementById('setting-webhook-url').value;
+                saveStateToStorage(); updateStatusIndicator();
+                document.getElementById('settings-modal').classList.add('hidden');
+            };
+
+            document.getElementById('btn-reset-cache').onclick = () => {
+                if (confirm('Deseja resetar o estado e histórico dos agentes?')) {
+                    localStorage.clear(); location.reload();
+                }
+            };
+
+            document.getElementById('btn-close-modal').onclick = () => {
+                document.getElementById('chat-modal').classList.add('hidden'); activeAgent = null;
+            };
+            document.getElementById('btn-send-message').onclick = handleUserSendMessage;
+            document.getElementById('chat-input').addEventListener('keypress', e => { if (e.key === 'Enter') handleUserSendMessage(); });
+
+            document.getElementById('btn-toggle-tts').onclick = () => {
+                ttsEnabled = !ttsEnabled;
+                document.getElementById('btn-toggle-tts').innerHTML = ttsEnabled 
+                    ? `<i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i> Voz: ON`
+                    : `<i data-lucide="volume-x" class="w-4 h-4 text-slate-500"></i> Voz: OFF`;
+                lucide.createIcons();
+            };
+        }
+
+        function gameLoop() {
+            if (document.getElementById('chat-modal').classList.contains('hidden')) {
+                let dx = 0, dy = 0;
+                if (keys['w'] || keys['arrowup']) dy -= 1;
+                if (keys['s'] || keys['arrowdown']) dy += 1;
+                if (keys['a'] || keys['arrowleft']) dx -= 1;
+                if (keys['d'] || keys['arrowright']) dx += 1;
+
+                if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
+                player.x = Math.max(25, Math.min(CANVAS_WIDTH - 25, player.x + dx * player.speed));
+                player.y = Math.max(25, Math.min(CANVAS_HEIGHT - 25, player.y + dy * player.speed));
+            }
+
+            // Checar Proximidade
+            let foundAgent = null;
+            agents.forEach(agent => {
+                if (Math.hypot(player.x - agent.x, player.y - agent.y) < 55) foundAgent = agent;
+            });
+
+            const badge = document.getElementById('proximity-badge');
+            if (foundAgent) {
+                badge.classList.remove('hidden');
+                document.getElementById('proximity-text').innerText = `Pressione [ESPAÇO] para conversar com ${foundAgent.name}`;
+                if (keys[' '] || keys['space']) { openChatModal(foundAgent); keys[' '] = false; keys['space'] = false; }
+            } else { badge.classList.add('hidden'); }
+
+            drawScene();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function drawScene() {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+            // Grade do Chão
+            ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
+            for (let x = 0; x < CANVAS_WIDTH; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT); ctx.stroke(); }
+            for (let y = 0; y < CANVAS_HEIGHT; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_WIDTH, y); ctx.stroke(); }
+
+            // Mesas do Escritório
+            [{ x: 140, y: 140 }, { x: 440, y: 140 }, { x: 140, y: 340 }, { x: 440, y: 340 }].forEach(desk => {
+                ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.roundRect(desk.x - 40, desk.y - 25, 80, 50, 8); ctx.fill();
+                ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.5; ctx.stroke();
+                ctx.fillStyle = '#0284c7'; ctx.fillRect(desk.x - 12, desk.y - 15, 24, 10);
+            });
+
+            // Desenhando Agentes
+            agents.forEach(agent => {
+                if (Math.hypot(player.x - agent.x, player.y - agent.y) < 55) {
+                    ctx.fillStyle = `${agent.color}22`; ctx.beginPath(); ctx.arc(agent.x, agent.y, 35, 0, Math.PI * 2); ctx.fill();
+                    ctx.strokeStyle = agent.color; ctx.lineWidth = 1.5; ctx.stroke();
+                }
+
+                ctx.fillStyle = agent.color; ctx.beginPath(); ctx.arc(agent.x, agent.y, 18, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.font = '16px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(agent.avatar, agent.x, agent.y);
+
+                ctx.fillStyle = '#0f172a'; ctx.fillRect(agent.x - 45, agent.y - 36, 90, 16);
+                ctx.fillStyle = '#f8fafc'; ctx.font = 'bold 9px Plus Jakarta Sans'; ctx.fillText(agent.name.split(' ')[0], agent.x, agent.y - 28);
+            });
+
+            // Desenhando Player
+            ctx.fillStyle = '#6366f1'; ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#a5b4fc'; ctx.lineWidth = 2.5; ctx.stroke();
+        }
+
+        function openChatModal(agent) {
+            activeAgent = agent;
+            document.getElementById('modal-agent-name').innerText = agent.name;
+            document.getElementById('modal-agent-role').innerText = agent.role;
+            document.getElementById('modal-agent-desc').innerText = agent.desc;
+            document.getElementById('modal-agent-avatar').innerText = agent.avatar;
+
+            const chipsContainer = document.getElementById('command-chips');
+            chipsContainer.innerHTML = `<span class="text-slate-500 text-[11px] whitespace-nowrap">Comandos rápidos:</span>`;
+            agent.skills.forEach(skill => {
+                const btn = document.createElement('button');
+                btn.className = "chip-btn bg-slate-800 hover:bg-indigo-900/40 text-indigo-300 border border-slate-700 px-2.5 py-1 rounded-lg text-xs transition";
+                btn.innerText = skill;
+                btn.onclick = () => { document.getElementById('chat-input').value = `Executar: ${skill}`; handleUserSendMessage(); };
+                chipsContainer.appendChild(btn);
+            });
+
+            renderChatMessages();
+            document.getElementById('chat-modal').classList.remove('hidden');
+            document.getElementById('chat-input').focus();
+        }
+
+        function renderChatMessages() {
+            if (!activeAgent) return;
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '';
+            activeAgent.history.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`;
+                const bubble = document.createElement('div');
+                bubble.className = msg.sender === 'user'
+                    ? "bg-indigo-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%] text-xs shadow-md"
+                    : "bg-slate-800 text-slate-100 border border-slate-700/80 p-3 rounded-2xl rounded-tl-none max-w-[85%] text-xs shadow-md";
+                bubble.innerText = msg.text;
+                msgDiv.appendChild(bubble);
+                container.appendChild(msgDiv);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function handleUserSendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || !activeAgent) return;
+
+            activeAgent.history.push({ sender: 'user', text });
+            input.value = ''; renderChatMessages();
+
+            const reply = await queryAIMode(activeAgent, text);
+            activeAgent.history.push({ sender: 'agent', text: reply });
+            saveStateToStorage(); renderChatMessages();
+            if (ttsEnabled && ('speechSynthesis' in window)) {
+                const utt = new SpeechSynthesisUtterance(reply); utt.lang = 'pt-BR'; window.speechSynthesis.speak(utt);
+            }
+        }
+
+        async function queryAIMode(agent, prompt) {
+            if (appSettings.aiMode === 'claude-api' && appSettings.apiKey) {
+                try {
+                    const res = await fetch('https://api.anthropic.com/v1/messages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'x-api-key': appSettings.apiKey, 'anthropic-version': '2023-06-01' },
+                        body: JSON.stringify({ model: 'claude-3-5-sonnet-20241022', max_tokens: 300, messages: [{ role: 'user', content: prompt }] })
+                    });
+                    const data = await res.json();
+                    if (data.content && data.content[0]) return data.content[0].text;
+                } catch (e) { console.error(e); }
+            }
+            if (appSettings.aiMode === 'custom-webhook' && appSettings.webhookUrl) {
+                try {
+                    const res = await fetch(appSettings.webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ agentId: agent.id, prompt: prompt })
+                    });
+                    const data = await res.json();
+                    if (data.reply) return data.reply;
+                } catch (e) { console.error(e); }
+            }
+            await new Promise(r => setTimeout(r, 800));
+            return `[${agent.role}] Entendido! Analisei sua solicitação "${prompt}" e já estou processando a ação com as regras de negócio configuradas.`;
+        }
+
+        function setupSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.onresult = (e) => {
+                document.getElementById('chat-input').value = e.results[0][0].transcript;
+                handleUserSendMessage();
+            };
+            document.getElementById('btn-voice-input').onclick = () => recognition.start();
+        }
+    </script>
+</body>
+</html>
