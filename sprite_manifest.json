@@ -1,175 +1,164 @@
 {
-  "version": "2.0",
+  "version": "3.0",
   "renderer": "canvas-pixel-art",
   "pixelPerfect": true,
+  "assetBase": "./",
   "assets": {
     "desk_single": {
       "file": "desk_single.png",
       "w": 111,
       "h": 80,
       "category": "furniture",
-      "outlinePx": 2
-    },
-    "desk_dual": {
-      "file": "desk_dual.png",
-      "w": 110,
-      "h": 86,
-      "category": "furniture",
-      "outlinePx": 2
-    },
-    "desk_triple": {
-      "file": "desk_triple.png",
-      "w": 101,
-      "h": 64,
-      "category": "furniture",
-      "outlinePx": 2
-    },
-    "office_chair": {
-      "file": "office_chair.png",
-      "w": 70,
-      "h": 65,
-      "category": "furniture",
-      "outlinePx": 2
+      "collision": {
+        "x": 8,
+        "y": 47,
+        "w": 95,
+        "h": 30
+      }
     },
     "sofa_blue": {
       "file": "sofa_blue.png",
       "w": 70,
       "h": 65,
       "category": "furniture",
-      "outlinePx": 2
+      "collision": {
+        "x": 6,
+        "y": 33,
+        "w": 58,
+        "h": 28
+      }
     },
     "sofa_orange": {
       "file": "sofa_orange.png",
       "w": 143,
       "h": 53,
       "category": "furniture",
-      "outlinePx": 2
+      "collision": {
+        "x": 7,
+        "y": 27,
+        "w": 129,
+        "h": 22
+      }
     },
     "sofa_orange_2": {
       "file": "sofa_orange_2.png",
       "w": 145,
       "h": 61,
       "category": "furniture",
-      "outlinePx": 2
+      "collision": {
+        "x": 7,
+        "y": 31,
+        "w": 131,
+        "h": 26
+      }
     },
     "coffee_table_round": {
       "file": "coffee_table_round.png",
       "w": 74,
       "h": 60,
       "category": "furniture",
-      "outlinePx": 2
-    },
-    "meeting_table": {
-      "file": "meeting_table.png",
-      "w": 158,
-      "h": 112,
-      "category": "furniture",
-      "outlinePx": 2
+      "collision": {
+        "x": 9,
+        "y": 28,
+        "w": 56,
+        "h": 27
+      }
     },
     "round_meeting_table": {
       "file": "round_meeting_table.png",
       "w": 155,
       "h": 123,
       "category": "furniture",
-      "outlinePx": 2
-    },
-    "armchair": {
-      "file": "armchair.png",
-      "w": 36,
-      "h": 45,
-      "category": "furniture",
-      "outlinePx": 2
+      "collision": {
+        "x": 14,
+        "y": 52,
+        "w": 127,
+        "h": 58
+      }
     },
     "plant_large": {
       "file": "plant_large.png",
       "w": 30,
       "h": 49,
       "category": "nature",
-      "outlinePx": 2
+      "collision": {
+        "x": 8,
+        "y": 34,
+        "w": 14,
+        "h": 13
+      }
     },
     "plant_small": {
       "file": "plant_small.png",
       "w": 60,
       "h": 75,
       "category": "nature",
-      "outlinePx": 2
-    },
-    "plant_pot": {
-      "file": "plant_pot.png",
-      "w": 48,
-      "h": 67,
-      "category": "nature",
-      "outlinePx": 2
-    },
-    "monitor": {
-      "file": "monitor.png",
-      "w": 110,
-      "h": 61,
-      "category": "office",
-      "outlinePx": 2
-    },
-    "wall_tv": {
-      "file": "wall_tv.png",
-      "w": 87,
-      "h": 63,
-      "category": "office",
-      "outlinePx": 2
-    },
-    "whiteboard": {
-      "file": "whiteboard.png",
-      "w": 91,
-      "h": 48,
-      "category": "office",
-      "outlinePx": 2
+      "collision": {
+        "x": 18,
+        "y": 56,
+        "w": 24,
+        "h": 16
+      }
     },
     "pool_table": {
       "file": "pool_table.png",
       "w": 121,
       "h": 92,
       "category": "furniture",
-      "outlinePx": 2
+      "collision": {
+        "x": 4,
+        "y": 38,
+        "w": 113,
+        "h": 48
+      }
     },
     "foosball": {
       "file": "foosball.png",
       "w": 73,
       "h": 66,
       "category": "furniture",
-      "outlinePx": 2
+      "collision": {
+        "x": 5,
+        "y": 34,
+        "w": 63,
+        "h": 27
+      }
     },
-    "water_cooler": {
-      "file": "water_cooler.png",
-      "w": 23,
-      "h": 16,
-      "category": "office",
-      "outlinePx": 2
+    "whiteboard": {
+      "file": "whiteboard.png",
+      "w": 91,
+      "h": 48,
+      "category": "office"
+    },
+    "wall_tv": {
+      "file": "wall_tv.png",
+      "w": 87,
+      "h": 63,
+      "category": "office"
     },
     "bookshelf": {
       "file": "bookshelf.png",
       "w": 67,
       "h": 70,
       "category": "office",
-      "outlinePx": 2
+      "collision": {
+        "x": 6,
+        "y": 47,
+        "w": 55,
+        "h": 19
+      }
     },
-    "cabinet": {
-      "file": "cabinet.png",
-      "w": 39,
-      "h": 29,
+    "water_cooler": {
+      "file": "water_cooler.png",
+      "w": 23,
+      "h": 16,
       "category": "office",
-      "outlinePx": 2
-    },
-    "vending": {
-      "file": "vending.png",
-      "w": 45,
-      "h": 84,
-      "category": "office",
-      "outlinePx": 2
-    },
-    "bench": {
-      "file": "bench.png",
-      "w": 51,
-      "h": 63,
-      "category": "furniture",
-      "outlinePx": 2
+      "collision": {
+        "x": 3,
+        "y": 8,
+        "w": 17,
+        "h": 7
+      }
     },
     "floor_beige": {
       "file": "floor_beige.png",
