@@ -2,135 +2,156 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Startup Workspace 2D - Agentes Autônomos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Startup Workspace 2D - Gather Style</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-        .font-pixel { font-family: 'Press Start 2P', cursive; }
-        .font-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            touch-action: manipulation;
+        }
 
-        ::-webkit-scrollbar { width: 6px; }
+        /* Garantia de renderização nítida do Canvas estilo Pixel Art */
+        canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-
-        canvas { image-rendering: pixelated; crisp-edges; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans h-screen overflow-hidden flex flex-col select-none">
+<body class="bg-slate-950 text-slate-100 h-screen w-screen overflow-hidden flex flex-col select-none">
 
-    <!-- Top Navigation Header -->
-    <header class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between z-20">
+    <!-- Header Navigation Bar -->
+    <header class="bg-slate-900/90 border-b border-slate-800 px-4 py-2 flex items-center justify-between shrink-0 z-20 backdrop-blur">
         <div class="flex items-center gap-3">
             <div class="bg-indigo-600/20 border border-indigo-500/40 p-2 rounded-lg text-indigo-400">
-                <i data-lucide="bot-off" class="w-5 h-5"></i>
+                <i data-lucide="layout-grid" class="w-5 h-5"></i>
             </div>
             <div>
-                <h1 class="font-pixel text-[10px] sm:text-xs text-indigo-400 tracking-wide">STARTUP HQ // AI AGENTS 2D</h1>
-                <p class="text-xs text-slate-400">Comande seus colaboradores de IA interativamente no escritório</p>
+                <h1 class="text-xs sm:text-sm font-bold text-slate-100 tracking-wide flex items-center gap-2">
+                    STARTUP HQ <span class="bg-indigo-500/20 text-indigo-400 text-[10px] px-2 py-0.5 rounded-full border border-indigo-500/30 uppercase font-semibold">Gather Style 2D</span>
+                </h1>
+                <p class="text-[11px] text-slate-400 hidden sm:block">Aproxime-se dos agentes de IA para comandar operações</p>
             </div>
         </div>
 
-        <!-- System Controls -->
-        <div class="flex items-center gap-3">
-            <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 flex items-center gap-2 text-xs">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div class="hidden md:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 text-xs">
                 <span id="connection-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="connection-status-text" class="text-slate-300 font-medium">Motor de IA: Local / Simulado</span>
+                <span class="text-slate-300 font-medium">Ngrok / Webhook Ready</span>
             </div>
 
-            <button id="btn-settings" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition">
-                <i data-lucide="settings" class="w-4 h-4"></i> Configurar APIs
+            <button id="btn-toggle-roster" class="lg:hidden bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg border border-slate-700 transition" title="Agentes">
+                <i data-lucide="users" class="w-4 h-4"></i>
+            </button>
+
+            <button id="btn-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                <i data-lucide="settings" class="w-4 h-4"></i> <span class="hidden sm:inline">Configurar Conexões</span>
             </button>
         </div>
     </header>
 
-    <!-- Main Game Canvas + Overlay Container -->
-    <div class="relative flex-1 bg-slate-900 overflow-hidden flex">
+    <!-- Main Content Container -->
+    <div class="relative flex-1 bg-slate-950 overflow-hidden flex flex-col lg:flex-row">
 
-        <!-- Canvas Container -->
-        <div id="game-container" class="relative flex-1 flex flex-col items-center justify-center bg-slate-950 p-2">
-            <canvas id="officeCanvas" class="rounded-xl border border-slate-800 shadow-2xl cursor-crosshair"></canvas>
+        <!-- Game Canvas Viewport -->
+        <div id="canvas-container" class="relative flex-1 flex flex-col items-center justify-center bg-slate-950 p-2 overflow-hidden">
+            
+            <div class="relative w-full h-full flex items-center justify-center">
+                <canvas id="officeCanvas" class="rounded-xl border border-slate-800/80 shadow-2xl bg-slate-900 cursor-pointer max-w-full max-h-full object-contain"></canvas>
 
-            <!-- Instructions Bar -->
-            <div class="absolute bottom-16 left-4 bg-slate-900/90 backdrop-blur border border-slate-800 px-4 py-2 rounded-lg text-xs text-slate-300 flex items-center gap-4 shadow-lg pointer-events-none">
-                <div class="flex items-center gap-1">
-                    <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">W A S D</span> /
-                    <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">Setas</span>
-                    <span class="ml-1">Mover CEO / Líder</span>
+                <!-- Floating Interaction Prompt -->
+                <div id="proximity-badge" class="hidden absolute top-6 bg-slate-900/95 backdrop-blur-md text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-2xl border border-indigo-500/50 flex items-center gap-2.5 transition-all transform hover:scale-105 cursor-pointer">
+                    <span class="relative flex h-2.5 w-2.5">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
+                    </span>
+                    <span id="proximity-text" class="text-slate-200">Próximo de Agente!</span>
+                    <span class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full font-mono font-bold">ESPAÇO / TOQUE</span>
                 </div>
-                <div class="w-px h-3 bg-slate-700"></div>
-                <div>Caminhe até um agente de IA e aperte <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 text-indigo-400 font-mono font-bold">ESPAÇO</span> para dar ordens!</div>
+
+                <!-- Onscreen Mobile Touch D-Pad -->
+                <div id="mobile-dpad" class="absolute bottom-6 left-6 grid grid-cols-3 gap-1 bg-slate-900/80 backdrop-blur p-2 rounded-2xl border border-slate-800 md:hidden z-10 touch-none">
+                    <div></div>
+                    <button id="btn-up" class="w-11 h-11 bg-slate-800 rounded-xl active:bg-indigo-600 flex items-center justify-center text-slate-300 active:text-white"><i data-lucide="chevron-up" class="w-6 h-6"></i></button>
+                    <div></div>
+                    <button id="btn-left" class="w-11 h-11 bg-slate-800 rounded-xl active:bg-indigo-600 flex items-center justify-center text-slate-300 active:text-white"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                    <button id="btn-interact" class="w-11 h-11 bg-indigo-600 rounded-xl active:bg-indigo-500 flex items-center justify-center text-white font-bold text-xs"><i data-lucide="message-square" class="w-5 h-5"></i></button>
+                    <button id="btn-right" class="w-11 h-11 bg-slate-800 rounded-xl active:bg-indigo-600 flex items-center justify-center text-slate-300 active:text-white"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
+                    <div></div>
+                    <button id="btn-down" class="w-11 h-11 bg-slate-800 rounded-xl active:bg-indigo-600 flex items-center justify-center text-slate-300 active:text-white"><i data-lucide="chevron-down" class="w-6 h-6"></i></button>
+                    <div></div>
+                </div>
             </div>
 
-            <!-- Proximity Alert Badge -->
-            <div id="proximity-badge" class="hidden absolute top-6 left-1/2 -translate-x-1/2 bg-indigo-600/90 text-white px-4 py-2 rounded-full font-medium text-xs shadow-xl border border-indigo-400/50 flex items-center gap-2 transition-all">
-                <i data-lucide="radio" class="w-4 h-4 text-indigo-200"></i>
-                <span id="proximity-text">Próximo de Agente!</span>
-            </div>
-
-            <!-- Global Activity Stream Terminal -->
-            <div class="w-full h-12 bg-slate-900 border-t border-slate-800 mt-2 rounded-lg px-4 flex items-center gap-3 text-xs overflow-x-auto">
-                <span class="text-indigo-400 font-bold uppercase tracking-wider text-[10px] shrink-0 flex items-center gap-1">
-                    <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Activity Log:
+            <!-- Global Activity Log Footer -->
+            <div class="w-full h-10 bg-slate-900/90 border border-slate-800 rounded-lg px-3 flex items-center gap-3 text-xs shrink-0 mt-1">
+                <span class="text-indigo-400 font-bold uppercase tracking-wider text-[10px] shrink-0 flex items-center gap-1.5">
+                    <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Status Log:
                 </span>
-                <div id="global-log" class="text-slate-400 font-mono truncate">
-                    [SISTEMA]: Todos os agentes de IA operacionais e aguardando instruções nas suas estações.
+                <div id="global-log" class="text-slate-400 font-mono text-[11px] truncate">
+                    [SISTEMA]: Conectado ao escritório virtual. Clique no mapa ou use WASD para caminhar.
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar Panel: Agent Roster -->
-        <aside class="w-80 bg-slate-900/95 border-l border-slate-800 flex flex-col z-10">
+        <!-- Sidebar / Agent Roster Panel -->
+        <aside id="agent-sidebar" class="w-full lg:w-80 bg-slate-900/95 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col shrink-0 transition-all duration-300">
             <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <i data-lucide="cpu" class="w-4 h-4 text-indigo-400"></i> Agentes no Escritório
+                    <i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i> Colaboradores de IA
                 </h2>
-                <span id="agent-count-badge" class="bg-slate-800 text-indigo-400 text-xs px-2 py-0.5 rounded-full font-mono">4</span>
+                <span id="agent-count-badge" class="bg-indigo-950 text-indigo-400 border border-indigo-800/50 text-xs px-2.5 py-0.5 rounded-full font-bold">4</span>
             </div>
 
-            <div id="agents-list" class="flex-1 overflow-y-auto p-3 space-y-2.5">
+            <div id="agents-list" class="flex-1 overflow-y-auto p-3 space-y-2 max-h-48 lg:max-h-none">
                 <!-- Injetado dinamicamente -->
             </div>
 
             <div class="p-3 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-400">
                 <div class="flex justify-between items-center mb-1">
-                    <span>Organização:</span>
-                    <span class="text-indigo-400 font-medium">Tech Startup HQ</span>
+                    <span>Modo de Operação:</span>
+                    <span id="lbl-active-mode" class="text-indigo-400 font-medium">Simulação / Local</span>
                 </div>
                 <div class="flex justify-between items-center text-[11px] text-slate-500">
-                    <span>Status Global:</span>
-                    <span class="text-emerald-400 font-medium">4 Agentes Ativos</span>
+                    <span>Atalho para Andar:</span>
+                    <span class="text-slate-400">WASD ou Clique no Chão</span>
                 </div>
             </div>
         </aside>
     </div>
 
-    <!-- Modal de Comando / Diálogo do Agente de IA -->
-    <div id="chat-modal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[600px]">
+    <!-- Modal de Diálogo e Comandos com o Agente de IA -->
+    <div id="chat-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[85vh] max-h-[620px]">
 
             <!-- Modal Header -->
-            <div class="bg-slate-800/80 px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
+            <div class="bg-slate-800/90 px-4 py-3 border-b border-slate-700 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-3">
-                    <div id="modal-agent-avatar" class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-xl">
-                        🤖
+                    <div id="modal-agent-avatar" class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-xl shrink-0">
+                        👨‍💻
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 id="modal-agent-name" class="font-bold text-slate-100 text-base">Agente Lead</h3>
-                            <span id="modal-agent-role" class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">DevOps</span>
+                            <h3 id="modal-agent-name" class="font-bold text-slate-100 text-sm sm:text-base">Alex</h3>
+                            <span id="modal-agent-role" class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0.5 rounded-full uppercase font-bold">Dev Lead</span>
                         </div>
-                        <p id="modal-agent-desc" class="text-xs text-slate-400">Especialista em tarefas operacionais.</p>
+                        <p id="modal-agent-desc" class="text-xs text-slate-400 line-clamp-1">Especialista em Engenharia de Software.</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2">
                     <button id="btn-toggle-tts" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 border border-slate-600 text-xs flex items-center gap-1 transition">
-                        <i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i> Voz: ON
+                        <i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i>
                     </button>
                     <button id="btn-close-modal" class="p-2 rounded-lg bg-slate-700/50 hover:bg-rose-900/60 text-slate-400 hover:text-rose-200 border border-slate-600 transition">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -139,132 +160,141 @@
             </div>
 
             <!-- Dialogue / Log History -->
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/40 font-sans"></div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/50 font-sans text-xs sm:text-sm"></div>
 
             <!-- Quick Agent Commands / Skills -->
-            <div id="command-chips" class="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto text-xs"></div>
+            <div id="command-chips" class="px-3 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto text-xs shrink-0"></div>
 
             <!-- Input Bar -->
-            <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
-                <button id="btn-voice-input" class="p-3 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-xl border border-slate-700 transition shrink-0" title="Falar Ordem por Microfone">
-                    <i data-lucide="mic" class="w-5 h-5"></i>
+            <div class="p-3 sm:p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2 shrink-0">
+                <button id="btn-voice-input" class="p-2.5 sm:p-3 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-xl border border-slate-700 transition shrink-0" title="Voz">
+                    <i data-lucide="mic" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </button>
 
-                <input id="chat-input" type="text" placeholder="Envie uma instrução ou prompt para seu agente..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition">
+                <input id="chat-input" type="text" placeholder="Escreva o prompt ou comando para o agente..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-3.5 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 outline-none transition">
 
-                <button id="btn-send-message" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-3 rounded-xl transition flex items-center gap-2 shrink-0">
-                    <span>Comandar</span>
+                <button id="btn-send-message" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl transition flex items-center gap-2 shrink-0 text-xs sm:text-sm">
+                    <span>Enviar</span>
                     <i data-lucide="send" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Settings Modal -->
+    <!-- Modal de Configurações de API & Webhook -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-5">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-slate-100 text-lg flex items-center gap-2">
-                    <i data-lucide="sliders" class="w-5 h-5 text-indigo-400"></i> Conexão com Agentes de IA
+                <h3 class="font-bold text-slate-100 text-base sm:text-lg flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-5 h-5 text-indigo-400"></i> Conexão dos Agentes
                 </h3>
                 <button id="btn-close-settings" class="text-slate-400 hover:text-white">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <div class="space-y-4 text-xs">
+            <div class="space-y-3 text-xs sm:text-sm">
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Modo de Operação:</label>
-                    <select id="setting-ai-mode" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
-                        <option value="simulated">Simulação Offline (Demonstração)</option>
-                        <option value="claude-api">Claude API / Anthropic Direct</option>
-                        <option value="custom-webhook">Custom Webhook / Backend Autônomo</option>
+                    <label class="block font-semibold text-slate-300 mb-1">Modo do Motor de IA:</label>
+                    <select id="setting-ai-mode" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none focus:border-indigo-500">
+                        <option value="simulated">Simulação Offline (Local Demo)</option>
+                        <option value="custom-webhook">Custom Webhook / Ngrok (Seu Backend)</option>
+                        <option value="claude-api">Claude API Direct (Anthropic Key)</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">API Key (Se Claude API):</label>
-                    <input id="setting-api-key" type="password" placeholder="sk-ant-..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                    <label class="block font-semibold text-slate-300 mb-1">Endpoint Webhook / URL do Ngrok:</label>
+                    <input id="setting-webhook-url" type="text" placeholder="https://seu-ngrok-subdomain.ngrok-free.app/api/agent" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none focus:border-indigo-500 font-mono text-xs">
+                    <p class="text-[11px] text-slate-500 mt-1">Conecte com seu servidor Node/Python exposto via Ngrok.</p>
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">URL Webhook / Servidor de Agentes:</label>
-                    <input id="setting-webhook-url" type="text" placeholder="https://api.suaempresa.com/v1/agent-prompt" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                    <label class="block font-semibold text-slate-300 mb-1">API Key Anthropic (Se modo Claude API):</label>
+                    <input id="setting-api-key" type="password" placeholder="sk-ant-..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none focus:border-indigo-500 font-mono text-xs">
                 </div>
             </div>
 
             <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
-                <button id="btn-save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-lg text-xs transition">
-                    Salvar Conexões
+                <button id="btn-save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition">
+                    Salvar Alterações
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Core Script -->
+    <!-- Game Engine Logic Script -->
     <script>
+        // Configuração dos Agentes posicionado nas ilhas de trabalho do escritório no mapa
         const DEFAULT_AGENTS = [
             {
                 id: 'agent-dev',
-                name: 'Alex (Tech Lead)',
-                role: 'Engenheiro & Code Reviewer',
-                desc: 'Executa refatorações, gera testes automatizados e analisa Pull Requests.',
+                name: 'Brad',
+                role: 'Tech Lead / Dev',
+                desc: 'Análise de código, Pull Requests e automação de builds.',
                 avatar: '👨‍💻',
-                color: '#6366f1',
-                x: 180, y: 180,
+                color: '#3b82f6',
+                x: 390, y: 190,
                 status: 'Ocioso',
-                skills: ['Review de PR', 'Gerar Testes Unitários', 'Deploy Staging', 'Audit de Performance'],
-                history: [{ sender: 'agent', text: 'E aí! Sou seu agente Lead de Dev. Qual repositório ou tarefa de código devemos rodar agora?' }]
+                skills: ['Review de PR', 'Gerar Testes Unitários', 'Deploy Staging', 'Debug Endpoint'],
+                history: [{ sender: 'agent', text: 'E aí! Sou o Brad, seu Lead de Eng. Qual repositório ou tarefa de código vamos rodar?' }]
             },
             {
                 id: 'agent-pm',
-                name: 'Sophia (Product Owner)',
-                role: 'Gestão de Produto & Backlog',
-                desc: 'Gera requisitos de usuário, define estórias e organiza cronograma da sprint.',
+                name: 'Alison',
+                role: 'Product Owner',
+                desc: 'Definição de estórias de usuário e planejamento de Sprints.',
                 avatar: '👩‍💼',
                 color: '#ec4899',
-                x: 480, y: 180,
+                x: 580, y: 190,
                 status: 'Ocioso',
-                skills: ['Escrever User Stories', 'Priorizar Backlog', 'Análise de Concorrentes', 'Roadmap Q3'],
-                history: [{ sender: 'agent', text: 'Olá! Pronta para transformar suas ideias em especificações de produto claras para o time.' }]
+                skills: ['Escrever User Stories', 'Priorizar Backlog', 'Análise de concorrentes', 'Roadmap Q3'],
+                history: [{ sender: 'agent', text: 'Oi! Alison por aqui. Pronta para mapear requisitos e alinhar a visão de produto.' }]
             },
             {
-                id: 'agent-data',
-                name: 'Carlos (Data Specialist)',
-                role: 'Business Intelligence & SQL',
-                desc: 'Consulta banco de dados, gera insights de produto e calcula métricas financeiras.',
-                avatar: '📊',
+                id: 'agent-cx',
+                name: 'Som & Morgan',
+                role: 'CX & Product Analytics',
+                desc: 'Análise de retenção, feedback de clientes e métricas de uso.',
+                avatar: '🎧',
+                color: '#8b5cf6',
+                x: 720, y: 390,
+                status: 'Ocioso',
+                skills: ['Relatório NPS', 'Métricas de Coorte', 'Feedbacks Críticos', 'Análise de Churn'],
+                history: [{ sender: 'agent', text: 'Olá! Estamos monitorando a experiência do cliente e os logs de atendimento.' }]
+            },
+            {
+                id: 'agent-lounge',
+                name: 'Jinen & Steven',
+                role: 'Arquitetos & Estratégia',
+                desc: 'Design de sistemas e arquitetura de integração.',
+                avatar: '☕',
                 color: '#10b981',
-                x: 180, y: 380,
+                x: 180, y: 190,
                 status: 'Ocioso',
-                skills: ['Query SQL Vendas', 'Relatório Churn', 'Calcular CAC/LTV', 'Métricas de Coorte'],
-                history: [{ sender: 'agent', text: 'Sistemas prontos! Quer rodar alguma análise de dados ou extrair relatórios da aplicação?' }]
-            },
-            {
-                id: 'agent-qa',
-                name: 'Beatriz (Quality Assurance)',
-                role: 'Analista de Qualidade e Processos',
-                desc: 'Testa fluxos end-to-end, reporta bugs e valida onboardings de produto.',
-                avatar: '🔎',
-                color: '#f59e0b',
-                x: 480, y: 380,
-                status: 'Ocioso',
-                skills: ['Executar BDD Tests', 'Mapear Bugs Critical', 'Validação UX', 'Checklist Onboarding'],
-                history: [{ sender: 'agent', text: 'Oi! Sou sua Agente de QA. Qual fluxo de tela ou processo você quer submeter a testes?' }]
+                skills: ['Mapeamento de APIs', 'Desenho de BD', 'Refatoração Core', 'Plano Cloud'],
+                history: [{ sender: 'agent', text: 'Pausa para o café! Quer revisar a arquitetura da infraestrutura ou banco?' }]
             }
         ];
 
+        // Estado do Jogo e do Jogador (CEO)
         let agents = [];
-        let player = { x: 330, y: 280, radius: 14, speed: 3.5 };
+        let player = { 
+            x: 280, y: 110, 
+            targetX: 280, targetY: 110, 
+            radius: 12, speed: 3.8, 
+            isMoving: false 
+        };
         let activeAgent = null;
         let keys = {};
         let ttsEnabled = true;
         let recognition = null;
         let appSettings = { aiMode: 'simulated', apiKey: '', webhookUrl: '' };
 
+        // Elementos DOM & Canvas Canvas Setup (Resolução de Alta Qualidade Estilo Gather: 960x540)
         const canvas = document.getElementById('officeCanvas');
         const ctx = canvas.getContext('2d');
-        const CANVAS_WIDTH = 660, CANVAS_HEIGHT = 520;
+        const CANVAS_WIDTH = 960, CANVAS_HEIGHT = 540;
         canvas.width = CANVAS_WIDTH; canvas.height = CANVAS_HEIGHT;
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -284,6 +314,8 @@
                 document.getElementById('setting-api-key').value = appSettings.apiKey || '';
                 document.getElementById('setting-webhook-url').value = appSettings.webhookUrl || '';
             }
+            updateActiveModeLabel();
+
             const savedAgents = localStorage.getItem('ai_office_agents_data');
             agents = savedAgents ? JSON.parse(savedAgents) : JSON.parse(JSON.stringify(DEFAULT_AGENTS));
         }
@@ -291,6 +323,14 @@
         function saveStateToStorage() {
             localStorage.setItem('ai_office_agents_data', JSON.stringify(agents));
             localStorage.setItem('ai_office_settings', JSON.stringify(appSettings));
+            updateActiveModeLabel();
+        }
+
+        function updateActiveModeLabel() {
+            const lbl = document.getElementById('lbl-active-mode');
+            if (appSettings.aiMode === 'custom-webhook') lbl.innerText = 'Ngrok / Backend';
+            else if (appSettings.aiMode === 'claude-api') lbl.innerText = 'Claude API';
+            else lbl.innerText = 'Simulação Local';
         }
 
         function renderAgentRoster() {
@@ -298,20 +338,24 @@
             container.innerHTML = '';
             agents.forEach(agent => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 p-3 rounded-xl transition cursor-pointer flex items-center gap-3";
-                card.onclick = () => { player.x = agent.x + 35; player.y = agent.y + 35; openChatModal(agent); };
+                card.className = "bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 p-2.5 rounded-xl transition cursor-pointer flex items-center gap-3";
+                card.onclick = () => { 
+                    player.targetX = agent.x; 
+                    player.targetY = agent.y + 40; 
+                    openChatModal(agent); 
+                };
                 
                 const isExecuting = agent.status === 'Executando...';
-                const statusColor = isExecuting ? 'bg-amber-400 animate-ping' : 'bg-emerald-400';
+                const statusBg = isExecuting ? 'bg-amber-400 animate-ping' : 'bg-emerald-400';
 
                 card.innerHTML = `
-                    <div class="w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0" style="background-color: ${agent.color}25; border: 1px solid ${agent.color}50;">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0" style="background-color: ${agent.color}25; border: 1px solid ${agent.color}50;">
                         ${agent.avatar}
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between">
                             <h4 class="text-xs font-bold text-slate-200 truncate">${agent.name}</h4>
-                            <span class="w-2 h-2 rounded-full ${statusColor}"></span>
+                            <span class="w-2 h-2 rounded-full ${statusBg}"></span>
                         </div>
                         <p class="text-[11px] text-slate-400 truncate">${agent.role}</p>
                     </div>
@@ -322,9 +366,46 @@
         }
 
         function setupControls() {
+            // Teclado
             window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; keys[e.code] = true; });
             window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; keys[e.code] = false; });
 
+            // Clique / Toque no Canvas (Click to Move estilo Gather)
+            canvas.addEventListener('pointerdown', e => {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = CANVAS_WIDTH / rect.width;
+                const scaleY = CANVAS_HEIGHT / rect.height;
+                player.targetX = (e.clientX - rect.left) * scaleX;
+                player.targetY = (e.clientY - rect.top) * scaleY;
+            });
+
+            // Botões D-Pad Mobile
+            const setupDpadBtn = (id, dx, dy) => {
+                const btn = document.getElementById(id);
+                if (!btn) return;
+                const move = () => {
+                    player.targetX = player.x + dx * 35;
+                    player.targetY = player.y + dy * 35;
+                };
+                btn.addEventListener('touchstart', (e) => { e.preventDefault(); move(); });
+                btn.addEventListener('click', move);
+            };
+            setupDpadBtn('btn-up', 0, -1);
+            setupDpadBtn('btn-down', 0, 1);
+            setupDpadBtn('btn-left', -1, 0);
+            setupDpadBtn('btn-right', 1, 0);
+
+            document.getElementById('btn-interact').onclick = () => {
+                let found = agents.find(a => Math.hypot(player.x - a.x, player.y - a.y) < 65);
+                if (found) openChatModal(found);
+            };
+
+            // Toggle Sidebar Roster no Mobile
+            document.getElementById('btn-toggle-roster').onclick = () => {
+                document.getElementById('agent-sidebar').classList.toggle('hidden');
+            };
+
+            // Modais
             document.getElementById('btn-settings').onclick = () => document.getElementById('settings-modal').classList.remove('hidden');
             document.getElementById('btn-close-settings').onclick = () => document.getElementById('settings-modal').classList.add('hidden');
             document.getElementById('btn-save-settings').onclick = () => {
@@ -344,8 +425,8 @@
             document.getElementById('btn-toggle-tts').onclick = () => {
                 ttsEnabled = !ttsEnabled;
                 document.getElementById('btn-toggle-tts').innerHTML = ttsEnabled 
-                    ? `<i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i> Voz: ON`
-                    : `<i data-lucide="volume-x" class="w-4 h-4 text-slate-500"></i> Voz: OFF`;
+                    ? `<i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i>`
+                    : `<i data-lucide="volume-x" class="w-4 h-4 text-slate-500"></i>`;
                 lucide.createIcons();
             };
         }
@@ -358,70 +439,163 @@
                 if (keys['a'] || keys['arrowleft']) dx -= 1;
                 if (keys['d'] || keys['arrowright']) dx += 1;
 
-                if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
-                player.x = Math.max(25, Math.min(CANVAS_WIDTH - 25, player.x + dx * player.speed));
-                player.y = Math.max(25, Math.min(CANVAS_HEIGHT - 25, player.y + dy * player.speed));
+                // Se houver input de teclado, ignora o target de clique
+                if (dx !== 0 || dy !== 0) {
+                    if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
+                    player.x = Math.max(30, Math.min(CANVAS_WIDTH - 30, player.x + dx * player.speed));
+                    player.y = Math.max(30, Math.min(CANVAS_HEIGHT - 30, player.y + dy * player.speed));
+                    player.targetX = player.x;
+                    player.targetY = player.y;
+                } else if (Math.hypot(player.targetX - player.x, player.targetY - player.y) > 3) {
+                    // Smooth Click-to-Move interpolation
+                    let angle = Math.atan2(player.targetY - player.y, player.targetX - player.x);
+                    player.x += Math.cos(angle) * player.speed;
+                    player.y += Math.sin(angle) * player.speed;
+                }
             }
 
-            // Proximidade dos Agentes
+            // Checagem de Proximidade
             let foundAgent = null;
             agents.forEach(agent => {
-                if (Math.hypot(player.x - agent.x, player.y - agent.y) < 55) foundAgent = agent;
+                if (Math.hypot(player.x - agent.x, player.y - agent.y) < 65) foundAgent = agent;
             });
 
             const badge = document.getElementById('proximity-badge');
             if (foundAgent) {
                 badge.classList.remove('hidden');
-                document.getElementById('proximity-text').innerText = `Pressione [ESPAÇO] para comandar ${foundAgent.name}`;
+                document.getElementById('proximity-text').innerText = `Conversar com ${foundAgent.name} (${foundAgent.role})`;
+                badge.onclick = () => openChatModal(foundAgent);
                 if (keys[' '] || keys['space']) { openChatModal(foundAgent); keys[' '] = false; keys['space'] = false; }
-            } else { badge.classList.add('hidden'); }
+            } else { 
+                badge.classList.add('hidden'); 
+            }
 
-            drawScene();
+            drawGatherOfficeScene();
             requestAnimationFrame(gameLoop);
         }
 
-        function drawScene() {
+        // Renderização Completa do Mapa Estilo Gather (Inspirado na imagem enviada)
+        function drawGatherOfficeScene() {
             ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-            // Piso do Escritório
-            ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
-            for (let x = 0; x < CANVAS_WIDTH; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT); ctx.stroke(); }
-            for (let y = 0; y < CANVAS_HEIGHT; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_WIDTH, y); ctx.stroke(); }
-
-            // Mesas dos Agentes
-            [{ x: 140, y: 140 }, { x: 440, y: 140 }, { x: 140, y: 340 }, { x: 440, y: 340 }].forEach(desk => {
-                ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.roundRect(desk.x - 40, desk.y - 25, 80, 50, 8); ctx.fill();
-                ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.5; ctx.stroke();
-                // Monitor
-                ctx.fillStyle = '#38bdf8'; ctx.fillRect(desk.x - 12, desk.y - 15, 24, 8);
+            // 1. ÁREA EXTERNA VERDE COM ÁRVORES (Canto Esquerdo)
+            ctx.fillStyle = '#86efac'; ctx.fillRect(0, 0, 110, CANVAS_HEIGHT);
+            // Árvores estilo Pixel
+            [[30, 60], [70, 140], [30, 260], [70, 380], [30, 480]].forEach(([tx, ty]) => {
+                ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.arc(tx, ty, 22, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(tx - 3, ty - 3, 16, 0, Math.PI * 2); ctx.fill();
             });
 
-            // Desenhando Agentes de IA
+            // 2. SALAS DO ESCRITÓRIO (Piso Principal de Madeira Clara)
+            ctx.fillStyle = '#fef08a'; ctx.fillRect(110, 0, CANVAS_WIDTH - 110, CANVAS_HEIGHT);
+            
+            // Grid suave de azulejos/tábuas
+            ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1;
+            for (let x = 110; x < CANVAS_WIDTH; x += 32) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT); ctx.stroke(); }
+            for (let y = 0; y < CANVAS_HEIGHT; y += 32) { ctx.beginPath(); ctx.moveTo(110, y); ctx.lineTo(CANVAS_WIDTH, y); ctx.stroke(); }
+
+            // Parede Divisória Principal
+            ctx.fillStyle = '#64748b'; ctx.fillRect(110, 0, 6, CANVAS_HEIGHT);
+            ctx.fillRect(110, 260, 220, 6); ctx.fillRect(330, 0, 6, CANVAS_HEIGHT);
+
+            // 3. SALA 1: Lounge / Reunião (Canto Superior Esquerdo - Tapete Lilás)
+            ctx.fillStyle = '#c084fc'; ctx.fillRect(116, 6, 214, 254);
+            // Sofás & Mesa de centro
+            ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.roundRect(140, 60, 50, 24, 4); ctx.fill();
+            ctx.fillStyle = '#7e22ce'; ctx.beginPath(); ctx.roundRect(150, 110, 70, 35, 6); ctx.fill(); // Mesa Madeira
+
+            // 4. SALA 2: Jogos / Descanço (Canto Inferior Esquerdo - Tapete Cinza)
+            ctx.fillStyle = '#cbd5e1'; ctx.fillRect(116, 266, 214, 268);
+            // Mesa de Ping Pong
+            ctx.fillStyle = '#10b981'; ctx.fillRect(160, 340, 80, 50);
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.strokeRect(160, 340, 80, 50);
+            ctx.beginPath(); ctx.moveTo(200, 340); ctx.lineTo(200, 390); ctx.stroke();
+
+            // 5. ZONA CENTRAL DE DEV & PRODUCT (Ilha de Mesas Duplas estilo Gather)
+            // Placa da Zona Product Team
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(430, 20, 100, 20, 10); ctx.fill();
+            ctx.fillStyle = '#64748b'; ctx.font = 'bold 10px Plus Jakarta Sans'; ctx.textAlign = 'center'; ctx.fillText('Product team', 480, 33);
+
+            // Bancadas Duplas com Computadores (Ilha Dev/PM)
+            drawWorkstationIsland(360, 140, 260, 100);
+
+            // 6. ZONA DIREITA: CX & CUSTOMER TEAM
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(700, 220, 80, 20, 10); ctx.fill();
+            ctx.fillStyle = '#64748b'; ctx.font = 'bold 10px Plus Jakarta Sans'; ctx.fillText('CX team', 740, 233);
+            drawWorkstationIsland(660, 340, 220, 100);
+
+            // Área de Sofá Lounge Superior Direito
+            ctx.fillStyle = '#d8b4fe'; ctx.fillRect(700, 20, 220, 160);
+            ctx.fillStyle = '#fdba74'; ctx.beginPath(); ctx.roundRect(720, 40, 120, 30, 6); ctx.fill(); // Sofá Laranja
+            ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.arc(800, 110, 20, 0, Math.PI * 2); ctx.fill(); // Mesa redonda
+
+            // 7. RENDERIZANDO OS AGENTES DE IA (Inspirado nas badges Gather)
             agents.forEach(agent => {
-                const near = Math.hypot(player.x - agent.x, player.y - agent.y) < 55;
-                if (near) {
-                    ctx.fillStyle = `${agent.color}22`; ctx.beginPath(); ctx.arc(agent.x, agent.y, 35, 0, Math.PI * 2); ctx.fill();
-                    ctx.strokeStyle = agent.color; ctx.lineWidth = 1.5; ctx.stroke();
-                }
+                // Sombra do Agente
+                ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath(); ctx.ellipse(agent.x, agent.y + 12, 12, 6, 0, 0, Math.PI * 2); ctx.fill();
 
-                // Corpo
-                ctx.fillStyle = agent.color; ctx.beginPath(); ctx.arc(agent.x, agent.y, 18, 0, Math.PI * 2); ctx.fill();
+                // Corpo/Avatar do Agente
+                ctx.fillStyle = agent.color; ctx.beginPath(); ctx.arc(agent.x, agent.y, 14, 0, Math.PI * 2); ctx.fill();
                 ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
-                ctx.font = '16px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(agent.avatar, agent.x, agent.y);
+                ctx.font = '13px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(agent.avatar, agent.x, agent.y);
 
-                // Label com Nome & Status
-                ctx.fillStyle = '#0f172a'; ctx.fillRect(agent.x - 50, agent.y - 40, 100, 18);
-                ctx.strokeStyle = '#334155'; ctx.lineWidth = 1; ctx.strokeRect(agent.x - 50, agent.y - 40, 100, 18);
-                ctx.fillStyle = agent.status === 'Executando...' ? '#fbbf24' : '#f8fafc'; 
-                ctx.font = 'bold 9px Plus Jakarta Sans'; 
-                ctx.fillText(`${agent.name.split(' ')[0]} [${agent.status}]`, agent.x, agent.y - 31);
+                // Badge Estilo Gather acima do Agente
+                const labelText = `${agent.name} (${agent.role.split('/')[0].trim()})`;
+                ctx.font = 'bold 11px Plus Jakarta Sans';
+                const textWidth = ctx.measureText(labelText).width;
+                const badgeWidth = textWidth + 20;
+                const badgeX = agent.x - badgeWidth / 2;
+                const badgeY = agent.y - 38;
+
+                // Fundo do Badge (Escuro com transparência)
+                ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeWidth, 20, 10); ctx.fill();
+                ctx.strokeStyle = agent.status === 'Executando...' ? '#f59e0b' : '#334155'; ctx.lineWidth = 1.5; ctx.stroke();
+
+                // Ponto de Status Ativo
+                ctx.fillStyle = agent.status === 'Executando...' ? '#f59e0b' : '#10b981';
+                ctx.beginPath(); ctx.arc(badgeX + 10, badgeY + 10, 3.5, 0, Math.PI * 2); ctx.fill();
+
+                // Texto do Nome/Role
+                ctx.fillStyle = '#f8fafc'; ctx.textAlign = 'left'; ctx.fillText(labelText, badgeX + 18, badgeY + 13);
             });
 
-            // Player / CEO
-            ctx.fillStyle = '#818cf8'; ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = '#c7d2fe'; ctx.lineWidth = 2.5; ctx.stroke();
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 9px Plus Jakarta Sans'; ctx.fillText('VOCÊ (CEO)', player.x, player.y - 20);
+            // 8. RENDERIZANDO O JOGADOR (CEO)
+            // Sombra do Jogador
+            ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(player.x, player.y + 12, 12, 6, 0, 0, Math.PI * 2); ctx.fill();
+
+            // Corpo do CEO
+            ctx.fillStyle = '#6366f1'; ctx.beginPath(); ctx.arc(player.x, player.y, 14, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5; ctx.stroke();
+            ctx.font = '12px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('👑', player.x, player.y);
+
+            // Badge Flutuante "You" estilo Gather
+            ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.roundRect(player.x - 25, player.y - 38, 50, 18, 9); ctx.fill();
+            ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(player.x - 14, player.y - 29, 3.5, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 10px Plus Jakarta Sans'; ctx.textAlign = 'left'; ctx.fillText('You', player.x - 6, player.y - 26);
+        }
+
+        // Desenha Ilhas de Trabalho / Estações de Computadores
+        function drawWorkstationIsland(x, y, width, height) {
+            // Mesa de Madeira Cinza/Branca
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(x, y, width, height, 8); ctx.fill();
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
+
+            // Divisor Central da Ilha
+            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y + height / 2); ctx.lineTo(x + width, y + height / 2); ctx.stroke();
+
+            // Monitores nas Mesas
+            const numDesks = 3;
+            const step = width / numDesks;
+            for (let i = 0; i < numDesks; i++) {
+                let mx = x + step * i + step / 2;
+                // Monitor Superior
+                ctx.fillStyle = '#1e293b'; ctx.fillRect(mx - 12, y + 8, 24, 12);
+                ctx.fillStyle = '#38bdf8'; ctx.fillRect(mx - 10, y + 10, 20, 8); // Tela ligada
+                // Monitor Inferior
+                ctx.fillStyle = '#1e293b'; ctx.fillRect(mx - 12, y + height - 20, 24, 12);
+                ctx.fillStyle = '#818cf8'; ctx.fillRect(mx - 10, y + height - 18, 20, 8);
+            }
         }
 
         function openChatModal(agent) {
@@ -432,10 +606,10 @@
             document.getElementById('modal-agent-avatar').innerText = agent.avatar;
 
             const chipsContainer = document.getElementById('command-chips');
-            chipsContainer.innerHTML = `<span class="text-slate-500 text-[11px] whitespace-nowrap">Prompts Rápidos:</span>`;
+            chipsContainer.innerHTML = `<span class="text-slate-500 text-[11px] whitespace-nowrap font-medium">Atalhos:</span>`;
             agent.skills.forEach(skill => {
                 const btn = document.createElement('button');
-                btn.className = "chip-btn bg-slate-800 hover:bg-indigo-900/40 text-indigo-300 border border-slate-700 px-2.5 py-1 rounded-lg text-xs transition whitespace-nowrap";
+                btn.className = "chip-btn bg-slate-800 hover:bg-indigo-900/50 text-indigo-300 border border-slate-700 px-2.5 py-1 rounded-lg text-xs transition whitespace-nowrap font-medium";
                 btn.innerText = skill;
                 btn.onclick = () => { document.getElementById('chat-input').value = `Executar: ${skill}`; handleUserSendMessage(); };
                 chipsContainer.appendChild(btn);
@@ -455,8 +629,8 @@
                 msgDiv.className = `flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`;
                 const bubble = document.createElement('div');
                 bubble.className = msg.sender === 'user'
-                    ? "bg-indigo-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%] text-xs shadow-md"
-                    : "bg-slate-800 text-slate-100 border border-slate-700/80 p-3 rounded-2xl rounded-tl-none max-w-[85%] text-xs shadow-md whitespace-pre-line";
+                    ? "bg-indigo-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-md"
+                    : "bg-slate-800 text-slate-100 border border-slate-700 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-md whitespace-pre-line";
                 bubble.innerText = msg.text;
                 msgDiv.appendChild(bubble);
                 container.appendChild(msgDiv);
@@ -485,7 +659,7 @@
             renderChatMessages();
             renderAgentRoster();
 
-            updateGlobalLog(`[AGENTE ${activeAgent.name.toUpperCase()}]: Tarefa concluída com sucesso.`);
+            updateGlobalLog(`[AGENTE ${activeAgent.name.toUpperCase()}]: Tarefa concluída.`);
 
             if (ttsEnabled && ('speechSynthesis' in window)) {
                 const utt = new SpeechSynthesisUtterance(reply); utt.lang = 'pt-BR'; window.speechSynthesis.speak(utt);
@@ -496,7 +670,25 @@
             document.getElementById('global-log').innerText = message;
         }
 
+        // Conectividade com seu Backend (Ngrok) ou APIs Diretas
         async function queryAIMode(agent, prompt) {
+            if (appSettings.aiMode === 'custom-webhook' && appSettings.webhookUrl) {
+                try {
+                    const res = await fetch(appSettings.webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ agentId: agent.id, agentName: agent.name, role: agent.role, prompt: prompt })
+                    });
+                    const data = await res.json();
+                    if (data.reply || data.response || data.message) {
+                        return data.reply || data.response || data.message;
+                    }
+                } catch (e) {
+                    console.error("Erro ao conectar com Ngrok/Webhook:", e);
+                    return `[ERRO NGROK/WEBHOOK]: Não foi possível conectar ao endpoint em ${appSettings.webhookUrl}. Verifique se seu servidor local está ativo.`;
+                }
+            }
+
             if (appSettings.aiMode === 'claude-api' && appSettings.apiKey) {
                 try {
                     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -504,8 +696,8 @@
                         headers: { 'Content-Type': 'application/json', 'x-api-key': appSettings.apiKey, 'anthropic-version': '2023-06-01' },
                         body: JSON.stringify({
                             model: 'claude-3-5-sonnet-20241022',
-                            max_tokens: 350,
-                            system: `Você é um Agente Autônomo de IA com o papel de ${agent.role} no escritório virtual. Responda de forma profissional e direta como se estivesse executando a tarefa pedida.`,
+                            max_tokens: 400,
+                            system: `Você é um Agente Autônomo de IA chamado ${agent.name} (${agent.role}) trabalhando na startup virtual. Responda como um colaborador especialista.`,
                             messages: [{ role: 'user', content: prompt }]
                         })
                     });
@@ -514,21 +706,9 @@
                 } catch (e) { console.error(e); }
             }
 
-            if (appSettings.aiMode === 'custom-webhook' && appSettings.webhookUrl) {
-                try {
-                    const res = await fetch(appSettings.webhookUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ agentId: agent.id, agentRole: agent.role, prompt: prompt })
-                    });
-                    const data = await res.json();
-                    if (data.reply) return data.reply;
-                } catch (e) { console.error(e); }
-            }
-
-            // Fallback Simulado
+            // Resposta de Simulação Padrão
             await new Promise(r => setTimeout(r, 1000));
-            return `[AGENTE DE IA - ${agent.role.toUpperCase()}]\n\nRecebi o prompt: "${prompt}".\n\n- Status: Executado na stack interna.\n- Resultado: Ação validada e atualizada no ecossistema da aplicação.`;
+            return `[AGENTE DE IA - ${agent.name.toUpperCase()}]\n\nRecebi a solicitação: "${prompt}".\n\n- Status: Executado na esteira simulada.\n- Dica: Configure seu endpoint Ngrok na engrenagem superior para conectar este agente diretamente ao seu backend Node/Python!`;
         }
 
         function setupSpeechRecognition() {
