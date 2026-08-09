@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Startup Workspace 2D - Gather Style</title>
+    <title>AI Startup Workspace 2D - Gather Pixel Art</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -16,7 +16,7 @@
             touch-action: manipulation;
         }
 
-        /* Garantia de renderização nítida do Canvas estilo Pixel Art */
+        /* Renderização ultra-nítida de Pixel Art */
         canvas {
             image-rendering: pixelated;
             image-rendering: crisp-edges;
@@ -38,7 +38,7 @@
             </div>
             <div>
                 <h1 class="text-xs sm:text-sm font-bold text-slate-100 tracking-wide flex items-center gap-2">
-                    STARTUP HQ <span class="bg-indigo-500/20 text-indigo-400 text-[10px] px-2 py-0.5 rounded-full border border-indigo-500/30 uppercase font-semibold">Gather Style 2D</span>
+                    STARTUP HQ <span class="bg-indigo-500/20 text-indigo-400 text-[10px] px-2 py-0.5 rounded-full border border-indigo-500/30 uppercase font-semibold">Gather Pixel-Art 2D</span>
                 </h1>
                 <p class="text-[11px] text-slate-400 hidden sm:block">Aproxime-se dos agentes de IA para comandar operações</p>
             </div>
@@ -50,7 +50,7 @@
                 <span class="text-slate-300 font-medium">Ngrok / Webhook Ready</span>
             </div>
 
-            <button id="btn-toggle-roster" class="lg:hidden bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg border border-slate-700 transition" title="Agentes">
+            <button id="btn-toggle-roster" class="lg:hidden bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg border border-slate-700 transition">
                 <i data-lucide="users" class="w-4 h-4"></i>
             </button>
 
@@ -69,7 +69,7 @@
             <div class="relative w-full h-full flex items-center justify-center">
                 <canvas id="officeCanvas" class="rounded-xl border border-slate-800/80 shadow-2xl bg-slate-900 cursor-pointer max-w-full max-h-full object-contain"></canvas>
 
-                <!-- Floating Interaction Prompt -->
+                <!-- Badge Flutuante de Proximidade -->
                 <div id="proximity-badge" class="hidden absolute top-6 bg-slate-900/95 backdrop-blur-md text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-2xl border border-indigo-500/50 flex items-center gap-2.5 transition-all transform hover:scale-105 cursor-pointer">
                     <span class="relative flex h-2.5 w-2.5">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
@@ -79,7 +79,7 @@
                     <span class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full font-mono font-bold">ESPAÇO / TOQUE</span>
                 </div>
 
-                <!-- Onscreen Mobile Touch D-Pad -->
+                <!-- Joystick Virtual Mobile -->
                 <div id="mobile-dpad" class="absolute bottom-6 left-6 grid grid-cols-3 gap-1 bg-slate-900/80 backdrop-blur p-2 rounded-2xl border border-slate-800 md:hidden z-10 touch-none">
                     <div></div>
                     <button id="btn-up" class="w-11 h-11 bg-slate-800 rounded-xl active:bg-indigo-600 flex items-center justify-center text-slate-300 active:text-white"><i data-lucide="chevron-up" class="w-6 h-6"></i></button>
@@ -99,7 +99,7 @@
                     <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Status Log:
                 </span>
                 <div id="global-log" class="text-slate-400 font-mono text-[11px] truncate">
-                    [SISTEMA]: Conectado ao escritório virtual. Clique no mapa ou use WASD para caminhar.
+                    [SISTEMA]: Conectado ao escritório Gather. Clique no piso ou use WASD para movimentar.
                 </div>
             </div>
         </div>
@@ -108,9 +108,9 @@
         <aside id="agent-sidebar" class="w-full lg:w-80 bg-slate-900/95 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col shrink-0 transition-all duration-300">
             <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i> Colaboradores de IA
+                    <i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i> Agentes de IA
                 </h2>
-                <span id="agent-count-badge" class="bg-indigo-950 text-indigo-400 border border-indigo-800/50 text-xs px-2.5 py-0.5 rounded-full font-bold">4</span>
+                <span id="agent-count-badge" class="bg-indigo-950 text-indigo-400 border border-indigo-800/50 text-xs px-2.5 py-0.5 rounded-full font-bold">3</span>
             </div>
 
             <div id="agents-list" class="flex-1 overflow-y-auto p-3 space-y-2 max-h-48 lg:max-h-none">
@@ -119,12 +119,12 @@
 
             <div class="p-3 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-400">
                 <div class="flex justify-between items-center mb-1">
-                    <span>Modo de Operação:</span>
+                    <span>Motor Conectado:</span>
                     <span id="lbl-active-mode" class="text-indigo-400 font-medium">Simulação / Local</span>
                 </div>
                 <div class="flex justify-between items-center text-[11px] text-slate-500">
-                    <span>Atalho para Andar:</span>
-                    <span class="text-slate-400">WASD ou Clique no Chão</span>
+                    <span>Movimentação:</span>
+                    <span class="text-slate-400">WASD / Setas / Clique</span>
                 </div>
             </div>
         </aside>
@@ -142,7 +142,7 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 id="modal-agent-name" class="font-bold text-slate-100 text-sm sm:text-base">Alex</h3>
+                            <h3 id="modal-agent-name" class="font-bold text-slate-100 text-sm sm:text-base">Brad</h3>
                             <span id="modal-agent-role" class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0.5 rounded-full uppercase font-bold">Dev Lead</span>
                         </div>
                         <p id="modal-agent-desc" class="text-xs text-slate-400 line-clamp-1">Especialista em Engenharia de Software.</p>
@@ -159,19 +159,19 @@
                 </div>
             </div>
 
-            <!-- Dialogue / Log History -->
+            <!-- Log / Diálogo -->
             <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/50 font-sans text-xs sm:text-sm"></div>
 
-            <!-- Quick Agent Commands / Skills -->
+            <!-- Quick Agent Commands -->
             <div id="command-chips" class="px-3 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto text-xs shrink-0"></div>
 
             <!-- Input Bar -->
             <div class="p-3 sm:p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2 shrink-0">
-                <button id="btn-voice-input" class="p-2.5 sm:p-3 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-xl border border-slate-700 transition shrink-0" title="Voz">
+                <button id="btn-voice-input" class="p-2.5 sm:p-3 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-xl border border-slate-700 transition shrink-0">
                     <i data-lucide="mic" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </button>
 
-                <input id="chat-input" type="text" placeholder="Escreva o prompt ou comando para o agente..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-3.5 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 outline-none transition">
+                <input id="chat-input" type="text" placeholder="Escreva um prompt ou instrução..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-3.5 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 outline-none transition">
 
                 <button id="btn-send-message" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl transition flex items-center gap-2 shrink-0 text-xs sm:text-sm">
                     <span>Enviar</span>
@@ -206,7 +206,7 @@
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1">Endpoint Webhook / URL do Ngrok:</label>
                     <input id="setting-webhook-url" type="text" placeholder="https://seu-ngrok-subdomain.ngrok-free.app/api/agent" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none focus:border-indigo-500 font-mono text-xs">
-                    <p class="text-[11px] text-slate-500 mt-1">Conecte com seu servidor Node/Python exposto via Ngrok.</p>
+                    <p class="text-[11px] text-slate-500 mt-1">Conecte com seu backend exposto via Ngrok.</p>
                 </div>
 
                 <div>
@@ -223,67 +223,59 @@
         </div>
     </div>
 
-    <!-- Game Engine Logic Script -->
+    <!-- Motor do Jogo e Gerador de Sprites Pixel Art -->
     <script>
-        // Configuração dos Agentes posicionado nas ilhas de trabalho do escritório no mapa
+        // Configuração dos Agentes mapeados conforme as ilhas das imagens
         const DEFAULT_AGENTS = [
             {
-                id: 'agent-dev',
+                id: 'agent-brad',
                 name: 'Brad',
-                role: 'Tech Lead / Dev',
-                desc: 'Análise de código, Pull Requests e automação de builds.',
+                badgeIcon: '🎸',
+                role: 'Product / Dev',
+                desc: 'Engenheiro de Software & Code Reviewer.',
                 avatar: '👨‍💻',
+                hairColor: '#3b0764',
                 color: '#3b82f6',
-                x: 390, y: 190,
+                x: 320, y: 195,
                 status: 'Ocioso',
                 skills: ['Review de PR', 'Gerar Testes Unitários', 'Deploy Staging', 'Debug Endpoint'],
-                history: [{ sender: 'agent', text: 'E aí! Sou o Brad, seu Lead de Eng. Qual repositório ou tarefa de código vamos rodar?' }]
+                history: [{ sender: 'agent', text: 'E aí! Sou o Brad. Pronto para refatorações e testes no projeto.' }]
             },
             {
-                id: 'agent-pm',
+                id: 'agent-alison',
                 name: 'Alison',
+                badgeIcon: '🍕',
                 role: 'Product Owner',
-                desc: 'Definição de estórias de usuário e planejamento de Sprints.',
+                desc: 'Gestão de Backlog e Requisitos de Produto.',
                 avatar: '👩‍💼',
+                hairColor: '#9a3412',
                 color: '#ec4899',
-                x: 580, y: 190,
+                x: 480, y: 195,
                 status: 'Ocioso',
-                skills: ['Escrever User Stories', 'Priorizar Backlog', 'Análise de concorrentes', 'Roadmap Q3'],
-                history: [{ sender: 'agent', text: 'Oi! Alison por aqui. Pronta para mapear requisitos e alinhar a visão de produto.' }]
+                skills: ['Escrever User Stories', 'Priorizar Backlog', 'Análise de Concorrentes', 'Roadmap Q3'],
+                history: [{ sender: 'agent', text: 'Oi! Alison por aqui. Vamos estruturar a próxima sprint?' }]
             },
             {
-                id: 'agent-cx',
-                name: 'Som & Morgan',
-                role: 'CX & Product Analytics',
-                desc: 'Análise de retenção, feedback de clientes e métricas de uso.',
-                avatar: '🎧',
+                id: 'agent-reading',
+                name: 'Morgan',
+                badgeIcon: '📚',
+                role: 'Research & Strategy',
+                desc: 'Análise estratégica na Sala de Leitura.',
+                avatar: '🧔',
+                hairColor: '#1e293b',
                 color: '#8b5cf6',
-                x: 720, y: 390,
+                x: 105, y: 440,
                 status: 'Ocioso',
-                skills: ['Relatório NPS', 'Métricas de Coorte', 'Feedbacks Críticos', 'Análise de Churn'],
-                history: [{ sender: 'agent', text: 'Olá! Estamos monitorando a experiência do cliente e os logs de atendimento.' }]
-            },
-            {
-                id: 'agent-lounge',
-                name: 'Jinen & Steven',
-                role: 'Arquitetos & Estratégia',
-                desc: 'Design de sistemas e arquitetura de integração.',
-                avatar: '☕',
-                color: '#10b981',
-                x: 180, y: 190,
-                status: 'Ocioso',
-                skills: ['Mapeamento de APIs', 'Desenho de BD', 'Refatoração Core', 'Plano Cloud'],
-                history: [{ sender: 'agent', text: 'Pausa para o café! Quer revisar a arquitetura da infraestrutura ou banco?' }]
+                skills: ['Pesquisa de Mercado', 'Análise Competitiva', 'Doc de Arquitetura'],
+                history: [{ sender: 'agent', text: 'Olá! Estou revisando a documentação e referências na biblioteca.' }]
             }
         ];
 
-        // Estado do Jogo e do Jogador (CEO)
         let agents = [];
         let player = { 
-            x: 280, y: 110, 
-            targetX: 280, targetY: 110, 
-            radius: 12, speed: 3.8, 
-            isMoving: false 
+            x: 200, y: 120, 
+            targetX: 200, targetY: 120, 
+            speed: 3.5 
         };
         let activeAgent = null;
         let keys = {};
@@ -291,14 +283,44 @@
         let recognition = null;
         let appSettings = { aiMode: 'simulated', apiKey: '', webhookUrl: '' };
 
-        // Elementos DOM & Canvas Canvas Setup (Resolução de Alta Qualidade Estilo Gather: 960x540)
+        // Configuração do Canvas (640x480 nativo para manter os pixels fiéis e nítidos)
         const canvas = document.getElementById('officeCanvas');
         const ctx = canvas.getContext('2d');
-        const CANVAS_WIDTH = 960, CANVAS_HEIGHT = 540;
+        const CANVAS_WIDTH = 600, CANVAS_HEIGHT = 500;
         canvas.width = CANVAS_WIDTH; canvas.height = CANVAS_HEIGHT;
+
+        // --- SISTEMA DE GERAÇÃO DE TEXTURAS/SPRITES PROCEDURAIS PIXEL ART ---
+        const pixelPatterns = {};
+
+        function initPixelTextures() {
+            // 1. Piso Azulejo Creme / Parede
+            const cTile = document.createElement('canvas'); cTile.width = 32; cTile.height = 32;
+            const ctxT = cTile.getContext('2d');
+            ctxT.fillStyle = '#fef3c7'; ctxT.fillRect(0,0,32,32);
+            ctxT.fillStyle = '#fde68a'; ctxT.fillRect(0,0,31,31);
+            ctxT.fillStyle = '#f59e0b20'; ctxT.fillRect(0,30,32,2); ctxT.fillRect(30,0,2,32);
+            pixelPatterns.tile = ctx.createPattern(cTile, 'repeat');
+
+            // 2. Piso Chevron Azul/Cinza (Product Team Area)
+            const cChev = document.createElement('canvas'); cChev.width = 16; cChev.height = 16;
+            const ctxC = cChev.getContext('2d');
+            ctxC.fillStyle = '#94a3b8'; ctxC.fillRect(0,0,16,16);
+            ctxC.fillStyle = '#cbd5e1'; 
+            ctxC.fillRect(0,0,8,8); ctxC.fillRect(8,8,8,8);
+            pixelPatterns.chevron = ctx.createPattern(cChev, 'repeat');
+
+            // 3. Piso Chevron Lilás (Biblioteca)
+            const cChev2 = document.createElement('canvas'); cChev2.width = 16; cChev2.height = 16;
+            const ctxC2 = cChev2.getContext('2d');
+            ctxC2.fillStyle = '#a78bfa'; ctxC2.fillRect(0,0,16,16);
+            ctxC2.fillStyle = '#c4b5fd'; 
+            ctxC2.fillRect(0,0,8,8); ctxC2.fillRect(8,8,8,8);
+            pixelPatterns.chevronPurple = ctx.createPattern(cChev2, 'repeat');
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
+            initPixelTextures();
             loadStateFromStorage();
             renderAgentRoster();
             setupControls();
@@ -328,7 +350,7 @@
 
         function updateActiveModeLabel() {
             const lbl = document.getElementById('lbl-active-mode');
-            if (appSettings.aiMode === 'custom-webhook') lbl.innerText = 'Ngrok / Backend';
+            if (appSettings.aiMode === 'custom-webhook') lbl.innerText = 'Ngrok / Webhook';
             else if (appSettings.aiMode === 'claude-api') lbl.innerText = 'Claude API';
             else lbl.innerText = 'Simulação Local';
         }
@@ -341,7 +363,7 @@
                 card.className = "bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 p-2.5 rounded-xl transition cursor-pointer flex items-center gap-3";
                 card.onclick = () => { 
                     player.targetX = agent.x; 
-                    player.targetY = agent.y + 40; 
+                    player.targetY = agent.y + 35; 
                     openChatModal(agent); 
                 };
                 
@@ -354,7 +376,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between">
-                            <h4 class="text-xs font-bold text-slate-200 truncate">${agent.name}</h4>
+                            <h4 class="text-xs font-bold text-slate-200 truncate">${agent.name} ${agent.badgeIcon}</h4>
                             <span class="w-2 h-2 rounded-full ${statusBg}"></span>
                         </div>
                         <p class="text-[11px] text-slate-400 truncate">${agent.role}</p>
@@ -366,11 +388,9 @@
         }
 
         function setupControls() {
-            // Teclado
             window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; keys[e.code] = true; });
             window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; keys[e.code] = false; });
 
-            // Clique / Toque no Canvas (Click to Move estilo Gather)
             canvas.addEventListener('pointerdown', e => {
                 const rect = canvas.getBoundingClientRect();
                 const scaleX = CANVAS_WIDTH / rect.width;
@@ -379,13 +399,12 @@
                 player.targetY = (e.clientY - rect.top) * scaleY;
             });
 
-            // Botões D-Pad Mobile
             const setupDpadBtn = (id, dx, dy) => {
                 const btn = document.getElementById(id);
                 if (!btn) return;
                 const move = () => {
-                    player.targetX = player.x + dx * 35;
-                    player.targetY = player.y + dy * 35;
+                    player.targetX = player.x + dx * 30;
+                    player.targetY = player.y + dy * 30;
                 };
                 btn.addEventListener('touchstart', (e) => { e.preventDefault(); move(); });
                 btn.addEventListener('click', move);
@@ -396,16 +415,14 @@
             setupDpadBtn('btn-right', 1, 0);
 
             document.getElementById('btn-interact').onclick = () => {
-                let found = agents.find(a => Math.hypot(player.x - a.x, player.y - a.y) < 65);
+                let found = agents.find(a => Math.hypot(player.x - a.x, player.y - a.y) < 50);
                 if (found) openChatModal(found);
             };
 
-            // Toggle Sidebar Roster no Mobile
             document.getElementById('btn-toggle-roster').onclick = () => {
                 document.getElementById('agent-sidebar').classList.toggle('hidden');
             };
 
-            // Modais
             document.getElementById('btn-settings').onclick = () => document.getElementById('settings-modal').classList.remove('hidden');
             document.getElementById('btn-close-settings').onclick = () => document.getElementById('settings-modal').classList.add('hidden');
             document.getElementById('btn-save-settings').onclick = () => {
@@ -439,163 +456,225 @@
                 if (keys['a'] || keys['arrowleft']) dx -= 1;
                 if (keys['d'] || keys['arrowright']) dx += 1;
 
-                // Se houver input de teclado, ignora o target de clique
                 if (dx !== 0 || dy !== 0) {
                     if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
-                    player.x = Math.max(30, Math.min(CANVAS_WIDTH - 30, player.x + dx * player.speed));
-                    player.y = Math.max(30, Math.min(CANVAS_HEIGHT - 30, player.y + dy * player.speed));
+                    player.x = Math.max(20, Math.min(CANVAS_WIDTH - 20, player.x + dx * player.speed));
+                    player.y = Math.max(20, Math.min(CANVAS_HEIGHT - 20, player.y + dy * player.speed));
                     player.targetX = player.x;
                     player.targetY = player.y;
                 } else if (Math.hypot(player.targetX - player.x, player.targetY - player.y) > 3) {
-                    // Smooth Click-to-Move interpolation
                     let angle = Math.atan2(player.targetY - player.y, player.targetX - player.x);
                     player.x += Math.cos(angle) * player.speed;
                     player.y += Math.sin(angle) * player.speed;
                 }
             }
 
-            // Checagem de Proximidade
             let foundAgent = null;
             agents.forEach(agent => {
-                if (Math.hypot(player.x - agent.x, player.y - agent.y) < 65) foundAgent = agent;
+                if (Math.hypot(player.x - agent.x, player.y - agent.y) < 50) foundAgent = agent;
             });
 
             const badge = document.getElementById('proximity-badge');
             if (foundAgent) {
                 badge.classList.remove('hidden');
-                document.getElementById('proximity-text').innerText = `Conversar com ${foundAgent.name} (${foundAgent.role})`;
+                document.getElementById('proximity-text').innerText = `Comandar ${foundAgent.name}`;
                 badge.onclick = () => openChatModal(foundAgent);
                 if (keys[' '] || keys['space']) { openChatModal(foundAgent); keys[' '] = false; keys['space'] = false; }
             } else { 
                 badge.classList.add('hidden'); 
             }
 
-            drawGatherOfficeScene();
+            renderGatherScene();
             requestAnimationFrame(gameLoop);
         }
 
-        // Renderização Completa do Mapa Estilo Gather (Inspirado na imagem enviada)
-        function drawGatherOfficeScene() {
+        // --- RENDERIZAÇÃO COMPLETA DA CENA PIXEL ART FIDELIZADA ÀS IMAGENS ---
+        function renderGatherScene() {
             ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-            // 1. ÁREA EXTERNA VERDE COM ÁRVORES (Canto Esquerdo)
-            ctx.fillStyle = '#86efac'; ctx.fillRect(0, 0, 110, CANVAS_HEIGHT);
-            // Árvores estilo Pixel
-            [[30, 60], [70, 140], [30, 260], [70, 380], [30, 480]].forEach(([tx, ty]) => {
-                ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.arc(tx, ty, 22, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(tx - 3, ty - 3, 16, 0, Math.PI * 2); ctx.fill();
-            });
+            // 1. Fundo do Piso Azulejo Creme Geral
+            ctx.fillStyle = pixelPatterns.tile;
+            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-            // 2. SALAS DO ESCRITÓRIO (Piso Principal de Madeira Clara)
-            ctx.fillStyle = '#fef08a'; ctx.fillRect(110, 0, CANVAS_WIDTH - 110, CANVAS_HEIGHT);
-            
-            // Grid suave de azulejos/tábuas
-            ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1;
-            for (let x = 110; x < CANVAS_WIDTH; x += 32) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_HEIGHT); ctx.stroke(); }
-            for (let y = 0; y < CANVAS_HEIGHT; y += 32) { ctx.beginPath(); ctx.moveTo(110, y); ctx.lineTo(CANVAS_WIDTH, y); ctx.stroke(); }
+            // 2. SALA SUPERIOR DIREITA: CAFETERIA / WATER COOLER (Baseada na Foto 2)
+            drawCoffeeCorner(320, 0);
 
-            // Parede Divisória Principal
-            ctx.fillStyle = '#64748b'; ctx.fillRect(110, 0, 6, CANVAS_HEIGHT);
-            ctx.fillRect(110, 260, 220, 6); ctx.fillRect(330, 0, 6, CANVAS_HEIGHT);
+            // 3. SALA CENTRAL: PRODUCT TEAM (Baseada na Foto 1)
+            drawProductTeamZone(240, 80);
 
-            // 3. SALA 1: Lounge / Reunião (Canto Superior Esquerdo - Tapete Lilás)
-            ctx.fillStyle = '#c084fc'; ctx.fillRect(116, 6, 214, 254);
-            // Sofás & Mesa de centro
-            ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.roundRect(140, 60, 50, 24, 4); ctx.fill();
-            ctx.fillStyle = '#7e22ce'; ctx.beginPath(); ctx.roundRect(150, 110, 70, 35, 6); ctx.fill(); // Mesa Madeira
+            // 4. SALA INFERIOR ESQUERDA: BIBLIOTECA DE LEITURA (Baseada na Foto 3)
+            drawLibraryRoom(10, 260);
 
-            // 4. SALA 2: Jogos / Descanço (Canto Inferior Esquerdo - Tapete Cinza)
-            ctx.fillStyle = '#cbd5e1'; ctx.fillRect(116, 266, 214, 268);
-            // Mesa de Ping Pong
-            ctx.fillStyle = '#10b981'; ctx.fillRect(160, 340, 80, 50);
-            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.strokeRect(160, 340, 80, 50);
-            ctx.beginPath(); ctx.moveTo(200, 340); ctx.lineTo(200, 390); ctx.stroke();
-
-            // 5. ZONA CENTRAL DE DEV & PRODUCT (Ilha de Mesas Duplas estilo Gather)
-            // Placa da Zona Product Team
-            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(430, 20, 100, 20, 10); ctx.fill();
-            ctx.fillStyle = '#64748b'; ctx.font = 'bold 10px Plus Jakarta Sans'; ctx.textAlign = 'center'; ctx.fillText('Product team', 480, 33);
-
-            // Bancadas Duplas com Computadores (Ilha Dev/PM)
-            drawWorkstationIsland(360, 140, 260, 100);
-
-            // 6. ZONA DIREITA: CX & CUSTOMER TEAM
-            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(700, 220, 80, 20, 10); ctx.fill();
-            ctx.fillStyle = '#64748b'; ctx.font = 'bold 10px Plus Jakarta Sans'; ctx.fillText('CX team', 740, 233);
-            drawWorkstationIsland(660, 340, 220, 100);
-
-            // Área de Sofá Lounge Superior Direito
-            ctx.fillStyle = '#d8b4fe'; ctx.fillRect(700, 20, 220, 160);
-            ctx.fillStyle = '#fdba74'; ctx.beginPath(); ctx.roundRect(720, 40, 120, 30, 6); ctx.fill(); // Sofá Laranja
-            ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.arc(800, 110, 20, 0, Math.PI * 2); ctx.fill(); // Mesa redonda
-
-            // 7. RENDERIZANDO OS AGENTES DE IA (Inspirado nas badges Gather)
+            // 5. RENDERIZAR AGENTES DE IA (Personagens Pixel Art + Badge Flutuante)
             agents.forEach(agent => {
-                // Sombra do Agente
-                ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath(); ctx.ellipse(agent.x, agent.y + 12, 12, 6, 0, 0, Math.PI * 2); ctx.fill();
-
-                // Corpo/Avatar do Agente
-                ctx.fillStyle = agent.color; ctx.beginPath(); ctx.arc(agent.x, agent.y, 14, 0, Math.PI * 2); ctx.fill();
-                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
-                ctx.font = '13px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(agent.avatar, agent.x, agent.y);
-
-                // Badge Estilo Gather acima do Agente
-                const labelText = `${agent.name} (${agent.role.split('/')[0].trim()})`;
-                ctx.font = 'bold 11px Plus Jakarta Sans';
-                const textWidth = ctx.measureText(labelText).width;
-                const badgeWidth = textWidth + 20;
-                const badgeX = agent.x - badgeWidth / 2;
-                const badgeY = agent.y - 38;
-
-                // Fundo do Badge (Escuro com transparência)
-                ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeWidth, 20, 10); ctx.fill();
-                ctx.strokeStyle = agent.status === 'Executando...' ? '#f59e0b' : '#334155'; ctx.lineWidth = 1.5; ctx.stroke();
-
-                // Ponto de Status Ativo
-                ctx.fillStyle = agent.status === 'Executando...' ? '#f59e0b' : '#10b981';
-                ctx.beginPath(); ctx.arc(badgeX + 10, badgeY + 10, 3.5, 0, Math.PI * 2); ctx.fill();
-
-                // Texto do Nome/Role
-                ctx.fillStyle = '#f8fafc'; ctx.textAlign = 'left'; ctx.fillText(labelText, badgeX + 18, badgeY + 13);
+                drawPixelCharacter(agent.x, agent.y, agent.hairColor, '#fca5a5', false);
+                drawGatherBadge(agent.x, agent.y - 22, `${agent.name}`, agent.badgeIcon, agent.status === 'Executando...');
             });
 
-            // 8. RENDERIZANDO O JOGADOR (CEO)
-            // Sombra do Jogador
-            ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(player.x, player.y + 12, 12, 6, 0, 0, Math.PI * 2); ctx.fill();
-
-            // Corpo do CEO
-            ctx.fillStyle = '#6366f1'; ctx.beginPath(); ctx.arc(player.x, player.y, 14, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5; ctx.stroke();
-            ctx.font = '12px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('👑', player.x, player.y);
-
-            // Badge Flutuante "You" estilo Gather
-            ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.roundRect(player.x - 25, player.y - 38, 50, 18, 9); ctx.fill();
-            ctx.strokeStyle = '#6366f1'; ctx.lineWidth = 1.5; ctx.stroke();
-            ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(player.x - 14, player.y - 29, 3.5, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 10px Plus Jakarta Sans'; ctx.textAlign = 'left'; ctx.fillText('You', player.x - 6, player.y - 26);
+            // 6. RENDERIZAR JOGADOR (CEO)
+            drawPixelCharacter(player.x, player.y, '#1e293b', '#fca5a5', true);
+            drawGatherBadge(player.x, player.y - 22, 'You', '', false, true);
         }
 
-        // Desenha Ilhas de Trabalho / Estações de Computadores
-        function drawWorkstationIsland(x, y, width, height) {
-            // Mesa de Madeira Cinza/Branca
-            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(x, y, width, height, 8); ctx.fill();
-            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
+        // --- MÓVEIS E SPRITES DESENHADOS EM PIXEL ART ---
 
-            // Divisor Central da Ilha
-            ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, y + height / 2); ctx.lineTo(x + width, y + height / 2); ctx.stroke();
+        // 1. Ilha do Product Team com Múltiplos Monitores e Detalhes
+        function drawProductTeamZone(x, y) {
+            // Tapete Chevron Azul
+            ctx.fillStyle = pixelPatterns.chevron;
+            ctx.fillRect(x, y, 320, 180);
 
-            // Monitores nas Mesas
-            const numDesks = 3;
-            const step = width / numDesks;
-            for (let i = 0; i < numDesks; i++) {
-                let mx = x + step * i + step / 2;
-                // Monitor Superior
-                ctx.fillStyle = '#1e293b'; ctx.fillRect(mx - 12, y + 8, 24, 12);
-                ctx.fillStyle = '#38bdf8'; ctx.fillRect(mx - 10, y + 10, 20, 8); // Tela ligada
-                // Monitor Inferior
-                ctx.fillStyle = '#1e293b'; ctx.fillRect(mx - 12, y + height - 20, 24, 12);
-                ctx.fillStyle = '#818cf8'; ctx.fillRect(mx - 10, y + height - 18, 20, 8);
+            // Placa "Product team" estilo Gather
+            ctx.fillStyle = '#ffffffd0'; ctx.beginPath(); ctx.roundRect(x + 110, y - 18, 100, 16, 8); ctx.fill();
+            ctx.fillStyle = '#475569'; ctx.font = 'bold 9px Plus Jakarta Sans'; ctx.textAlign = 'center'; ctx.fillText('Product team', x + 160, y - 6);
+
+            // BANCADA SUPERIOR
+            drawDeskSegment(x + 20, y + 10, 80);
+            // PC Gamer / Setup Teclado Azul (Foto 1 Canto Esquerdo)
+            ctx.fillStyle = '#1e293b'; ctx.fillRect(x + 25, y + 2, 12, 18); // Torre
+            ctx.fillStyle = '#ec4899'; ctx.fillRect(x + 40, y + 4, 20, 12); // Monitor Neon
+            ctx.fillStyle = '#3b82f6'; ctx.fillRect(x + 62, y + 4, 14, 12); // Monitor Vertical
+            ctx.fillStyle = '#0284c7'; ctx.fillRect(x + 42, y + 18, 16, 4); // Teclado Azul
+
+            drawDeskSegment(x + 110, y + 10, 80);
+            // Setup Dual Monitor Coding
+            ctx.fillStyle = '#0284c7'; ctx.fillRect(x + 120, y + 4, 18, 12);
+            ctx.fillStyle = '#0369a1'; ctx.fillRect(x + 140, y + 4, 18, 12);
+
+            drawDeskSegment(x + 200, y + 10, 80);
+            // Vasinho Plantinha Verde + Laptop
+            ctx.fillStyle = '#16a34a'; ctx.beginPath(); ctx.arc(x + 215, y + 8, 5, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#d97706'; ctx.fillRect(x + 213, y + 11, 4, 4);
+            ctx.fillStyle = '#38bdf8'; ctx.fillRect(x + 245, y + 6, 16, 10); // Laptop
+
+            // CADEIRAS DE ESCRITÓRIO PRETAS (Superiores)
+            [x + 50, x + 145, x + 240].forEach(cx => {
+                ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(cx, y + 36, 7, 0, Math.PI*2); ctx.fill();
+            });
+
+            // BANCADA INFERIOR
+            drawDeskSegment(x + 20, y + 100, 80);
+            // Frigobar/Vending Machine ao lado (Foto 1)
+            ctx.fillStyle = '#94a3b8'; ctx.fillRect(x + 22, y + 88, 16, 20); ctx.fillStyle = '#38bdf8'; ctx.fillRect(x + 24, y + 92, 12, 8);
+
+            drawDeskSegment(x + 110, y + 100, 80);
+            // Curved Monitor (Foto 1 Centro Inferior)
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(x + 135, y + 94, 30, 10);
+            ctx.fillStyle = '#38bdf8'; ctx.fillRect(x + 137, y + 95, 26, 7);
+
+            drawDeskSegment(x + 200, y + 100, 80);
+            // Mesa Cyan da Alison com Pizza (Foto 1)
+            ctx.fillStyle = '#2dd4bf'; ctx.fillRect(x + 200, y + 100, 80, 20);
+            ctx.fillStyle = '#ea580c'; ctx.beginPath(); ctx.arc(x + 265, y + 95, 5, 0, Math.PI*2); ctx.fill(); // Pizza / Item
+        }
+
+        // Desenha Módulo de Mesa de Escritório Pixel Art
+        function drawDeskSegment(dx, dy, width) {
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(dx, dy, width, 22);
+            ctx.fillStyle = '#cbd5e1'; ctx.fillRect(dx, dy + 20, width, 4); // Borda/Sombra da mesa
+        }
+
+        // 2. Canto do Café e Galão de Água (Foto 2)
+        function drawCoffeeCorner(cx, cy) {
+            // Parede Cinza de Fundo com Janela Vidro
+            ctx.fillStyle = '#475569'; ctx.fillRect(cx, cy, 260, 45);
+            ctx.fillStyle = '#a5f3fc'; ctx.fillRect(cx + 60, cy + 5, 120, 32); // Janela
+            ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2; ctx.strokeRect(cx + 60, cy + 5, 120, 32);
+            ctx.beginPath(); ctx.moveTo(cx + 120, cy + 5); ctx.lineTo(cx + 120, cy + 37); ctx.stroke();
+
+            // Balcão Branco com Xícaras Roxas (Foto 2)
+            ctx.fillStyle = '#f8fafc'; ctx.fillRect(cx + 10, cy + 45, 80, 22);
+            ctx.fillStyle = '#64748b'; ctx.fillRect(cx + 10, cy + 65, 80, 10); // Armário inferior
+            ctx.fillStyle = '#16a34a'; ctx.beginPath(); ctx.arc(cx + 22, cy + 40, 5, 0, Math.PI*2); ctx.fill(); // Vaso
+            ctx.fillStyle = '#9333ea'; ctx.fillRect(cx + 50, cy + 48, 8, 8); ctx.fillRect(cx + 62, cy + 48, 8, 8); // Xícaras roxas!
+
+            // Máquina de Café e Bebedouro / Galão de Água Azul (Foto 2)
+            ctx.fillStyle = '#1e293b'; ctx.fillRect(cx + 95, cy + 38, 30, 36); // Máquina Café
+            ctx.fillStyle = '#a855f7'; ctx.fillRect(cx + 106, cy + 55, 6, 6); // Xícara na máquina
+
+            ctx.fillStyle = '#64748b'; ctx.fillRect(cx + 130, cy + 50, 24, 24); // Base Bebedouro
+            ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(cx + 142, cy + 42, 10, 0, Math.PI*2); ctx.fill(); // Galão Água Azul
+
+            // Vaso de Planta de Canto (Foto 2)
+            ctx.fillStyle = '#1e293b'; ctx.fillRect(cx + 165, cy + 55, 18, 18); // Vaso rocha
+            ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(cx + 174, cy + 45, 12, 0, Math.PI*2); ctx.fill(); // Folhagem
+        }
+
+        // 3. Sala da Biblioteca com Estante e Quadro (Foto 3)
+        function drawLibraryRoom(lx, ly) {
+            // Paredes Roxas da Sala
+            ctx.fillStyle = '#6b21a8'; ctx.fillRect(lx, ly, 190, 40);
+            // Piso Chevron Lilás
+            ctx.fillStyle = pixelPatterns.chevronPurple; ctx.fillRect(lx, ly + 40, 190, 190);
+            ctx.strokeStyle = '#581c87'; ctx.lineWidth = 3; ctx.strokeRect(lx, ly, 190, 230);
+
+            // Estante de Livros Coloridos (Foto 3)
+            ctx.fillStyle = '#1e293b'; ctx.fillRect(lx + 10, ly + 10, 70, 50);
+            // Livros em pixel art nas prateleiras
+            const bookColors = ['#ef4444', '#3b82f6', '#eab308', '#10b981', '#ec4899'];
+            for (let r = 0; r < 3; r++) {
+                for (let b = 0; b < 10; b++) {
+                    ctx.fillStyle = bookColors[(r + b) % bookColors.length];
+                    ctx.fillRect(lx + 14 + (b * 6), ly + 15 + (r * 14), 4, 10);
+                }
             }
+
+            // Quadro com Paisagem na Parede (Foto 3)
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(lx + 95, ly + 8, 30, 24);
+            ctx.fillStyle = '#38bdf8'; ctx.fillRect(lx + 97, ly + 10, 26, 20);
+            ctx.fillStyle = '#22c55e'; ctx.fillRect(lx + 97, ly + 22, 26, 8); // Montanha no quadro
+
+            // Armário com vaso na Parede Direita
+            ctx.fillStyle = '#334155'; ctx.fillRect(lx + 135, ly + 20, 35, 30);
+            ctx.fillStyle = '#ea580c'; ctx.beginPath(); ctx.arc(lx + 152, ly + 14, 6, 0, Math.PI*2); ctx.fill();
+
+            // Conjunto de 4 Cadeiras Azuis + Mesa Redonda com Livro Verde (Foto 3)
+            const mx = lx + 95, my = ly + 140;
+            // Mesa centro
+            ctx.fillStyle = '#cbd5e1'; ctx.beginPath(); ctx.arc(mx, my, 18, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#22c55e'; ctx.fillRect(mx - 4, my - 6, 10, 12); // Livro verde na mesa!
+
+            // 4 Cadeiras azuis viradas em cruz
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(mx - 8, my - 32, 16, 10); // Norte
+            ctx.fillRect(mx - 8, my + 22, 16, 10); // Sul
+            ctx.fillRect(mx - 32, my - 8, 10, 16); // Oeste
+            ctx.fillRect(mx + 22, my - 8, 10, 16); // Leste
+        }
+
+        // 4. Desenha Personagem Pixel Art Top-Down (Estilo Gather / Pokémon)
+        function drawPixelCharacter(px, py, hairColor, skinColor, isLeader) {
+            // Sombra
+            ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(px, py + 10, 8, 4, 0, 0, Math.PI * 2); ctx.fill();
+
+            // Corpo / Roupa
+            ctx.fillStyle = isLeader ? '#4f46e5' : '#334155'; ctx.fillRect(px - 5, py, 10, 10);
+            // Cabeça / Pele
+            ctx.fillStyle = skinColor; ctx.fillRect(px - 6, py - 10, 12, 10);
+            // Cabelo estilo Pixel
+            ctx.fillStyle = hairColor; ctx.fillRect(px - 7, py - 13, 14, 6);
+            // Olhos
+            ctx.fillStyle = '#000000'; ctx.fillRect(px - 3, py - 6, 2, 2); ctx.fillRect(px + 1, py - 6, 2, 2);
+        }
+
+        // 5. Desenha Badge Flutuante Fiel ao Gather (Com Ícones e Ponto Online Verde)
+        function drawGatherBadge(bx, by, name, iconText, isExecuting, isYou) {
+            const label = isYou ? 'You' : `${name} ${iconText}`;
+            ctx.font = 'bold 10px Plus Jakarta Sans';
+            const textWidth = ctx.measureText(label).width;
+            const width = textWidth + 24;
+            const x = bx - width / 2;
+
+            // Balão Escuro Arredondado
+            ctx.fillStyle = '#1e293be6'; ctx.beginPath(); ctx.roundRect(x, by, width, 18, 9); ctx.fill();
+            ctx.strokeStyle = isExecuting ? '#f59e0b' : '#00000033'; ctx.lineWidth = 1; ctx.stroke();
+
+            // Ponto Verde Status "Online"
+            ctx.fillStyle = isExecuting ? '#f59e0b' : '#22c55e';
+            ctx.beginPath(); ctx.arc(x + 9, by + 9, 3, 0, Math.PI * 2); ctx.fill();
+
+            // Texto
+            ctx.fillStyle = '#ffffff'; ctx.textAlign = 'left'; ctx.fillText(label, x + 16, by + 12);
         }
 
         function openChatModal(agent) {
@@ -649,7 +728,7 @@
             renderChatMessages();
             renderAgentRoster();
 
-            updateGlobalLog(`[AGENTE ${activeAgent.name.toUpperCase()}]: Processando ordem "${promptText}"...`);
+            updateGlobalLog(`[AGENTE ${activeAgent.name.toUpperCase()}]: Processando "${promptText}"...`);
 
             const reply = await queryAIMode(activeAgent, promptText);
             
@@ -659,7 +738,7 @@
             renderChatMessages();
             renderAgentRoster();
 
-            updateGlobalLog(`[AGENTE ${activeAgent.name.toUpperCase()}]: Tarefa concluída.`);
+            updateGlobalLog(`[AGENTE ${activeAgent.name.toUpperCase()}]: Resposta emitida com sucesso.`);
 
             if (ttsEnabled && ('speechSynthesis' in window)) {
                 const utt = new SpeechSynthesisUtterance(reply); utt.lang = 'pt-BR'; window.speechSynthesis.speak(utt);
@@ -670,7 +749,6 @@
             document.getElementById('global-log').innerText = message;
         }
 
-        // Conectividade com seu Backend (Ngrok) ou APIs Diretas
         async function queryAIMode(agent, prompt) {
             if (appSettings.aiMode === 'custom-webhook' && appSettings.webhookUrl) {
                 try {
@@ -684,8 +762,8 @@
                         return data.reply || data.response || data.message;
                     }
                 } catch (e) {
-                    console.error("Erro ao conectar com Ngrok/Webhook:", e);
-                    return `[ERRO NGROK/WEBHOOK]: Não foi possível conectar ao endpoint em ${appSettings.webhookUrl}. Verifique se seu servidor local está ativo.`;
+                    console.error("Erro no Ngrok:", e);
+                    return `[ERRO NGROK]: Não foi possível conectar ao endpoint ${appSettings.webhookUrl}. Verifique se o servidor local está rodando.`;
                 }
             }
 
@@ -696,8 +774,8 @@
                         headers: { 'Content-Type': 'application/json', 'x-api-key': appSettings.apiKey, 'anthropic-version': '2023-06-01' },
                         body: JSON.stringify({
                             model: 'claude-3-5-sonnet-20241022',
-                            max_tokens: 400,
-                            system: `Você é um Agente Autônomo de IA chamado ${agent.name} (${agent.role}) trabalhando na startup virtual. Responda como um colaborador especialista.`,
+                            max_tokens: 350,
+                            system: `Você é um Agente Autônomo de IA chamado ${agent.name} (${agent.role}). Responda diretamente ao prompt do usuário.`,
                             messages: [{ role: 'user', content: prompt }]
                         })
                     });
@@ -706,9 +784,8 @@
                 } catch (e) { console.error(e); }
             }
 
-            // Resposta de Simulação Padrão
-            await new Promise(r => setTimeout(r, 1000));
-            return `[AGENTE DE IA - ${agent.name.toUpperCase()}]\n\nRecebi a solicitação: "${prompt}".\n\n- Status: Executado na esteira simulada.\n- Dica: Configure seu endpoint Ngrok na engrenagem superior para conectar este agente diretamente ao seu backend Node/Python!`;
+            await new Promise(r => setTimeout(r, 800));
+            return `[AGENTE - ${agent.name.toUpperCase()}]\n\nRecebi o comando: "${prompt}".\n\n- Executado localmente com sucesso!`;
         }
 
         function setupSpeechRecognition() {
