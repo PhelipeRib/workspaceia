@@ -3,11 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>2D Virtual Workspace - Interactive Atlas Map</title>
-  <!-- Tailwind CSS CDN para renderização rápida da UI -->
+  <title>2D Virtual Workspace - Gather Atlas</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Estilização para Pixel Art e Canvas Interativo */
     body {
       background-color: #0f172a;
       color: #f8fafc;
@@ -35,23 +33,23 @@
 </head>
 <body class="h-screen w-screen flex flex-col justify-between p-4 select-none">
 
-  <!-- Header / Barra Superior -->
+  <!-- Header -->
   <header class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-3 flex justify-between items-center z-10">
     <div class="flex items-center gap-3">
       <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
-      <h1 class="text-lg font-bold tracking-wide text-slate-100">Gather Office Workspace</h1>
-      <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-slate-300 font-mono">v2.4 Atlas Edition</span>
+      <h1 class="text-lg font-bold tracking-wide text-slate-100">Gather Virtual Office</h1>
+      <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-slate-300 font-mono">v2.5 Full Atlas Engine</span>
     </div>
     <div class="flex items-center gap-2">
-      <button id="btn-toggle-grid" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded transition font-medium">Grid: ON</button>
-      <button id="btn-recenter" class="bg-indigo-600 hover:bg-indigo-500 text-xs px-3 py-1.5 rounded transition font-medium">Centralizar</button>
+      <button id="btn-toggle-grid" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded transition font-medium">Grid: OFF</button>
+      <button id="btn-recenter" class="bg-indigo-600 hover:bg-indigo-500 text-xs px-3 py-1.5 rounded transition font-medium">Resetar Posição</button>
     </div>
   </header>
 
-  <!-- Container Principal: Canvas do Jogo + Sidebars -->
+  <!-- Container Principal -->
   <main class="flex-1 my-3 flex gap-4 overflow-hidden relative">
     
-    <!-- Painel Lateral Esquerdo: Agentes & Status -->
+    <!-- Sidebar Esquerda -->
     <aside class="w-64 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-4 flex flex-col gap-3 custom-scrollbar overflow-y-auto">
       <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Agentes em Sala</h2>
       <div id="agent-list" class="flex flex-col gap-2">
@@ -59,7 +57,7 @@
           <div class="w-8 h-8 bg-indigo-500/20 border border-indigo-400/30 rounded flex items-center justify-center font-bold text-indigo-400">P1</div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-medium text-slate-200 truncate">Você (Player)</p>
-            <p class="text-xs text-emerald-400">Ativo • Estação A1</p>
+            <p class="text-xs text-emerald-400">Ativo • Estação QA</p>
           </div>
         </div>
         <div class="flex items-center gap-3 p-2 bg-slate-700/30 rounded-lg border border-slate-700">
@@ -72,25 +70,24 @@
       </div>
     </aside>
 
-    <!-- Canvas Central do Mapa -->
+    <!-- Canvas Central -->
     <section class="flex-1 relative flex items-center justify-center">
       <canvas id="workspace-canvas" width="960" height="640" class="shadow-2xl"></canvas>
       
-      <!-- Overlay de Controles Básicos (Dicas de Movimento) -->
       <div class="absolute bottom-4 left-4 bg-slate-900/90 border border-slate-700 text-xs text-slate-300 p-2.5 rounded-lg backdrop-blur pointer-events-none">
         <p class="font-semibold text-slate-200 mb-1">Controles:</p>
         <p><span class="bg-slate-700 px-1 rounded">W</span> <span class="bg-slate-700 px-1 rounded">A</span> <span class="bg-slate-700 px-1 rounded">S</span> <span class="bg-slate-700 px-1 rounded">D</span> ou <span class="bg-slate-700 px-1 rounded">Setas</span> para mover</p>
       </div>
     </section>
 
-    <!-- Painel Lateral Direito: Chat / Detalhes de Interação -->
+    <!-- Sidebar Direita -->
     <aside id="chat-panel" class="w-80 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-4 flex flex-col justify-between">
       <div>
         <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Chat da Estação</h2>
         <div id="chat-messages" class="h-80 overflow-y-auto custom-scrollbar flex flex-col gap-2 text-xs pr-1">
           <div class="bg-slate-700/40 p-2 rounded border border-slate-600/30">
             <span class="font-bold text-indigo-400">Sistema:</span>
-            <span class="text-slate-300">Carregados componentes do Atlas & Sprites. Use o mapa interativo.</span>
+            <span class="text-slate-300">Carregados objetos e tiles a partir do atlas `gather_office_atlas.png`.</span>
           </div>
         </div>
       </div>
@@ -102,43 +99,110 @@
 
   </main>
 
-  <!-- Lógica do Canvas, Spritesheet e Renderização do Mapa -->
   <script>
     const canvas = document.getElementById('workspace-canvas');
     const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false; // Garante Pixel Art Nítida
 
-    // Configuração de Renderização Pixel Art
     const TILE_SIZE = 32;
-    const COLS = 30;
-    const ROWS = 20;
-    let showGrid = true;
+    const COLS = 30; // 960px
+    const ROWS = 20; // 640px
+    let showGrid = false;
 
-    // Posição do Jogador
+    // Estado do Jogador
     const player = {
-      x: 5,
-      y: 5,
-      pixelX: 5 * TILE_SIZE,
-      pixelY: 5 * TILE_SIZE,
-      speed: 4,
-      size: TILE_SIZE,
-      color: '#6366f1'
+      x: 100,
+      y: 100,
+      speed: 3,
+      size: 32,
+      // Coordenadas de corte do Sprite do Avatar no Atlas (32x48px aprox no grid de avatares)[cite: 4]
+      spriteSX: 0,
+      spriteSY: 0,
+      spriteW: 32,
+      spriteH: 48
     };
 
-    // Imagem do Atlas / Spritesheet (Carregamento da imagem tratada do Zip/JPEG)
-    const atlasImage = new Image();
+    // Imagem do Atlas
+    const atlas = new Image();
     let atlasLoaded = false;
-    atlasImage.src = 'gather_office_atlas.png'; // Atualize para o nome correto extraído do zip/jpeg
-    atlasImage.onload = () => {
+    atlas.src = 'gather_office_atlas.png';[cite: 3, 4]
+    atlas.onload = () => {
       atlasLoaded = true;
       draw();
     };
 
-    // Desenha o Grid de Estações/Escritório
+    // Mapeamento de Clipes do Atlas (Coordenadas com base na imagem 1536x1024)[cite: 4]
+    const SPRITES = {
+      // Tiles de Chão (Região de Flores/Pisos)
+      floorWood: { sx: 0, sy: 615, sw: 32, sh: 32 },
+      floorTile: { sx: 135, sy: 565, sw: 32, sh: 32 },
+      wallTop:   { sx: 0, sy: 765, sw: 32, sh: 32 },
+
+      // Móveis / Objetos (Clippings baseados no manifesto)[cite: 4]
+      workstation: { sx: 535, sy: 0, sw: 120, sh: 80 },    // Mesa de Trabalho
+      doubleDesk:  { sx: 660, sy: 0, sw: 120, sh: 80 },    // Dual Monitors[cite: 3, 4]
+      chair:       { sx: 575, sy: 100, sw: 32, sh: 40 },   // Cadeira de Escritório[cite: 3, 4]
+      sofa:        { sx: 700, sy: 275, sw: 120, sh: 60 },   // Sofá Laranja[cite: 3, 4]
+      plant:       { sx: 535, sy: 410, sw: 40, sh: 50 },   // Vasos de Planta[cite: 3, 4]
+      arcade:      { sx: 1380, sy: 735, sw: 35, sh: 65 },  // Máquina Arcade[cite: 4]
+      poolTable:   { sx: 1200, sy: 735, sw: 90, sh: 60 }   // Mesa de Sinuca[cite: 4]
+    };
+
+    // Desenha o mapa de fundo renderizando os tiles do atlas[cite: 3, 4]
+    function drawMap() {
+      if (!atlasLoaded) return;
+
+      // 1. Preencher Chão com Piso
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (r === 0) {
+            // Parede Superior
+            ctx.drawImage(atlas, SPRITES.wallTop.sx, SPRITES.wallTop.sy, SPRITES.wallTop.sw, SPRITES.wallTop.sh, c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+          } else {
+            // Piso de Madeira
+            ctx.drawImage(atlas, SPRITES.floorWood.sx, SPRITES.floorWood.sy, SPRITES.floorWood.sw, SPRITES.floorWood.sh, c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+          }
+        }
+      }
+
+      // 2. Renderizar Estações de Trabalho (Desks + Chairs)[cite: 3, 4]
+      ctx.drawImage(atlas, SPRITES.workstation.sx, SPRITES.workstation.sy, SPRITES.workstation.sw, SPRITES.workstation.sh, 100, 100, 120, 80);
+      ctx.drawImage(atlas, SPRITES.chair.sx, SPRITES.chair.sy, SPRITES.chair.sw, SPRITES.chair.sh, 144, 180, 32, 40);
+
+      ctx.drawImage(atlas, SPRITES.doubleDesk.sx, SPRITES.doubleDesk.sy, SPRITES.doubleDesk.sw, SPRITES.doubleDesk.sh, 300, 100, 120, 80);
+      ctx.drawImage(atlas, SPRITES.chair.sx, SPRITES.chair.sy, SPRITES.chair.sw, SPRITES.chair.sh, 344, 180, 32, 40);
+
+      // 3. Renderizar Área de Lounge / Jogos[cite: 4]
+      ctx.drawImage(atlas, SPRITES.sofa.sx, SPRITES.sofa.sy, SPRITES.sofa.sw, SPRITES.sofa.sh, 600, 120, 120, 60);
+      ctx.drawImage(atlas, SPRITES.poolTable.sx, SPRITES.poolTable.sy, SPRITES.poolTable.sw, SPRITES.poolTable.sh, 600, 350, 100, 70);
+      ctx.drawImage(atlas, SPRITES.arcade.sx, SPRITES.arcade.sy, SPRITES.arcade.sw, SPRITES.arcade.sh, 850, 100, 40, 75);
+
+      // 4. Plantas Decorativas[cite: 3, 4]
+      ctx.drawImage(atlas, SPRITES.plant.sx, SPRITES.plant.sy, SPRITES.plant.sw, SPRITES.plant.sh, 40, 60, 40, 50);
+      ctx.drawImage(atlas, SPRITES.plant.sx, SPRITES.plant.sy, SPRITES.plant.sw, SPRITES.plant.sh, 500, 60, 40, 50);
+    }
+
+    // Desenha o Jogador a partir do recorte de Sprite de Personagem do Atlas[cite: 4]
+    function drawPlayer() {
+      if (!atlasLoaded) return;
+      // Desenha a sombra do personagem
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.beginPath();
+      ctx.ellipse(player.x + 16, player.y + 42, 12, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Renderiza o Sprite do Personagem (Primeiro avatar do grid superior esquerdo do atlas)[cite: 4]
+      ctx.drawImage(
+        atlas,
+        player.spriteSX, player.spriteSY, player.spriteW, player.spriteH, // Recorte de Origem no Atlas[cite: 4]
+        player.x, player.y, 32, 48                                       // Posição e Escala no Canvas
+      );
+    }
+
     function drawGrid() {
       if (!showGrid) return;
-      ctx.strokeStyle = '#334155';
-      ctx.lineWidth = 0.5;
-
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.lineWidth = 1;
       for (let r = 0; r <= ROWS; r++) {
         ctx.beginPath();
         ctx.moveTo(0, r * TILE_SIZE);
@@ -153,69 +217,34 @@
       }
     }
 
-    // Desenha o Jogador/Sprite
-    function drawPlayer() {
-      ctx.fillStyle = player.color;
-      ctx.beginPath();
-      ctx.arc(
-        player.pixelX + TILE_SIZE / 2,
-        player.pixelY + TILE_SIZE / 2,
-        TILE_SIZE / 3,
-        0,
-        Math.PI * 2
-      );
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
-
-    // Loop Principal de Renderização
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (atlasLoaded) {
-        // Se a imagem do atlas estiver presente, desenha o background renderizado
-        ctx.drawImage(atlasImage, 0, 0, canvas.width, canvas.height);
-      } else {
-        // Fallback estilizado enquanto o atlas recarrega
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-
+      drawMap();
       drawGrid();
       drawPlayer();
     }
 
-    // Movimentação do Personagem Smooth
+    // Controles de Movimento
     const keys = {};
-    window.addEventListener('keydown', (e) => {
-      keys[e.key.toLowerCase()] = true;
-    });
-    window.addEventListener('keyup', (e) => {
-      keys[e.key.toLowerCase()] = false;
-    });
+    window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
 
     function update() {
       let moved = false;
       if (keys['w'] || keys['arrowup']) {
-        if (player.pixelY > 0) { player.pixelY -= player.speed; moved = true; }
+        if (player.y > 32) { player.y -= player.speed; moved = true; }
       }
       if (keys['s'] || keys['arrowdown']) {
-        if (player.pixelY < canvas.height - TILE_SIZE) { player.pixelY += player.speed; moved = true; }
+        if (player.y < canvas.height - 48) { player.y += player.speed; moved = true; }
       }
       if (keys['a'] || keys['arrowleft']) {
-        if (player.pixelX > 0) { player.pixelX -= player.speed; moved = true; }
+        if (player.x > 0) { player.x -= player.speed; moved = true; }
       }
       if (keys['d'] || keys['arrowright']) {
-        if (player.pixelX < canvas.width - TILE_SIZE) { player.pixelX += player.speed; moved = true; }
+        if (player.x < canvas.width - 32) { player.x += player.speed; moved = true; }
       }
 
-      if (moved) {
-        player.x = Math.floor(player.pixelX / TILE_SIZE);
-        player.y = Math.floor(player.pixelY / TILE_SIZE);
-        draw();
-      }
+      if (moved) draw();
       requestAnimationFrame(update);
     }
 
@@ -227,12 +256,12 @@
     });
 
     document.getElementById('btn-recenter').addEventListener('click', () => {
-      player.pixelX = 5 * TILE_SIZE;
-      player.pixelY = 5 * TILE_SIZE;
+      player.x = 100;
+      player.y = 100;
       draw();
     });
 
-    // Inicia Loop
+    // Loop
     draw();
     update();
   </script>
