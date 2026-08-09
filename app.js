@@ -24,7 +24,7 @@ const imageCache=new Map();
 function img(path){if(!imageCache.has(path)){const im=new Image();im.src=path;imageCache.set(path,im)}return imageCache.get(path)}
 function preload(){
  Object.values(atlasAssets).forEach(a=>img(a.file));
- Object.values(characterAssets).forEach(c=>['down','up'].forEach(d=>c[d].forEach(f=>img('assets/characters/'+f))));
+ Object.values(characterAssets).forEach(c=>['down','up'].forEach(d=>c[d].forEach(f=>img(f))));
 }
 function resize(){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=Math.floor(r.width*d);canvas.height=Math.floor(r.height*d);ctx.setTransform(d,0,0,d,0,0);ctx.imageSmoothingEnabled=false}
 addEventListener('resize',resize);resize();
@@ -41,7 +41,7 @@ function drawCharacter(a,x,y,moving){
  let dir=a.direction||'down';
  let frames=c[dir]||c.down;
  let idx=moving?Math.floor(walkClock/105)%frames.length:Math.floor(idleClock/390)%frames.length;
- let im=img('assets/characters/'+frames[idx]);if(!im.complete)return;
+ let im=img(frames[idx]);if(!im.complete)return;
  const s=1.05;
  shadow(x,y+2,17);
  let bob=moving?Math.sin(walkClock/55)*1.0:Math.sin(idleClock/390*Math.PI*2)*.65;
@@ -137,14 +137,14 @@ function renderAgents(){
  const el=$('agents');el.innerHTML='';$('agentCount').textContent=agents.length;
  agents.forEach(a=>{
    const d=document.createElement('div');d.className='agentCard';
-   const c=characterAssets[a.character],srcPath='assets/characters/'+c.down[0];
+   const c=characterAssets[a.character],srcPath=c.down[0];
    d.innerHTML=`<img class="mini" src="${srcPath}"><div><strong>${a.name}</strong><span>${a.role}</span></div>`;
    d.onclick=()=>{player.targetX=a.x;player.targetY=a.y+70;openChat(a)};el.appendChild(d)
  })
 }
 function openChat(a){
  activeAgent=a;$('modalName').textContent=a.name;$('modalRole').textContent=a.role;$('modalDesc').textContent=a.desc;
- $('modalAvatar').src='assets/characters/'+characterAssets[a.character].down[0];$('chatModal').classList.add('open');renderChat();
+ $('modalAvatar').src=characterAssets[a.character].down[0];$('chatModal').classList.add('open');renderChat();
  const c=$('chips');c.innerHTML='';a.skills.forEach(s=>{const b=document.createElement('button');b.className='chip';b.textContent=s;b.onclick=()=>{$('chatInput').value='Executar: '+s;sendMessage()};c.appendChild(b)})
 }
 function renderChat(){const el=$('messages');el.innerHTML='';activeAgent.history.forEach(m=>{const d=document.createElement('div');d.className='msg '+(m.sender==='user'?'user':'agent');d.textContent=m.text;el.appendChild(d)});el.scrollTop=el.scrollHeight}

@@ -4,193 +4,193 @@
   "pixelPerfect": true,
   "assets": {
     "desk_single": {
-      "file": "assets/furniture/desk_single.png",
+      "file": "desk_single.png",
       "w": 111,
       "h": 80,
       "category": "furniture",
       "outlinePx": 2
     },
     "desk_dual": {
-      "file": "assets/furniture/desk_dual.png",
+      "file": "desk_dual.png",
       "w": 110,
       "h": 86,
       "category": "furniture",
       "outlinePx": 2
     },
     "desk_triple": {
-      "file": "assets/furniture/desk_triple.png",
+      "file": "desk_triple.png",
       "w": 101,
       "h": 64,
       "category": "furniture",
       "outlinePx": 2
     },
     "office_chair": {
-      "file": "assets/furniture/office_chair.png",
+      "file": "office_chair.png",
       "w": 70,
       "h": 65,
       "category": "furniture",
       "outlinePx": 2
     },
     "sofa_blue": {
-      "file": "assets/furniture/sofa_blue.png",
+      "file": "sofa_blue.png",
       "w": 70,
       "h": 65,
       "category": "furniture",
       "outlinePx": 2
     },
     "sofa_orange": {
-      "file": "assets/furniture/sofa_orange.png",
+      "file": "sofa_orange.png",
       "w": 143,
       "h": 53,
       "category": "furniture",
       "outlinePx": 2
     },
     "sofa_orange_2": {
-      "file": "assets/furniture/sofa_orange_2.png",
+      "file": "sofa_orange_2.png",
       "w": 145,
       "h": 61,
       "category": "furniture",
       "outlinePx": 2
     },
     "coffee_table_round": {
-      "file": "assets/furniture/coffee_table_round.png",
+      "file": "coffee_table_round.png",
       "w": 74,
       "h": 60,
       "category": "furniture",
       "outlinePx": 2
     },
     "meeting_table": {
-      "file": "assets/furniture/meeting_table.png",
+      "file": "meeting_table.png",
       "w": 158,
       "h": 112,
       "category": "furniture",
       "outlinePx": 2
     },
     "round_meeting_table": {
-      "file": "assets/furniture/round_meeting_table.png",
+      "file": "round_meeting_table.png",
       "w": 155,
       "h": 123,
       "category": "furniture",
       "outlinePx": 2
     },
     "armchair": {
-      "file": "assets/furniture/armchair.png",
+      "file": "armchair.png",
       "w": 36,
       "h": 45,
       "category": "furniture",
       "outlinePx": 2
     },
     "plant_large": {
-      "file": "assets/nature/plant_large.png",
+      "file": "plant_large.png",
       "w": 30,
       "h": 49,
       "category": "nature",
       "outlinePx": 2
     },
     "plant_small": {
-      "file": "assets/nature/plant_small.png",
+      "file": "plant_small.png",
       "w": 60,
       "h": 75,
       "category": "nature",
       "outlinePx": 2
     },
     "plant_pot": {
-      "file": "assets/nature/plant_pot.png",
+      "file": "plant_pot.png",
       "w": 48,
       "h": 67,
       "category": "nature",
       "outlinePx": 2
     },
     "monitor": {
-      "file": "assets/office/monitor.png",
+      "file": "monitor.png",
       "w": 110,
       "h": 61,
       "category": "office",
       "outlinePx": 2
     },
     "wall_tv": {
-      "file": "assets/office/wall_tv.png",
+      "file": "wall_tv.png",
       "w": 87,
       "h": 63,
       "category": "office",
       "outlinePx": 2
     },
     "whiteboard": {
-      "file": "assets/office/whiteboard.png",
+      "file": "whiteboard.png",
       "w": 91,
       "h": 48,
       "category": "office",
       "outlinePx": 2
     },
     "pool_table": {
-      "file": "assets/furniture/pool_table.png",
+      "file": "pool_table.png",
       "w": 121,
       "h": 92,
       "category": "furniture",
       "outlinePx": 2
     },
     "foosball": {
-      "file": "assets/furniture/foosball.png",
+      "file": "foosball.png",
       "w": 73,
       "h": 66,
       "category": "furniture",
       "outlinePx": 2
     },
     "water_cooler": {
-      "file": "assets/office/water_cooler.png",
+      "file": "water_cooler.png",
       "w": 23,
       "h": 16,
       "category": "office",
       "outlinePx": 2
     },
     "bookshelf": {
-      "file": "assets/office/bookshelf.png",
+      "file": "bookshelf.png",
       "w": 67,
       "h": 70,
       "category": "office",
       "outlinePx": 2
     },
     "cabinet": {
-      "file": "assets/office/cabinet.png",
+      "file": "cabinet.png",
       "w": 39,
       "h": 29,
       "category": "office",
       "outlinePx": 2
     },
     "vending": {
-      "file": "assets/office/vending.png",
+      "file": "vending.png",
       "w": 45,
       "h": 84,
       "category": "office",
       "outlinePx": 2
     },
     "bench": {
-      "file": "assets/furniture/bench.png",
+      "file": "bench.png",
       "w": 51,
       "h": 63,
       "category": "furniture",
       "outlinePx": 2
     },
     "floor_beige": {
-      "file": "assets/tiles/floor_beige.png",
+      "file": "floor_beige.png",
       "w": 65,
       "h": 65,
       "category": "tiles"
     },
     "floor_gray": {
-      "file": "assets/tiles/floor_gray.png",
+      "file": "floor_gray.png",
       "w": 65,
       "h": 65,
       "category": "tiles"
     },
     "floor_purple": {
-      "file": "assets/tiles/floor_purple.png",
+      "file": "floor_purple.png",
       "w": 65,
       "h": 65,
       "category": "tiles"
     },
     "grass": {
-      "file": "assets/tiles/grass.png",
+      "file": "grass.png",
       "w": 65,
       "h": 65,
       "category": "tiles"
@@ -199,10 +199,10 @@
   "characters": {
     "char_01": {
       "down": [
-        "char_01_up_0.png",
-        "char_01_up_1.png",
-        "char_01_up_2.png",
-        "char_01_up_3.png"
+        "char_01_down_0.png",
+        "char_01_down_1.png",
+        "char_01_down_2.png",
+        "char_01_down_3.png"
       ],
       "up": [
         "char_01_up_0.png",
@@ -213,10 +213,10 @@
     },
     "char_02": {
       "down": [
-        "char_02_up_0.png",
-        "char_02_up_1.png",
-        "char_02_up_2.png",
-        "char_02_up_3.png"
+        "char_02_down_0.png",
+        "char_02_down_1.png",
+        "char_02_down_2.png",
+        "char_02_down_3.png"
       ],
       "up": [
         "char_02_up_0.png",
@@ -227,10 +227,10 @@
     },
     "char_03": {
       "down": [
-        "char_03_up_0.png",
-        "char_03_up_1.png",
-        "char_03_up_2.png",
-        "char_03_up_3.png"
+        "char_03_down_0.png",
+        "char_03_down_1.png",
+        "char_03_down_2.png",
+        "char_03_down_3.png"
       ],
       "up": [
         "char_03_up_0.png",
@@ -241,10 +241,10 @@
     },
     "char_04": {
       "down": [
-        "char_04_up_0.png",
-        "char_04_up_1.png",
-        "char_04_up_2.png",
-        "char_04_up_3.png"
+        "char_04_down_0.png",
+        "char_04_down_1.png",
+        "char_04_down_2.png",
+        "char_04_down_3.png"
       ],
       "up": [
         "char_04_up_0.png",
@@ -255,10 +255,10 @@
     },
     "char_05": {
       "down": [
-        "char_05_up_0.png",
-        "char_05_up_1.png",
-        "char_05_up_2.png",
-        "char_05_up_3.png"
+        "char_05_down_0.png",
+        "char_05_down_1.png",
+        "char_05_down_2.png",
+        "char_05_down_3.png"
       ],
       "up": [
         "char_05_up_0.png",
@@ -269,10 +269,10 @@
     },
     "char_06": {
       "down": [
-        "char_06_up_0.png",
-        "char_06_up_1.png",
-        "char_06_up_2.png",
-        "char_06_up_3.png"
+        "char_06_down_0.png",
+        "char_06_down_1.png",
+        "char_06_down_2.png",
+        "char_06_down_3.png"
       ],
       "up": [
         "char_06_up_0.png",
@@ -283,10 +283,10 @@
     },
     "char_07": {
       "down": [
-        "char_07_up_0.png",
-        "char_07_up_1.png",
-        "char_07_up_2.png",
-        "char_07_up_3.png"
+        "char_07_down_0.png",
+        "char_07_down_1.png",
+        "char_07_down_2.png",
+        "char_07_down_3.png"
       ],
       "up": [
         "char_07_up_0.png",
@@ -297,10 +297,10 @@
     },
     "char_08": {
       "down": [
-        "char_08_up_0.png",
-        "char_08_up_1.png",
-        "char_08_up_2.png",
-        "char_08_up_3.png"
+        "char_08_down_0.png",
+        "char_08_down_1.png",
+        "char_08_down_2.png",
+        "char_08_down_3.png"
       ],
       "up": [
         "char_08_up_0.png",
