@@ -1,804 +1,240 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Startup Workspace 2D - Gather Pixel Art</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            touch-action: manipulation;
-        }
-
-        /* Renderização ultra-nítida de Pixel Art */
-        canvas {
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            -ms-interpolation-mode: nearest-neighbor;
-        }
-
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2D Virtual Workspace - Interactive Atlas Map</title>
+  <!-- Tailwind CSS CDN para renderização rápida da UI -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Estilização para Pixel Art e Canvas Interativo */
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+    canvas {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      background-color: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 3px;
+    }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 h-screen w-screen overflow-hidden flex flex-col select-none">
+<body class="h-screen w-screen flex flex-col justify-between p-4 select-none">
 
-    <!-- Header Navigation Bar -->
-    <header class="bg-slate-900/90 border-b border-slate-800 px-4 py-2 flex items-center justify-between shrink-0 z-20 backdrop-blur">
-        <div class="flex items-center gap-3">
-            <div class="bg-indigo-600/20 border border-indigo-500/40 p-2 rounded-lg text-indigo-400">
-                <i data-lucide="layout-grid" class="w-5 h-5"></i>
-            </div>
-            <div>
-                <h1 class="text-xs sm:text-sm font-bold text-slate-100 tracking-wide flex items-center gap-2">
-                    STARTUP HQ <span class="bg-indigo-500/20 text-indigo-400 text-[10px] px-2 py-0.5 rounded-full border border-indigo-500/30 uppercase font-semibold">Gather Pixel-Art 2D</span>
-                </h1>
-                <p class="text-[11px] text-slate-400 hidden sm:block">Aproxime-se dos agentes de IA para comandar operações</p>
-            </div>
-        </div>
-
-        <div class="flex items-center gap-2 sm:gap-3">
-            <div class="hidden md:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 text-xs">
-                <span id="connection-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-slate-300 font-medium">Ngrok / Webhook Ready</span>
-            </div>
-
-            <button id="btn-toggle-roster" class="lg:hidden bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-lg border border-slate-700 transition">
-                <i data-lucide="users" class="w-4 h-4"></i>
-            </button>
-
-            <button id="btn-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
-                <i data-lucide="settings" class="w-4 h-4"></i> <span class="hidden sm:inline">Configurar Conexões</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <div class="relative flex-1 bg-slate-950 overflow-hidden flex flex-col lg:flex-row">
-
-        <!-- Game Canvas Viewport -->
-        <div id="canvas-container" class="relative flex-1 flex flex-col items-center justify-center bg-slate-950 p-2 overflow-hidden">
-            
-            <div class="relative w-full h-full flex items-center justify-center">
-                <canvas id="officeCanvas" class="rounded-xl border border-slate-800/80 shadow-2xl bg-slate-900 cursor-pointer max-w-full max-h-full object-contain"></canvas>
-
-                <!-- Badge Flutuante de Proximidade -->
-                <div id="proximity-badge" class="hidden absolute top-6 bg-slate-900/95 backdrop-blur-md text-white px-4 py-2.5 rounded-full text-xs font-semibold shadow-2xl border border-indigo-500/50 flex items-center gap-2.5 transition-all transform hover:scale-105 cursor-pointer">
-                    <span class="relative flex h-2.5 w-2.5">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
-                    </span>
-                    <span id="proximity-text" class="text-slate-200">Próximo de Agente!</span>
-                    <span class="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full font-mono font-bold">ESPAÇO / TOQUE</span>
-                </div>
-
-                <!-- Joystick Virtual Mobile -->
-                <div id="mobile-dpad" class="absolute bottom-6 left-6 grid grid-cols-3 gap-1 bg-slate-900/80 backdrop-blur p-2 rounded-2xl border border-slate-800 md:hidden z-10 touch-none">
-                    <div></div>
-                    <button id="btn-up" class="w-11 h-11 bg-slate-800 rounded-xl active:bg-indigo-600 flex items-center justify-center text-slate-300 active:text-white"><i data-lucide="chevron-up" class="w-6 h-6"></i></button>
-                    <div></div>
-                    <button id="btn-left" class="w-11 h-11 bg-slate-800 rounded-xl active:bg-indigo-600 flex items-center justify-center text-slate-300 active:text-white"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
-                    <button id="btn-interact" class="w-11 h-11 bg-indigo-600 rounded-xl active:bg-indigo-500 flex items-center justify-center text-white font-bold text-xs"><i data-lucide="message-square" class="w-5 h-5"></i></button>
-                    <button id="btn-right" class="w-11 h-11 bg-slate-800 rounded-xl active:bg-indigo-600 flex items-center justify-center text-slate-300 active:text-white"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
-                    <div></div>
-                    <button id="btn-down" class="w-11 h-11 bg-slate-800 rounded-xl active:bg-indigo-600 flex items-center justify-center text-slate-300 active:text-white"><i data-lucide="chevron-down" class="w-6 h-6"></i></button>
-                    <div></div>
-                </div>
-            </div>
-
-            <!-- Global Activity Log Footer -->
-            <div class="w-full h-10 bg-slate-900/90 border border-slate-800 rounded-lg px-3 flex items-center gap-3 text-xs shrink-0 mt-1">
-                <span class="text-indigo-400 font-bold uppercase tracking-wider text-[10px] shrink-0 flex items-center gap-1.5">
-                    <i data-lucide="terminal" class="w-3.5 h-3.5"></i> Status Log:
-                </span>
-                <div id="global-log" class="text-slate-400 font-mono text-[11px] truncate">
-                    [SISTEMA]: Conectado ao escritório Gather. Clique no piso ou use WASD para movimentar.
-                </div>
-            </div>
-        </div>
-
-        <!-- Sidebar / Agent Roster Panel -->
-        <aside id="agent-sidebar" class="w-full lg:w-80 bg-slate-900/95 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col shrink-0 transition-all duration-300">
-            <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <i data-lucide="bot" class="w-4 h-4 text-indigo-400"></i> Agentes de IA
-                </h2>
-                <span id="agent-count-badge" class="bg-indigo-950 text-indigo-400 border border-indigo-800/50 text-xs px-2.5 py-0.5 rounded-full font-bold">3</span>
-            </div>
-
-            <div id="agents-list" class="flex-1 overflow-y-auto p-3 space-y-2 max-h-48 lg:max-h-none">
-                <!-- Injetado dinamicamente -->
-            </div>
-
-            <div class="p-3 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-400">
-                <div class="flex justify-between items-center mb-1">
-                    <span>Motor Conectado:</span>
-                    <span id="lbl-active-mode" class="text-indigo-400 font-medium">Simulação / Local</span>
-                </div>
-                <div class="flex justify-between items-center text-[11px] text-slate-500">
-                    <span>Movimentação:</span>
-                    <span class="text-slate-400">WASD / Setas / Clique</span>
-                </div>
-            </div>
-        </aside>
+  <!-- Header / Barra Superior -->
+  <header class="w-full bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-3 flex justify-between items-center z-10">
+    <div class="flex items-center gap-3">
+      <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+      <h1 class="text-lg font-bold tracking-wide text-slate-100">Gather Office Workspace</h1>
+      <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-slate-300 font-mono">v2.4 Atlas Edition</span>
     </div>
-
-    <!-- Modal de Diálogo e Comandos com o Agente de IA -->
-    <div id="chat-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[85vh] max-h-[620px]">
-
-            <!-- Modal Header -->
-            <div class="bg-slate-800/90 px-4 py-3 border-b border-slate-700 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-3">
-                    <div id="modal-agent-avatar" class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-xl shrink-0">
-                        👨‍💻
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 id="modal-agent-name" class="font-bold text-slate-100 text-sm sm:text-base">Brad</h3>
-                            <span id="modal-agent-role" class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0.5 rounded-full uppercase font-bold">Dev Lead</span>
-                        </div>
-                        <p id="modal-agent-desc" class="text-xs text-slate-400 line-clamp-1">Especialista em Engenharia de Software.</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <button id="btn-toggle-tts" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 border border-slate-600 text-xs flex items-center gap-1 transition">
-                        <i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i>
-                    </button>
-                    <button id="btn-close-modal" class="p-2 rounded-lg bg-slate-700/50 hover:bg-rose-900/60 text-slate-400 hover:text-rose-200 border border-slate-600 transition">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Log / Diálogo -->
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/50 font-sans text-xs sm:text-sm"></div>
-
-            <!-- Quick Agent Commands -->
-            <div id="command-chips" class="px-3 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto text-xs shrink-0"></div>
-
-            <!-- Input Bar -->
-            <div class="p-3 sm:p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2 shrink-0">
-                <button id="btn-voice-input" class="p-2.5 sm:p-3 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-xl border border-slate-700 transition shrink-0">
-                    <i data-lucide="mic" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                </button>
-
-                <input id="chat-input" type="text" placeholder="Escreva um prompt ou instrução..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-3.5 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 outline-none transition">
-
-                <button id="btn-send-message" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl transition flex items-center gap-2 shrink-0 text-xs sm:text-sm">
-                    <span>Enviar</span>
-                    <i data-lucide="send" class="w-4 h-4"></i>
-                </button>
-            </div>
-        </div>
+    <div class="flex items-center gap-2">
+      <button id="btn-toggle-grid" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded transition font-medium">Grid: ON</button>
+      <button id="btn-recenter" class="bg-indigo-600 hover:bg-indigo-500 text-xs px-3 py-1.5 rounded transition font-medium">Centralizar</button>
     </div>
+  </header>
 
-    <!-- Modal de Configurações de API & Webhook -->
-    <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl p-5 sm:p-6 space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-slate-100 text-base sm:text-lg flex items-center gap-2">
-                    <i data-lucide="sliders" class="w-5 h-5 text-indigo-400"></i> Conexão dos Agentes
-                </h3>
-                <button id="btn-close-settings" class="text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <div class="space-y-3 text-xs sm:text-sm">
-                <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Modo do Motor de IA:</label>
-                    <select id="setting-ai-mode" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none focus:border-indigo-500">
-                        <option value="simulated">Simulação Offline (Local Demo)</option>
-                        <option value="custom-webhook">Custom Webhook / Ngrok (Seu Backend)</option>
-                        <option value="claude-api">Claude API Direct (Anthropic Key)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Endpoint Webhook / URL do Ngrok:</label>
-                    <input id="setting-webhook-url" type="text" placeholder="https://seu-ngrok-subdomain.ngrok-free.app/api/agent" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none focus:border-indigo-500 font-mono text-xs">
-                    <p class="text-[11px] text-slate-500 mt-1">Conecte com seu backend exposto via Ngrok.</p>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-300 mb-1">API Key Anthropic (Se modo Claude API):</label>
-                    <input id="setting-api-key" type="password" placeholder="sk-ant-..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none focus:border-indigo-500 font-mono text-xs">
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
-                <button id="btn-save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition">
-                    Salvar Alterações
-                </button>
-            </div>
+  <!-- Container Principal: Canvas do Jogo + Sidebars -->
+  <main class="flex-1 my-3 flex gap-4 overflow-hidden relative">
+    
+    <!-- Painel Lateral Esquerdo: Agentes & Status -->
+    <aside class="w-64 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-4 flex flex-col gap-3 custom-scrollbar overflow-y-auto">
+      <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Agentes em Sala</h2>
+      <div id="agent-list" class="flex flex-col gap-2">
+        <div class="flex items-center gap-3 p-2 bg-slate-700/50 rounded-lg border border-slate-600/50">
+          <div class="w-8 h-8 bg-indigo-500/20 border border-indigo-400/30 rounded flex items-center justify-center font-bold text-indigo-400">P1</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-slate-200 truncate">Você (Player)</p>
+            <p class="text-xs text-emerald-400">Ativo • Estação A1</p>
+          </div>
         </div>
-    </div>
-
-    <!-- Motor do Jogo e Gerador de Sprites Pixel Art -->
-    <script>
-        // Configuração dos Agentes mapeados conforme as ilhas das imagens
-        const DEFAULT_AGENTS = [
-            {
-                id: 'agent-brad',
-                name: 'Brad',
-                badgeIcon: '🎸',
-                role: 'Product / Dev',
-                desc: 'Engenheiro de Software & Code Reviewer.',
-                avatar: '👨‍💻',
-                hairColor: '#3b0764',
-                color: '#3b82f6',
-                x: 320, y: 195,
-                status: 'Ocioso',
-                skills: ['Review de PR', 'Gerar Testes Unitários', 'Deploy Staging', 'Debug Endpoint'],
-                history: [{ sender: 'agent', text: 'E aí! Sou o Brad. Pronto para refatorações e testes no projeto.' }]
-            },
-            {
-                id: 'agent-alison',
-                name: 'Alison',
-                badgeIcon: '🍕',
-                role: 'Product Owner',
-                desc: 'Gestão de Backlog e Requisitos de Produto.',
-                avatar: '👩‍💼',
-                hairColor: '#9a3412',
-                color: '#ec4899',
-                x: 480, y: 195,
-                status: 'Ocioso',
-                skills: ['Escrever User Stories', 'Priorizar Backlog', 'Análise de Concorrentes', 'Roadmap Q3'],
-                history: [{ sender: 'agent', text: 'Oi! Alison por aqui. Vamos estruturar a próxima sprint?' }]
-            },
-            {
-                id: 'agent-reading',
-                name: 'Morgan',
-                badgeIcon: '📚',
-                role: 'Research & Strategy',
-                desc: 'Análise estratégica na Sala de Leitura.',
-                avatar: '🧔',
-                hairColor: '#1e293b',
-                color: '#8b5cf6',
-                x: 105, y: 440,
-                status: 'Ocioso',
-                skills: ['Pesquisa de Mercado', 'Análise Competitiva', 'Doc de Arquitetura'],
-                history: [{ sender: 'agent', text: 'Olá! Estou revisando a documentação e referências na biblioteca.' }]
-            }
-        ];
-
-        let agents = [];
-        let player = { 
-            x: 200, y: 120, 
-            targetX: 200, targetY: 120, 
-            speed: 3.5 
-        };
-        let activeAgent = null;
-        let keys = {};
-        let ttsEnabled = true;
-        let recognition = null;
-        let appSettings = { aiMode: 'simulated', apiKey: '', webhookUrl: '' };
-
-        // Configuração do Canvas (640x480 nativo para manter os pixels fiéis e nítidos)
-        const canvas = document.getElementById('officeCanvas');
-        const ctx = canvas.getContext('2d');
-        const CANVAS_WIDTH = 600, CANVAS_HEIGHT = 500;
-        canvas.width = CANVAS_WIDTH; canvas.height = CANVAS_HEIGHT;
-
-        // --- SISTEMA DE GERAÇÃO DE TEXTURAS/SPRITES PROCEDURAIS PIXEL ART ---
-        const pixelPatterns = {};
-
-        function initPixelTextures() {
-            // 1. Piso Azulejo Creme / Parede
-            const cTile = document.createElement('canvas'); cTile.width = 32; cTile.height = 32;
-            const ctxT = cTile.getContext('2d');
-            ctxT.fillStyle = '#fef3c7'; ctxT.fillRect(0,0,32,32);
-            ctxT.fillStyle = '#fde68a'; ctxT.fillRect(0,0,31,31);
-            ctxT.fillStyle = '#f59e0b20'; ctxT.fillRect(0,30,32,2); ctxT.fillRect(30,0,2,32);
-            pixelPatterns.tile = ctx.createPattern(cTile, 'repeat');
-
-            // 2. Piso Chevron Azul/Cinza (Product Team Area)
-            const cChev = document.createElement('canvas'); cChev.width = 16; cChev.height = 16;
-            const ctxC = cChev.getContext('2d');
-            ctxC.fillStyle = '#94a3b8'; ctxC.fillRect(0,0,16,16);
-            ctxC.fillStyle = '#cbd5e1'; 
-            ctxC.fillRect(0,0,8,8); ctxC.fillRect(8,8,8,8);
-            pixelPatterns.chevron = ctx.createPattern(cChev, 'repeat');
-
-            // 3. Piso Chevron Lilás (Biblioteca)
-            const cChev2 = document.createElement('canvas'); cChev2.width = 16; cChev2.height = 16;
-            const ctxC2 = cChev2.getContext('2d');
-            ctxC2.fillStyle = '#a78bfa'; ctxC2.fillRect(0,0,16,16);
-            ctxC2.fillStyle = '#c4b5fd'; 
-            ctxC2.fillRect(0,0,8,8); ctxC2.fillRect(8,8,8,8);
-            pixelPatterns.chevronPurple = ctx.createPattern(cChev2, 'repeat');
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            initPixelTextures();
-            loadStateFromStorage();
-            renderAgentRoster();
-            setupControls();
-            setupSpeechRecognition();
-            requestAnimationFrame(gameLoop);
-        });
-
-        function loadStateFromStorage() {
-            const savedSettings = localStorage.getItem('ai_office_settings');
-            if (savedSettings) {
-                appSettings = JSON.parse(savedSettings);
-                document.getElementById('setting-ai-mode').value = appSettings.aiMode || 'simulated';
-                document.getElementById('setting-api-key').value = appSettings.apiKey || '';
-                document.getElementById('setting-webhook-url').value = appSettings.webhookUrl || '';
-            }
-            updateActiveModeLabel();
-
-            const savedAgents = localStorage.getItem('ai_office_agents_data');
-            agents = savedAgents ? JSON.parse(savedAgents) : JSON.parse(JSON.stringify(DEFAULT_AGENTS));
-        }
-
-        function saveStateToStorage() {
-            localStorage.setItem('ai_office_agents_data', JSON.stringify(agents));
-            localStorage.setItem('ai_office_settings', JSON.stringify(appSettings));
-            updateActiveModeLabel();
-        }
-
-        function updateActiveModeLabel() {
-            const lbl = document.getElementById('lbl-active-mode');
-            if (appSettings.aiMode === 'custom-webhook') lbl.innerText = 'Ngrok / Webhook';
-            else if (appSettings.aiMode === 'claude-api') lbl.innerText = 'Claude API';
-            else lbl.innerText = 'Simulação Local';
-        }
-
-        function renderAgentRoster() {
-            const container = document.getElementById('agents-list');
-            container.innerHTML = '';
-            agents.forEach(agent => {
-                const card = document.createElement('div');
-                card.className = "bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 p-2.5 rounded-xl transition cursor-pointer flex items-center gap-3";
-                card.onclick = () => { 
-                    player.targetX = agent.x; 
-                    player.targetY = agent.y + 35; 
-                    openChatModal(agent); 
-                };
-                
-                const isExecuting = agent.status === 'Executando...';
-                const statusBg = isExecuting ? 'bg-amber-400 animate-ping' : 'bg-emerald-400';
-
-                card.innerHTML = `
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0" style="background-color: ${agent.color}25; border: 1px solid ${agent.color}50;">
-                        ${agent.avatar}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between">
-                            <h4 class="text-xs font-bold text-slate-200 truncate">${agent.name} ${agent.badgeIcon}</h4>
-                            <span class="w-2 h-2 rounded-full ${statusBg}"></span>
-                        </div>
-                        <p class="text-[11px] text-slate-400 truncate">${agent.role}</p>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            document.getElementById('agent-count-badge').innerText = agents.length;
-        }
-
-        function setupControls() {
-            window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; keys[e.code] = true; });
-            window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; keys[e.code] = false; });
-
-            canvas.addEventListener('pointerdown', e => {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = CANVAS_WIDTH / rect.width;
-                const scaleY = CANVAS_HEIGHT / rect.height;
-                player.targetX = (e.clientX - rect.left) * scaleX;
-                player.targetY = (e.clientY - rect.top) * scaleY;
-            });
-
-            const setupDpadBtn = (id, dx, dy) => {
-                const btn = document.getElementById(id);
-                if (!btn) return;
-                const move = () => {
-                    player.targetX = player.x + dx * 30;
-                    player.targetY = player.y + dy * 30;
-                };
-                btn.addEventListener('touchstart', (e) => { e.preventDefault(); move(); });
-                btn.addEventListener('click', move);
-            };
-            setupDpadBtn('btn-up', 0, -1);
-            setupDpadBtn('btn-down', 0, 1);
-            setupDpadBtn('btn-left', -1, 0);
-            setupDpadBtn('btn-right', 1, 0);
-
-            document.getElementById('btn-interact').onclick = () => {
-                let found = agents.find(a => Math.hypot(player.x - a.x, player.y - a.y) < 50);
-                if (found) openChatModal(found);
-            };
-
-            document.getElementById('btn-toggle-roster').onclick = () => {
-                document.getElementById('agent-sidebar').classList.toggle('hidden');
-            };
-
-            document.getElementById('btn-settings').onclick = () => document.getElementById('settings-modal').classList.remove('hidden');
-            document.getElementById('btn-close-settings').onclick = () => document.getElementById('settings-modal').classList.add('hidden');
-            document.getElementById('btn-save-settings').onclick = () => {
-                appSettings.aiMode = document.getElementById('setting-ai-mode').value;
-                appSettings.apiKey = document.getElementById('setting-api-key').value;
-                appSettings.webhookUrl = document.getElementById('setting-webhook-url').value;
-                saveStateToStorage();
-                document.getElementById('settings-modal').classList.add('hidden');
-            };
-
-            document.getElementById('btn-close-modal').onclick = () => {
-                document.getElementById('chat-modal').classList.add('hidden'); activeAgent = null;
-            };
-            document.getElementById('btn-send-message').onclick = handleUserSendMessage;
-            document.getElementById('chat-input').addEventListener('keypress', e => { if (e.key === 'Enter') handleUserSendMessage(); });
-
-            document.getElementById('btn-toggle-tts').onclick = () => {
-                ttsEnabled = !ttsEnabled;
-                document.getElementById('btn-toggle-tts').innerHTML = ttsEnabled 
-                    ? `<i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i>`
-                    : `<i data-lucide="volume-x" class="w-4 h-4 text-slate-500"></i>`;
-                lucide.createIcons();
-            };
-        }
-
-        function gameLoop() {
-            if (document.getElementById('chat-modal').classList.contains('hidden')) {
-                let dx = 0, dy = 0;
-                if (keys['w'] || keys['arrowup']) dy -= 1;
-                if (keys['s'] || keys['arrowdown']) dy += 1;
-                if (keys['a'] || keys['arrowleft']) dx -= 1;
-                if (keys['d'] || keys['arrowright']) dx += 1;
-
-                if (dx !== 0 || dy !== 0) {
-                    if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
-                    player.x = Math.max(20, Math.min(CANVAS_WIDTH - 20, player.x + dx * player.speed));
-                    player.y = Math.max(20, Math.min(CANVAS_HEIGHT - 20, player.y + dy * player.speed));
-                    player.targetX = player.x;
-                    player.targetY = player.y;
-                } else if (Math.hypot(player.targetX - player.x, player.targetY - player.y) > 3) {
-                    let angle = Math.atan2(player.targetY - player.y, player.targetX - player.x);
-                    player.x += Math.cos(angle) * player.speed;
-                    player.y += Math.sin(angle) * player.speed;
-                }
-            }
-
-            let foundAgent = null;
-            agents.forEach(agent => {
-                if (Math.hypot(player.x - agent.x, player.y - agent.y) < 50) foundAgent = agent;
-            });
-
-            const badge = document.getElementById('proximity-badge');
-            if (foundAgent) {
-                badge.classList.remove('hidden');
-                document.getElementById('proximity-text').innerText = `Comandar ${foundAgent.name}`;
-                badge.onclick = () => openChatModal(foundAgent);
-                if (keys[' '] || keys['space']) { openChatModal(foundAgent); keys[' '] = false; keys['space'] = false; }
-            } else { 
-                badge.classList.add('hidden'); 
-            }
-
-            renderGatherScene();
-            requestAnimationFrame(gameLoop);
-        }
-
-        // --- RENDERIZAÇÃO COMPLETA DA CENA PIXEL ART FIDELIZADA ÀS IMAGENS ---
-        function renderGatherScene() {
-            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-            // 1. Fundo do Piso Azulejo Creme Geral
-            ctx.fillStyle = pixelPatterns.tile;
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-            // 2. SALA SUPERIOR DIREITA: CAFETERIA / WATER COOLER (Baseada na Foto 2)
-            drawCoffeeCorner(320, 0);
-
-            // 3. SALA CENTRAL: PRODUCT TEAM (Baseada na Foto 1)
-            drawProductTeamZone(240, 80);
-
-            // 4. SALA INFERIOR ESQUERDA: BIBLIOTECA DE LEITURA (Baseada na Foto 3)
-            drawLibraryRoom(10, 260);
-
-            // 5. RENDERIZAR AGENTES DE IA (Personagens Pixel Art + Badge Flutuante)
-            agents.forEach(agent => {
-                drawPixelCharacter(agent.x, agent.y, agent.hairColor, '#fca5a5', false);
-                drawGatherBadge(agent.x, agent.y - 22, `${agent.name}`, agent.badgeIcon, agent.status === 'Executando...');
-            });
-
-            // 6. RENDERIZAR JOGADOR (CEO)
-            drawPixelCharacter(player.x, player.y, '#1e293b', '#fca5a5', true);
-            drawGatherBadge(player.x, player.y - 22, 'You', '', false, true);
-        }
-
-        // --- MÓVEIS E SPRITES DESENHADOS EM PIXEL ART ---
-
-        // 1. Ilha do Product Team com Múltiplos Monitores e Detalhes
-        function drawProductTeamZone(x, y) {
-            // Tapete Chevron Azul
-            ctx.fillStyle = pixelPatterns.chevron;
-            ctx.fillRect(x, y, 320, 180);
-
-            // Placa "Product team" estilo Gather
-            ctx.fillStyle = '#ffffffd0'; ctx.beginPath(); ctx.roundRect(x + 110, y - 18, 100, 16, 8); ctx.fill();
-            ctx.fillStyle = '#475569'; ctx.font = 'bold 9px Plus Jakarta Sans'; ctx.textAlign = 'center'; ctx.fillText('Product team', x + 160, y - 6);
-
-            // BANCADA SUPERIOR
-            drawDeskSegment(x + 20, y + 10, 80);
-            // PC Gamer / Setup Teclado Azul (Foto 1 Canto Esquerdo)
-            ctx.fillStyle = '#1e293b'; ctx.fillRect(x + 25, y + 2, 12, 18); // Torre
-            ctx.fillStyle = '#ec4899'; ctx.fillRect(x + 40, y + 4, 20, 12); // Monitor Neon
-            ctx.fillStyle = '#3b82f6'; ctx.fillRect(x + 62, y + 4, 14, 12); // Monitor Vertical
-            ctx.fillStyle = '#0284c7'; ctx.fillRect(x + 42, y + 18, 16, 4); // Teclado Azul
-
-            drawDeskSegment(x + 110, y + 10, 80);
-            // Setup Dual Monitor Coding
-            ctx.fillStyle = '#0284c7'; ctx.fillRect(x + 120, y + 4, 18, 12);
-            ctx.fillStyle = '#0369a1'; ctx.fillRect(x + 140, y + 4, 18, 12);
-
-            drawDeskSegment(x + 200, y + 10, 80);
-            // Vasinho Plantinha Verde + Laptop
-            ctx.fillStyle = '#16a34a'; ctx.beginPath(); ctx.arc(x + 215, y + 8, 5, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#d97706'; ctx.fillRect(x + 213, y + 11, 4, 4);
-            ctx.fillStyle = '#38bdf8'; ctx.fillRect(x + 245, y + 6, 16, 10); // Laptop
-
-            // CADEIRAS DE ESCRITÓRIO PRETAS (Superiores)
-            [x + 50, x + 145, x + 240].forEach(cx => {
-                ctx.fillStyle = '#1e293b'; ctx.beginPath(); ctx.arc(cx, y + 36, 7, 0, Math.PI*2); ctx.fill();
-            });
-
-            // BANCADA INFERIOR
-            drawDeskSegment(x + 20, y + 100, 80);
-            // Frigobar/Vending Machine ao lado (Foto 1)
-            ctx.fillStyle = '#94a3b8'; ctx.fillRect(x + 22, y + 88, 16, 20); ctx.fillStyle = '#38bdf8'; ctx.fillRect(x + 24, y + 92, 12, 8);
-
-            drawDeskSegment(x + 110, y + 100, 80);
-            // Curved Monitor (Foto 1 Centro Inferior)
-            ctx.fillStyle = '#0f172a'; ctx.fillRect(x + 135, y + 94, 30, 10);
-            ctx.fillStyle = '#38bdf8'; ctx.fillRect(x + 137, y + 95, 26, 7);
-
-            drawDeskSegment(x + 200, y + 100, 80);
-            // Mesa Cyan da Alison com Pizza (Foto 1)
-            ctx.fillStyle = '#2dd4bf'; ctx.fillRect(x + 200, y + 100, 80, 20);
-            ctx.fillStyle = '#ea580c'; ctx.beginPath(); ctx.arc(x + 265, y + 95, 5, 0, Math.PI*2); ctx.fill(); // Pizza / Item
-        }
-
-        // Desenha Módulo de Mesa de Escritório Pixel Art
-        function drawDeskSegment(dx, dy, width) {
-            ctx.fillStyle = '#ffffff'; ctx.fillRect(dx, dy, width, 22);
-            ctx.fillStyle = '#cbd5e1'; ctx.fillRect(dx, dy + 20, width, 4); // Borda/Sombra da mesa
-        }
-
-        // 2. Canto do Café e Galão de Água (Foto 2)
-        function drawCoffeeCorner(cx, cy) {
-            // Parede Cinza de Fundo com Janela Vidro
-            ctx.fillStyle = '#475569'; ctx.fillRect(cx, cy, 260, 45);
-            ctx.fillStyle = '#a5f3fc'; ctx.fillRect(cx + 60, cy + 5, 120, 32); // Janela
-            ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2; ctx.strokeRect(cx + 60, cy + 5, 120, 32);
-            ctx.beginPath(); ctx.moveTo(cx + 120, cy + 5); ctx.lineTo(cx + 120, cy + 37); ctx.stroke();
-
-            // Balcão Branco com Xícaras Roxas (Foto 2)
-            ctx.fillStyle = '#f8fafc'; ctx.fillRect(cx + 10, cy + 45, 80, 22);
-            ctx.fillStyle = '#64748b'; ctx.fillRect(cx + 10, cy + 65, 80, 10); // Armário inferior
-            ctx.fillStyle = '#16a34a'; ctx.beginPath(); ctx.arc(cx + 22, cy + 40, 5, 0, Math.PI*2); ctx.fill(); // Vaso
-            ctx.fillStyle = '#9333ea'; ctx.fillRect(cx + 50, cy + 48, 8, 8); ctx.fillRect(cx + 62, cy + 48, 8, 8); // Xícaras roxas!
-
-            // Máquina de Café e Bebedouro / Galão de Água Azul (Foto 2)
-            ctx.fillStyle = '#1e293b'; ctx.fillRect(cx + 95, cy + 38, 30, 36); // Máquina Café
-            ctx.fillStyle = '#a855f7'; ctx.fillRect(cx + 106, cy + 55, 6, 6); // Xícara na máquina
-
-            ctx.fillStyle = '#64748b'; ctx.fillRect(cx + 130, cy + 50, 24, 24); // Base Bebedouro
-            ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(cx + 142, cy + 42, 10, 0, Math.PI*2); ctx.fill(); // Galão Água Azul
-
-            // Vaso de Planta de Canto (Foto 2)
-            ctx.fillStyle = '#1e293b'; ctx.fillRect(cx + 165, cy + 55, 18, 18); // Vaso rocha
-            ctx.fillStyle = '#22c55e'; ctx.beginPath(); ctx.arc(cx + 174, cy + 45, 12, 0, Math.PI*2); ctx.fill(); // Folhagem
-        }
-
-        // 3. Sala da Biblioteca com Estante e Quadro (Foto 3)
-        function drawLibraryRoom(lx, ly) {
-            // Paredes Roxas da Sala
-            ctx.fillStyle = '#6b21a8'; ctx.fillRect(lx, ly, 190, 40);
-            // Piso Chevron Lilás
-            ctx.fillStyle = pixelPatterns.chevronPurple; ctx.fillRect(lx, ly + 40, 190, 190);
-            ctx.strokeStyle = '#581c87'; ctx.lineWidth = 3; ctx.strokeRect(lx, ly, 190, 230);
-
-            // Estante de Livros Coloridos (Foto 3)
-            ctx.fillStyle = '#1e293b'; ctx.fillRect(lx + 10, ly + 10, 70, 50);
-            // Livros em pixel art nas prateleiras
-            const bookColors = ['#ef4444', '#3b82f6', '#eab308', '#10b981', '#ec4899'];
-            for (let r = 0; r < 3; r++) {
-                for (let b = 0; b < 10; b++) {
-                    ctx.fillStyle = bookColors[(r + b) % bookColors.length];
-                    ctx.fillRect(lx + 14 + (b * 6), ly + 15 + (r * 14), 4, 10);
-                }
-            }
-
-            // Quadro com Paisagem na Parede (Foto 3)
-            ctx.fillStyle = '#0f172a'; ctx.fillRect(lx + 95, ly + 8, 30, 24);
-            ctx.fillStyle = '#38bdf8'; ctx.fillRect(lx + 97, ly + 10, 26, 20);
-            ctx.fillStyle = '#22c55e'; ctx.fillRect(lx + 97, ly + 22, 26, 8); // Montanha no quadro
-
-            // Armário com vaso na Parede Direita
-            ctx.fillStyle = '#334155'; ctx.fillRect(lx + 135, ly + 20, 35, 30);
-            ctx.fillStyle = '#ea580c'; ctx.beginPath(); ctx.arc(lx + 152, ly + 14, 6, 0, Math.PI*2); ctx.fill();
-
-            // Conjunto de 4 Cadeiras Azuis + Mesa Redonda com Livro Verde (Foto 3)
-            const mx = lx + 95, my = ly + 140;
-            // Mesa centro
-            ctx.fillStyle = '#cbd5e1'; ctx.beginPath(); ctx.arc(mx, my, 18, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#22c55e'; ctx.fillRect(mx - 4, my - 6, 10, 12); // Livro verde na mesa!
-
-            // 4 Cadeiras azuis viradas em cruz
-            ctx.fillStyle = '#2563eb';
-            ctx.fillRect(mx - 8, my - 32, 16, 10); // Norte
-            ctx.fillRect(mx - 8, my + 22, 16, 10); // Sul
-            ctx.fillRect(mx - 32, my - 8, 10, 16); // Oeste
-            ctx.fillRect(mx + 22, my - 8, 10, 16); // Leste
-        }
-
-        // 4. Desenha Personagem Pixel Art Top-Down (Estilo Gather / Pokémon)
-        function drawPixelCharacter(px, py, hairColor, skinColor, isLeader) {
-            // Sombra
-            ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(px, py + 10, 8, 4, 0, 0, Math.PI * 2); ctx.fill();
-
-            // Corpo / Roupa
-            ctx.fillStyle = isLeader ? '#4f46e5' : '#334155'; ctx.fillRect(px - 5, py, 10, 10);
-            // Cabeça / Pele
-            ctx.fillStyle = skinColor; ctx.fillRect(px - 6, py - 10, 12, 10);
-            // Cabelo estilo Pixel
-            ctx.fillStyle = hairColor; ctx.fillRect(px - 7, py - 13, 14, 6);
-            // Olhos
-            ctx.fillStyle = '#000000'; ctx.fillRect(px - 3, py - 6, 2, 2); ctx.fillRect(px + 1, py - 6, 2, 2);
-        }
-
-        // 5. Desenha Badge Flutuante Fiel ao Gather (Com Ícones e Ponto Online Verde)
-        function drawGatherBadge(bx, by, name, iconText, isExecuting, isYou) {
-            const label = isYou ? 'You' : `${name} ${iconText}`;
-            ctx.font = 'bold 10px Plus Jakarta Sans';
-            const textWidth = ctx.measureText(label).width;
-            const width = textWidth + 24;
-            const x = bx - width / 2;
-
-            // Balão Escuro Arredondado
-            ctx.fillStyle = '#1e293be6'; ctx.beginPath(); ctx.roundRect(x, by, width, 18, 9); ctx.fill();
-            ctx.strokeStyle = isExecuting ? '#f59e0b' : '#00000033'; ctx.lineWidth = 1; ctx.stroke();
-
-            // Ponto Verde Status "Online"
-            ctx.fillStyle = isExecuting ? '#f59e0b' : '#22c55e';
-            ctx.beginPath(); ctx.arc(x + 9, by + 9, 3, 0, Math.PI * 2); ctx.fill();
-
-            // Texto
-            ctx.fillStyle = '#ffffff'; ctx.textAlign = 'left'; ctx.fillText(label, x + 16, by + 12);
-        }
-
-        function openChatModal(agent) {
-            activeAgent = agent;
-            document.getElementById('modal-agent-name').innerText = agent.name;
-            document.getElementById('modal-agent-role').innerText = agent.role;
-            document.getElementById('modal-agent-desc').innerText = agent.desc;
-            document.getElementById('modal-agent-avatar').innerText = agent.avatar;
-
-            const chipsContainer = document.getElementById('command-chips');
-            chipsContainer.innerHTML = `<span class="text-slate-500 text-[11px] whitespace-nowrap font-medium">Atalhos:</span>`;
-            agent.skills.forEach(skill => {
-                const btn = document.createElement('button');
-                btn.className = "chip-btn bg-slate-800 hover:bg-indigo-900/50 text-indigo-300 border border-slate-700 px-2.5 py-1 rounded-lg text-xs transition whitespace-nowrap font-medium";
-                btn.innerText = skill;
-                btn.onclick = () => { document.getElementById('chat-input').value = `Executar: ${skill}`; handleUserSendMessage(); };
-                chipsContainer.appendChild(btn);
-            });
-
-            renderChatMessages();
-            document.getElementById('chat-modal').classList.remove('hidden');
-            document.getElementById('chat-input').focus();
-        }
-
-        function renderChatMessages() {
-            if (!activeAgent) return;
-            const container = document.getElementById('chat-messages');
-            container.innerHTML = '';
-            activeAgent.history.forEach(msg => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = `flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`;
-                const bubble = document.createElement('div');
-                bubble.className = msg.sender === 'user'
-                    ? "bg-indigo-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-md"
-                    : "bg-slate-800 text-slate-100 border border-slate-700 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-md whitespace-pre-line";
-                bubble.innerText = msg.text;
-                msgDiv.appendChild(bubble);
-                container.appendChild(msgDiv);
-            });
-            container.scrollTop = container.scrollHeight;
-        }
-
-        async function handleUserSendMessage() {
-            const input = document.getElementById('chat-input');
-            const promptText = input.value.trim();
-            if (!promptText || !activeAgent) return;
-
-            activeAgent.history.push({ sender: 'user', text: promptText });
-            activeAgent.status = 'Executando...';
-            input.value = ''; 
-            renderChatMessages();
-            renderAgentRoster();
-
-            updateGlobalLog(`[AGENTE ${activeAgent.name.toUpperCase()}]: Processando "${promptText}"...`);
-
-            const reply = await queryAIMode(activeAgent, promptText);
-            
-            activeAgent.status = 'Ocioso';
-            activeAgent.history.push({ sender: 'agent', text: reply });
-            saveStateToStorage();
-            renderChatMessages();
-            renderAgentRoster();
-
-            updateGlobalLog(`[AGENTE ${activeAgent.name.toUpperCase()}]: Resposta emitida com sucesso.`);
-
-            if (ttsEnabled && ('speechSynthesis' in window)) {
-                const utt = new SpeechSynthesisUtterance(reply); utt.lang = 'pt-BR'; window.speechSynthesis.speak(utt);
-            }
-        }
-
-        function updateGlobalLog(message) {
-            document.getElementById('global-log').innerText = message;
-        }
-
-        async function queryAIMode(agent, prompt) {
-            if (appSettings.aiMode === 'custom-webhook' && appSettings.webhookUrl) {
-                try {
-                    const res = await fetch(appSettings.webhookUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ agentId: agent.id, agentName: agent.name, role: agent.role, prompt: prompt })
-                    });
-                    const data = await res.json();
-                    if (data.reply || data.response || data.message) {
-                        return data.reply || data.response || data.message;
-                    }
-                } catch (e) {
-                    console.error("Erro no Ngrok:", e);
-                    return `[ERRO NGROK]: Não foi possível conectar ao endpoint ${appSettings.webhookUrl}. Verifique se o servidor local está rodando.`;
-                }
-            }
-
-            if (appSettings.aiMode === 'claude-api' && appSettings.apiKey) {
-                try {
-                    const res = await fetch('https://api.anthropic.com/v1/messages', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'x-api-key': appSettings.apiKey, 'anthropic-version': '2023-06-01' },
-                        body: JSON.stringify({
-                            model: 'claude-3-5-sonnet-20241022',
-                            max_tokens: 350,
-                            system: `Você é um Agente Autônomo de IA chamado ${agent.name} (${agent.role}). Responda diretamente ao prompt do usuário.`,
-                            messages: [{ role: 'user', content: prompt }]
-                        })
-                    });
-                    const data = await res.json();
-                    if (data.content && data.content[0]) return data.content[0].text;
-                } catch (e) { console.error(e); }
-            }
-
-            await new Promise(r => setTimeout(r, 800));
-            return `[AGENTE - ${agent.name.toUpperCase()}]\n\nRecebi o comando: "${prompt}".\n\n- Executado localmente com sucesso!`;
-        }
-
-        function setupSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
-            recognition = new SpeechRecognition();
-            recognition.lang = 'pt-BR';
-            recognition.onresult = (e) => {
-                document.getElementById('chat-input').value = e.results[0][0].transcript;
-                handleUserSendMessage();
-            };
-            document.getElementById('btn-voice-input').onclick = () => recognition.start();
-        }
-    </script>
+        <div class="flex items-center gap-3 p-2 bg-slate-700/30 rounded-lg border border-slate-700">
+          <div class="w-8 h-8 bg-amber-500/20 border border-amber-400/30 rounded flex items-center justify-center font-bold text-amber-400">A1</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-slate-300 truncate">Dev Bot QA</p>
+            <p class="text-xs text-slate-400">Ausente • Reunião</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Canvas Central do Mapa -->
+    <section class="flex-1 relative flex items-center justify-center">
+      <canvas id="workspace-canvas" width="960" height="640" class="shadow-2xl"></canvas>
+      
+      <!-- Overlay de Controles Básicos (Dicas de Movimento) -->
+      <div class="absolute bottom-4 left-4 bg-slate-900/90 border border-slate-700 text-xs text-slate-300 p-2.5 rounded-lg backdrop-blur pointer-events-none">
+        <p class="font-semibold text-slate-200 mb-1">Controles:</p>
+        <p><span class="bg-slate-700 px-1 rounded">W</span> <span class="bg-slate-700 px-1 rounded">A</span> <span class="bg-slate-700 px-1 rounded">S</span> <span class="bg-slate-700 px-1 rounded">D</span> ou <span class="bg-slate-700 px-1 rounded">Setas</span> para mover</p>
+      </div>
+    </section>
+
+    <!-- Painel Lateral Direito: Chat / Detalhes de Interação -->
+    <aside id="chat-panel" class="w-80 bg-slate-800/80 backdrop-blur border border-slate-700 rounded-xl p-4 flex flex-col justify-between">
+      <div>
+        <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Chat da Estação</h2>
+        <div id="chat-messages" class="h-80 overflow-y-auto custom-scrollbar flex flex-col gap-2 text-xs pr-1">
+          <div class="bg-slate-700/40 p-2 rounded border border-slate-600/30">
+            <span class="font-bold text-indigo-400">Sistema:</span>
+            <span class="text-slate-300">Carregados componentes do Atlas & Sprites. Use o mapa interativo.</span>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 flex gap-2">
+        <input type="text" id="chat-input" placeholder="Enviar mensagem..." class="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-indigo-500 text-slate-200" />
+        <button id="btn-send" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg transition font-medium">OK</button>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Lógica do Canvas, Spritesheet e Renderização do Mapa -->
+  <script>
+    const canvas = document.getElementById('workspace-canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Configuração de Renderização Pixel Art
+    const TILE_SIZE = 32;
+    const COLS = 30;
+    const ROWS = 20;
+    let showGrid = true;
+
+    // Posição do Jogador
+    const player = {
+      x: 5,
+      y: 5,
+      pixelX: 5 * TILE_SIZE,
+      pixelY: 5 * TILE_SIZE,
+      speed: 4,
+      size: TILE_SIZE,
+      color: '#6366f1'
+    };
+
+    // Imagem do Atlas / Spritesheet (Carregamento da imagem tratada do Zip/JPEG)
+    const atlasImage = new Image();
+    let atlasLoaded = false;
+    atlasImage.src = 'gather_office_atlas.png'; // Atualize para o nome correto extraído do zip/jpeg
+    atlasImage.onload = () => {
+      atlasLoaded = true;
+      draw();
+    };
+
+    // Desenha o Grid de Estações/Escritório
+    function drawGrid() {
+      if (!showGrid) return;
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 0.5;
+
+      for (let r = 0; r <= ROWS; r++) {
+        ctx.beginPath();
+        ctx.moveTo(0, r * TILE_SIZE);
+        ctx.lineTo(COLS * TILE_SIZE, r * TILE_SIZE);
+        ctx.stroke();
+      }
+      for (let c = 0; c <= COLS; c++) {
+        ctx.beginPath();
+        ctx.moveTo(c * TILE_SIZE, 0);
+        ctx.lineTo(c * TILE_SIZE, ROWS * TILE_SIZE);
+        ctx.stroke();
+      }
+    }
+
+    // Desenha o Jogador/Sprite
+    function drawPlayer() {
+      ctx.fillStyle = player.color;
+      ctx.beginPath();
+      ctx.arc(
+        player.pixelX + TILE_SIZE / 2,
+        player.pixelY + TILE_SIZE / 2,
+        TILE_SIZE / 3,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    // Loop Principal de Renderização
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (atlasLoaded) {
+        // Se a imagem do atlas estiver presente, desenha o background renderizado
+        ctx.drawImage(atlasImage, 0, 0, canvas.width, canvas.height);
+      } else {
+        // Fallback estilizado enquanto o atlas recarrega
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      drawGrid();
+      drawPlayer();
+    }
+
+    // Movimentação do Personagem Smooth
+    const keys = {};
+    window.addEventListener('keydown', (e) => {
+      keys[e.key.toLowerCase()] = true;
+    });
+    window.addEventListener('keyup', (e) => {
+      keys[e.key.toLowerCase()] = false;
+    });
+
+    function update() {
+      let moved = false;
+      if (keys['w'] || keys['arrowup']) {
+        if (player.pixelY > 0) { player.pixelY -= player.speed; moved = true; }
+      }
+      if (keys['s'] || keys['arrowdown']) {
+        if (player.pixelY < canvas.height - TILE_SIZE) { player.pixelY += player.speed; moved = true; }
+      }
+      if (keys['a'] || keys['arrowleft']) {
+        if (player.pixelX > 0) { player.pixelX -= player.speed; moved = true; }
+      }
+      if (keys['d'] || keys['arrowright']) {
+        if (player.pixelX < canvas.width - TILE_SIZE) { player.pixelX += player.speed; moved = true; }
+      }
+
+      if (moved) {
+        player.x = Math.floor(player.pixelX / TILE_SIZE);
+        player.y = Math.floor(player.pixelY / TILE_SIZE);
+        draw();
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Handlers de UI
+    document.getElementById('btn-toggle-grid').addEventListener('click', (e) => {
+      showGrid = !showGrid;
+      e.target.innerText = `Grid: ${showGrid ? 'ON' : 'OFF'}`;
+      draw();
+    });
+
+    document.getElementById('btn-recenter').addEventListener('click', () => {
+      player.pixelX = 5 * TILE_SIZE;
+      player.pixelY = 5 * TILE_SIZE;
+      draw();
+    });
+
+    // Inicia Loop
+    draw();
+    update();
+  </script>
 </body>
 </html>
