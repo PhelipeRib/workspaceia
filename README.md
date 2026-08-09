@@ -1,16 +1,37 @@
-# STARTUP HQ — Gather Pixel Office
+# STARTUP HQ — Gather Pixel Office v2
 
-Abra `index.html` com `gather_office_atlas.png` na mesma pasta.
+## O que mudou
+- Sprites individuais extraídos do atlas original, em PNG com transparência.
+- Contorno pixel-art mais forte aplicado aos objetos.
+- Personagens possuem 4 frames de idle/walk por direção.
+- Idle tem breathing/bobbing sutil.
+- Walk alterna frames a cada ~105 ms.
+- Movimento horizontal usa espelhamento; vertical usa sprites front/back.
+- Objetos deixaram de ser desenhados por grandes recortes do atlas, evitando retângulos grosseiros.
+- `sprite_manifest.json` descreve os assets para uso por outras IAs e pelo frontend.
+- `app.js` contém o motor do mapa, câmera, animação, interação e chat.
 
-O HTML foi reestruturado para:
-- usar o atlas PNG como fonte visual;
-- renderizar pixel art com nearest-neighbor;
-- ter mapa maior com câmera seguindo o jogador;
-- movimento WASD/setas e click-to-move;
-- badges de agentes e proximidade;
-- roster responsivo;
-- chat e configurações preservados;
-- integração com webhook mantida;
-- arquitetura simples em Canvas, sem dependência de framework para o motor 2D.
+## Estrutura
+```text
+index.html
+app.js
+sprite_manifest.json
+assets/
+  characters/
+  furniture/
+  office/
+  nature/
+  tiles/
+```
 
-Para produção, recomenda-se servir os dois arquivos pelo mesmo domínio.
+## Execução
+Sirva a pasta por HTTP local (por exemplo, Live Server/Vite). O `fetch()` do manifest
+não funciona corretamente quando o arquivo é aberto diretamente via `file://` em alguns browsers.
+
+## Renderização
+- Canvas 2D
+- `imageSmoothingEnabled = false`
+- imagens PNG
+- nearest-neighbor/pixelated
+- coordenadas inteiras
+- sprites separados com alpha
