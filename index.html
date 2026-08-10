@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STARTUP HQ - AI Virtual Office 2D</title>
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- html2pdf.js para Exportação Automática de PDFs Reais -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
@@ -36,11 +42,11 @@
             image-rendering: crisp-edges;
         }
 
-        /* Estilos dos popups nativos do mapa antigo */
+        /* Estilos dos popups nativos do mapa */
         #proximity {
             position: absolute;
             display: none;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(15, 23, 42, 0.95);
             border: 1px solid #475569;
             color: #f8fafc;
             padding: 8px 16px;
@@ -192,9 +198,19 @@
 
             <div id="chips" class="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto"></div>
 
+            <!-- Input Bar com Anexo de Arquivo -->
             <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
-                <input id="chatInput" type="text" placeholder="Escreva uma mensagem..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none">
-                <button id="send" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-3 rounded-xl transition flex items-center gap-2">
+                <!-- Input Oculto para Seleção de Arquivo -->
+                <input type="file" id="fileInput" accept=".pdf,.txt,.json,.md" class="hidden">
+                
+                <!-- Botão de Anexo -->
+                <button id="btnFile" onclick="document.getElementById('fileInput').click()" class="p-3 bg-slate-800 hover:bg-slate-700 text-indigo-400 rounded-xl border border-slate-700 transition shrink-0" title="Anexar arquivo/PDF">
+                    📎
+                </button>
+
+                <input id="chatInput" type="text" placeholder="Escreva uma mensagem ou anexe um documento..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none">
+                
+                <button id="send" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-3 rounded-xl transition flex items-center gap-2 shrink-0">
                     <span>Enviar</span>
                     <i data-lucide="send" class="w-4 h-4"></i>
                 </button>
