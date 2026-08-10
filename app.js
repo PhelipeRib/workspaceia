@@ -7,16 +7,8 @@ const PLAYER_RADIUS=13;
 let camera={x:0,y:0},keys={},activeAgent=null,last=performance.now(),walkClock=0,idleClock=0;
 let atlasAssets={},characterAssets={},sceneObjects=[],staticColliders=[];
 
-// Configuração Padrão conectada diretamente à sua API do Render
-const DEFAULT_SETTINGS = {
-  aiMode: 'custom-webhook',
-  webhookUrl: 'https://workspaceia.onrender.com/agent-chat',
-  apiKey: ''
-};
-
-let settings = JSON.parse(localStorage.getItem('startup_hq_settings') || JSON.stringify(DEFAULT_SETTINGS));
-
-// Garante que a URL do Render esteja sempre atualizada
+// Configurações do Render mantidas
+let settings = JSON.parse(localStorage.getItem('startup_hq_settings') || '{"aiMode":"custom-webhook","webhookUrl":"https://workspaceia.onrender.com/agent-chat","apiKey":""}');
 if (!settings.webhookUrl || settings.webhookUrl.includes('ngrok')) {
   settings.webhookUrl = 'https://workspaceia.onrender.com/agent-chat';
   settings.aiMode = 'custom-webhook';
@@ -28,10 +20,7 @@ const DEFAULT=[
 {id:'cx',name:'Som & Morgan',role:'CX & Product Analytics',short:'CX',desc:'Retenção, feedback de clientes e métricas de uso.',character:'char_06',direction:'down',x:1325,y:670,status:'Ocioso',skills:['Relatório NPS','Métricas de Coorte','Feedbacks Críticos','Análise de Churn'],history:[{sender:'agent',text:'Olá! Estamos monitorando a experiência do cliente e os logs de atendimento.'}]},
 {id:'arch',name:'Jinen & Steven',role:'Arquitetos & Estratégia',short:'Strategy',desc:'Design de sistemas e arquitetura de integração.',character:'char_08',direction:'down',x:355,y:650,status:'Ocioso',skills:['Mapeamento de APIs','Desenho de BD','Refatoração Core','Plano Cloud'],history:[{sender:'agent',text:'Pausa para o café! Quer revisar a arquitetura da infraestrutura ou banco?'}]}
 ];
-
 let agents=JSON.parse(localStorage.getItem('startup_hq_agents')||'null')||DEFAULT;
-
-// Corrige saves antigos que carregavam personagens/posições inconsistentes.
 for(const d of DEFAULT){const a=agents.find(x=>x.id===d.id);if(a){a.character=d.character;a.direction=a.direction||'down'}}
 let player={x:700,y:560,targetX:700,targetY:560,speed:220,direction:'down',moving:false,character:'char_03'};
 
@@ -46,19 +35,23 @@ async function loadJSON(){
  const r=await fetch('sprite_manifest.json?v=3');const m=await r.json();
  atlasAssets=m.assets||{};characterAssets=m.characters||{};
 }
-
 const imageCache=new Map();
 function img(path){
  if(!imageCache.has(path)){const im=new Image();im.decoding='async';im.src=path;imageCache.set(path,im)}
  return imageCache.get(path)
 }
-
 function preload(){
  Object.values(atlasAssets).forEach(a=>img(a.file));
  Object.values(characterAssets).forEach(c=>['down','up'].forEach(d=>(c[d]||[]).forEach(f=>img(f))));
 }
-
-function resize(){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=Math.floor(r.width*d);canvas.height=Math.floor(r.height*d);ctx.setTransform(d,0,0,d,0,0);ctx.imageSmoothingEnabled=false}
+function resize(){
+ const r=canvas.getBoundingClientRect();
+ const d=Math.min(devicePixelRatio||1,2);
+ canvas.width=Math.floor(r.width*d);
+ canvas.height=Math.floor(r.height*d);
+ ctx.setTransform(d,0,0,d,0,0);
+ ctx.imageSmoothingEnabled=false;
+}
 addEventListener('resize',resize);resize();
 
 function drawAsset(id,x,y,scale=1,anchor=.5){
@@ -67,7 +60,6 @@ function drawAsset(id,x,y,scale=1,anchor=.5){
  const w=a.w*scale,h=a.h*scale;
  ctx.drawImage(im,Math.round(x-w*anchor),Math.round(y-h),Math.round(w),Math.round(h));
 }
-
 function addObject(id,x,y,scale=1,anchor=.5,interactive=null){
  const a=atlasAssets[id];if(!a)return;
  const w=a.w*scale,h=a.h*scale,left=x-w*anchor,top=y-h;
@@ -77,7 +69,6 @@ function addObject(id,x,y,scale=1,anchor=.5,interactive=null){
    staticColliders.push({x:left+c.x*scale,y:top+c.y*scale,w:c.w*scale,h:c.h*scale,type:'object',id});
  }
 }
-
 function shadow(x,y,w=28){ctx.save();ctx.globalAlpha=.22;ctx.fillStyle='#101722';ctx.beginPath();ctx.ellipse(x,y,w,Math.max(3,w*.22),0,0,Math.PI*2);ctx.fill();ctx.restore()}
 
 function characterFrame(a,moving){
@@ -89,7 +80,6 @@ function characterFrame(a,moving){
  const idx=moving?Math.floor(walkClock/125)%frames.length:0;
  return img(frames[idx]);
 }
-
 function drawCharacter(a,x,y,moving){
  const im=characterFrame(a,moving);if(!im||!im.complete||!im.naturalWidth)return;
  const dir=a.direction||'down',s=1.08;
@@ -107,9 +97,7 @@ function drawCharacter(a,x,y,moving){
  }
  ctx.restore();
 }
-
 function label(t,x,y){ctx.save();ctx.fillStyle='#fff';ctx.beginPath();ctx.roundRect(x-55,y-12,110,24,12);ctx.fill();ctx.fillStyle='#7b8495';ctx.font='800 9px Arial';ctx.textAlign='center';ctx.fillText(t,x,y+3);ctx.restore()}
-
 function nameBadge(a,x,y){ctx.save();ctx.font='700 10px Arial';const txt=`${a.name} · ${a.short||a.role}`;const tw=ctx.measureText(txt).width+25;ctx.fillStyle='#101827f5';ctx.beginPath();ctx.roundRect(x-tw/2,y-18,tw,19,9);ctx.fill();ctx.fillStyle=a.status==='Executando...'?'#ffb13b':'#35d486';ctx.beginPath();ctx.arc(x-tw/2+9,y-8.5,3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(txt,x-tw/2+16,y-5);ctx.restore()}
 
 function tileFloor(x,y,w,h,tile='floor_beige'){
@@ -117,11 +105,9 @@ function tileFloor(x,y,w,h,tile='floor_beige'){
  const im=img(a.file),tw=a.w,th=a.h;if(!im.complete||!im.naturalWidth)return;
  for(let yy=y;yy<y+h;yy+=th)for(let xx=x;xx<x+w;xx+=tw)ctx.drawImage(im,xx,yy,Math.min(tw,x+w-xx),Math.min(th,y+h-yy));
 }
-
 function wallRect(x,y,w,h,draw=true){
  if(draw){ctx.fillStyle='#737a84';ctx.fillRect(x,y,w,h);ctx.fillStyle='#9aa1ac';if(w>h)ctx.fillRect(x,y,w,3);else ctx.fillRect(x,y,3,h)}
 }
-
 function drawRoom(x,y,w,h,tile='floor_beige'){
  tileFloor(x,y,w,h,tile);
 }
@@ -278,12 +264,16 @@ function animate(now){
  const b=$('proximity') || $('proximity-badge');
  if(b){
    if(found){
-     b.style.display='block';b.style.left=(found.x-camera.x)+'px';b.style.top=(found.y-camera.y-70)+'px';
-     b.innerHTML=`Conversar com ${found.name} <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">ESPAÇO</span>`;
+     b.style.display='block';
+     b.style.left=(found.x-camera.x)+'px';
+     b.style.top=(found.y-camera.y-70)+'px';
+     b.innerHTML=`Conversar com ${found.name} <span class="key">ESPAÇO</span>`;
      b.onclick=()=>openChat(found)
    }else if(interactObj){
-     b.style.display='block';b.style.left=(interactObj.x-camera.x)+'px';b.style.top=(interactObj.y-camera.y-55)+'px';
-     b.innerHTML=`${interactObj.interactive} <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">E</span>`;
+     b.style.display='block';
+     b.style.left=(interactObj.x-camera.x)+'px';
+     b.style.top=(interactObj.y-camera.y-55)+'px';
+     b.innerHTML=`${interactObj.interactive} <span class="key">E</span>`;
      b.onclick=interact
    }else b.style.display='none';
  }
@@ -309,10 +299,10 @@ function renderAgents(){
 
  agents.forEach(a=>{
    const d=document.createElement('div');
-   d.className='bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 p-3 rounded-xl transition cursor-pointer flex items-center gap-3 mb-2';
+   d.className='agentCard';
    const c=characterAssets[a.character],srcPath=c?.down?.[0]||'char_01_down_0.png';
-   d.innerHTML=`<img class="w-8 h-8 rounded-lg object-contain" src="${srcPath}"><div><strong class="text-xs font-bold text-slate-200 block">${a.name}</strong><span class="text-[11px] text-slate-400">${a.role}</span></div>`;
-   d.onclick=()=>{player.targetX=a.x;player.targetY=a.y+72;openChat(a)};
+   d.innerHTML=`<img class="mini" src="${srcPath}"><div><strong>${a.name}</strong><span>${a.role}</span></div>`;
+   d.onclick=()=>{player.targetX=a.x;player.targetY=a.y+72};
    el.appendChild(d)
  })
 }
@@ -337,7 +327,7 @@ function openChat(a){
    c.innerHTML='';
    a.skills.forEach(s=>{
      const b=document.createElement('button');
-     b.className='chip-btn bg-slate-800 hover:bg-indigo-900/40 text-indigo-300 border border-slate-700 px-2.5 py-1 rounded-lg text-xs transition mr-2 mb-2';
+     b.className='chip';
      b.textContent=s;
      b.onclick=()=>{
        const input = $('chatInput') || $('chat-input');
@@ -354,19 +344,14 @@ function renderChat(){
  el.innerHTML='';
  activeAgent.history.forEach(m=>{
    const d=document.createElement('div');
-   d.className='flex mb-2 '+(m.sender==='user'?'justify-end':'justify-start');
-   const inner = document.createElement('div');
-   inner.className = m.sender==='user' 
-     ? "bg-indigo-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%] text-xs shadow-md"
-     : "bg-slate-800 text-slate-100 border border-slate-700/80 p-3 rounded-2xl rounded-tl-none max-w-[85%] text-xs shadow-md leading-relaxed";
-   inner.textContent = m.text;
-   d.appendChild(inner);
-   el.appendChild(d);
+   d.className='msg '+(m.sender==='user'?'user':'agent');
+   d.textContent=m.text;
+   el.appendChild(d)
  });
  el.scrollTop=el.scrollHeight
 }
 
-// 🧠 CONEXÃO COM O RENDER / GROQ
+// 🧠 CONEXÃO REAL COM A API DO RENDER + GROQ
 async function queryAI(a,p){
  if(settings.aiMode==='custom-webhook' && settings.webhookUrl){
   try{
@@ -443,7 +428,7 @@ const saveSetBtn = $('saveSettings') || $('btn-save-settings');
 if(saveSetBtn) saveSetBtn.onclick=()=>{
  const modeEl = $('aiMode') || $('setting-ai-mode');
  const webEl = $('webhook') || $('setting-webhook-url');
- const apiEl = $('apiKey') || $('setting-api-key');
+ const apiEl = $('apiKey') || $('setting-apiKey');
 
  settings={
    aiMode: modeEl ? modeEl.value : 'custom-webhook',
