@@ -7,9 +7,9 @@ const PLAYER_RADIUS=13;
 let camera={x:0,y:0},keys={},activeAgent=null,last=performance.now(),walkClock=0,idleClock=0;
 let atlasAssets={},characterAssets={},sceneObjects=[],staticColliders=[];
 
-let settings = JSON.parse(localStorage.getItem('startup_hq_settings') || '{"aiMode":"custom-webhook","webhookUrl":"[https://workspaceia.onrender.com/agent-chat](https://workspaceia.onrender.com/agent-chat)","apiKey":""}');
+let settings = JSON.parse(localStorage.getItem('startup_hq_settings') || '{"aiMode":"custom-webhook","webhookUrl":"https://workspaceia.onrender.com/agent-chat","apiKey":""}');
 if (!settings.webhookUrl || settings.webhookUrl.includes('ngrok')) {
-  settings.webhookUrl = '[https://workspaceia.onrender.com/agent-chat](https://workspaceia.onrender.com/agent-chat)';
+  settings.webhookUrl = 'https://workspaceia.onrender.com/agent-chat';
   settings.aiMode = 'custom-webhook';
 }
 
@@ -353,16 +353,49 @@ function openChat(a){
  }
 }
 
-// RENDERIZADOR DE CHAT CORRIGIDO (BALÕES SEPARADOS E SUPORTE A MARKDOWN/QUEBRAS)
+// FUNÇÃO PARA EXPORTAR PDF DIRETO PELA INTERFACE
+window.downloadPDF = function(index) {
+  if(!activeAgent || !activeAgent.history[index]) return;
+  const msgText = activeAgent.history[index].text;
+  
+  // Cria elemento HTML temporário formatado para o PDF
+  const element = document.createElement('div');
+  element.style.padding = '30px';
+  element.style.fontFamily = 'Arial, sans-serif';
+  element.style.color = '#1e293b';
+  element.innerHTML = `
+    <h1 style="color: #4f46e5; border-b: 2px solid #e2e8f0; padding-bottom: 10px;">${activeAgent.name} - Documento Oficial</h1>
+    <p style="font-size: 12px; color: #64748b;">Função: ${activeAgent.role} | Gerado via AI Virtual Office 2D</p>
+    <hr style="margin-bottom: 200px; border: 0; border-top: 1px solid #cbd5e1;">
+    <div style="font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${msgText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</div>
+  `;
+
+  const opt = {
+    margin:       10,
+    filename:     `Documento_${activeAgent.name.replace(/\s+/g, '_')}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  if(window.html2pdf) {
+    html2pdf().set(opt).from(element).save();
+  } else {
+    alert('Biblioteca de PDF carregando... Tente em 2 segundos.');
+  }
+};
+
+// RENDERIZADOR DE CHAT COM BOTÃO DE EXPORTAR PDF
 function renderChat(){
  const el=$('messages') || $('chat-messages');if(!el)return;
  el.innerHTML='';
 
- activeAgent.history.forEach(m=>{
+ activeAgent.history.forEach((m, idx)=>{
    const msgDiv=document.createElement('div');
    msgDiv.style.display = 'flex';
-   msgDiv.style.marginBottom = '12px';
-   msgDiv.style.justifyContent = m.sender==='user' ? 'flex-end' : 'flex-start';
+   msgDiv.style.flexDirection = 'column';
+   msgDiv.style.marginBottom = '14px';
+   msgDiv.style.alignItems = m.sender==='user' ? 'flex-end' : 'flex-start';
 
    const bubble = document.createElement('div');
    bubble.style.maxWidth = '85%';
@@ -390,10 +423,44 @@ function renderChat(){
 
    bubble.innerHTML = formattedText;
    msgDiv.appendChild(bubble);
+
+   // Se for mensagem da IA, adiciona o Botão de Baixar PDF
+   if(m.sender === 'agent' && idx > 0){
+     const btnExport = document.createElement('button');
+     btnExport.innerHTML = '📥 Baixar como PDF';
+     btnExport.style.fontSize = '11px';
+     btnExport.style.color = '#a5b4fc';
+     btnExport.style.marginTop = '4px';
+     btnExport.style.background = 'transparent';
+     btnExport.style.border = 'none';
+     btnExport.style.cursor = 'pointer';
+     btnExport.onclick = () => window.downloadPDF(idx);
+     msgDiv.appendChild(btnExport);
+   }
+
    el.appendChild(msgDiv);
  });
 
  el.scrollTop=el.scrollHeight;
+}
+
+// LEITURA DE ARQUIVO IMPORTADO (PDF / TXT)
+const fileInput = $('fileInput');
+if(fileInput) {
+  fileInput.onchange = function(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const textContent = evt.target.result;
+      const chatInp = $('chatInput') || $('chat-input');
+      if(chatInp) {
+        chatInp.value = `[ARQUIVO ANEXADO: ${file.name}]\n${textContent.slice(0, 1500)}`;
+      }
+    };
+    reader.readAsText(file);
+  };
 }
 
 async function queryAI(a, p) {
@@ -482,7 +549,7 @@ if(saveSetBtn) saveSetBtn.onclick=()=>{
 
  settings={
    aiMode: modeEl ? modeEl.value : 'custom-webhook',
-   webhookUrl: webEl ? webEl.value : '[https://workspaceia.onrender.com/agent-chat](https://workspaceia.onrender.com/agent-chat)',
+   webhookUrl: webEl ? webEl.value : 'https://workspaceia.onrender.com/agent-chat',
    apiKey: apiEl ? apiEl.value : ''
  };
  localStorage.setItem('startup_hq_settings',JSON.stringify(settings));
