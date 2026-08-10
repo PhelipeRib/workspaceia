@@ -1,4 +1,4 @@
-// --- CONFIGURAÇÃO COM O RENDER ---
+// --- CONFIGURAÇÃO COM O RENDER & GROQ ---
 const DEFAULT_SETTINGS = {
     aiMode: 'custom-webhook',
     apiKey: '',
@@ -16,8 +16,8 @@ const DEFAULT_AGENTS = [
         desc: 'Especialista em arquitetura, CI/CD, revisão de PRs e relatórios de código.',
         avatar: '👨‍💻',
         color: '#6366f1',
-        x: 200,
-        y: 180,
+        x: 272,
+        y: 200,
         skills: ['Review de PRs', 'Status da Sprint', 'Arquitetura Cloud'],
         history: [
             { sender: 'agent', text: 'Olá! Sou o Alex, Tech Lead. Como posso ajudar com a arquitetura ou o progresso do código hoje?' }
@@ -31,7 +31,7 @@ const DEFAULT_AGENTS = [
         avatar: '👩‍💼',
         color: '#ec4899',
         x: 480,
-        y: 180,
+        y: 200,
         skills: ['Roadmap 2026', 'Priorizar Backlog', 'Métricas de OKR'],
         history: [
             { sender: 'agent', text: 'Oi! Tudo bem? Quer alinhar entregáveis de produto ou rodar uma priorização?' }
@@ -44,7 +44,7 @@ const DEFAULT_AGENTS = [
         desc: 'Executa queries em SQL, gera gráficos de ROI e relatórios de métricas.',
         avatar: '📊',
         color: '#10b981',
-        x: 200,
+        x: 272,
         y: 380,
         skills: ['Relatório de Churn', 'Consultar SQL', 'Métricas CAC/LTV'],
         history: [
@@ -69,7 +69,7 @@ const DEFAULT_AGENTS = [
 
 let agents = [];
 let player = {
-    x: 340,
+    x: 376,
     y: 280,
     radius: 12,
     speed: 3.5,
@@ -84,10 +84,10 @@ let ttsEnabled = true;
 let isListeningVoice = false;
 let recognition = null;
 
-// ELEMENTOS DE ÁUDIO E CANVAS
+// CANVAS
 const canvas = document.getElementById('officeCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
-const CANVAS_WIDTH = 680;
+const CANVAS_WIDTH = 752;
 const CANVAS_HEIGHT = 520;
 
 if (canvas) {
@@ -95,7 +95,7 @@ if (canvas) {
     canvas.height = CANVAS_HEIGHT;
 }
 
-// CARREGAMENTO DE IMAGENS DO SEU MAPA
+// IMAGENS DOS MÓVEIS
 const images = {};
 const imageSources = {
     floor_beige: 'floor_beige.png',
@@ -147,19 +147,12 @@ const spriteSheets = {
     }
 };
 
-let loadedImagesCount = 0;
-let totalImagesCount = Object.keys(imageSources).length;
-
 function loadImages() {
     for (let key in imageSources) {
         images[key] = new Image();
         images[key].src = imageSources[key];
-        images[key].onload = () => {
-            loadedImagesCount++;
-        };
     }
 
-    // Precarrega Sprites
     for (let charKey in spriteSheets) {
         for (let dirKey in spriteSheets[charKey]) {
             spriteSheets[charKey][dirKey] = spriteSheets[charKey][dirKey].map(src => {
@@ -327,7 +320,7 @@ function setupControls() {
     }
 }
 
-// LOOP E DESENHO
+// LOOP DO JOGO E MOVIMENTAÇÃO
 function gameLoop() {
     const chatModal = document.getElementById('chat-modal');
     if (chatModal && chatModal.classList.contains('hidden')) {
@@ -376,55 +369,117 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+// DESENHO COMPLETO DO ESCRITÓRIO
 function drawScene() {
     if (!ctx) return;
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    // Desenha Chão com Imagens
-    drawFloor();
+    // 1. CHÃO & PISOS DAS SALAS
+    drawOfficeFloor();
 
-    // Desenha Móveis
-    drawFurniture();
+    // 2. PAREDES & DIVISÓRIAS
+    drawWalls();
 
-    // Desenha Agentes com Sprites
+    // 3. MÓVEIS E DECORAÇÃO
+    drawOfficeFurniture();
+
+    // 4. AGENTES (SPRITES)
     agents.forEach(agent => {
         drawCharacter(agent.id, 'down', 0, agent.x, agent.y, agent.name, agent.color);
     });
 
-    // Desenha Player
+    // 5. PLAYER (SPRITE)
     drawCharacter('player', player.dir, player.frame, player.x, player.y, 'Você', '#6366f1');
 }
 
-function drawFloor() {
-    // Sala Principal
+function drawOfficeFloor() {
+    // Fundo Bege na Área Principal
     if (images.floor_beige && images.floor_beige.complete) {
-        const pattern = ctx.createPattern(images.floor_beige, 'repeat');
-        ctx.fillStyle = pattern;
+        const patternBeige = ctx.createPattern(images.floor_beige, 'repeat');
+        ctx.fillStyle = patternBeige;
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     } else {
         ctx.fillStyle = '#1e293b';
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
+
+    // Carpete Roxo na Sala de Reunião (Lado Esquerdo Superior)
+    if (images.floor_purple && images.floor_purple.complete) {
+        const patternPurple = ctx.createPattern(images.floor_purple, 'repeat');
+        ctx.fillStyle = patternPurple;
+        ctx.fillRect(16, 16, 192, 192);
+    }
+
+    // Carpete Cinza na Área de Lazer (Lado Direito Inferior)
+    if (images.floor_gray && images.floor_gray.complete) {
+        const patternGray = ctx.createPattern(images.floor_gray, 'repeat');
+        ctx.fillStyle = patternGray;
+        ctx.fillRect(560, 320, 176, 184);
+    }
 }
 
-function drawFurniture() {
-    // Desenha Objetos do Escritório
-    const furnitureList = [
-        { img: 'desk_dual', x: 140, y: 140 },
-        { img: 'desk_dual', x: 420, y: 140 },
-        { img: 'desk_dual', x: 140, y: 340 },
-        { img: 'desk_dual', x: 420, y: 340 },
-        { img: 'sofa_blue', x: 280, y: 240 },
-        { img: 'plant_large', x: 50, y: 50 },
-        { img: 'plant_large', x: 600, y: 50 },
-        { img: 'bookshelf', x: 320, y: 50 }
-    ];
+function drawWalls() {
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 4;
 
-    furnitureList.forEach(item => {
-        if (images[item.img] && images[item.img].complete) {
-            ctx.drawImage(images[item.img], item.x, item.y);
-        }
-    });
+    // Divisória da Sala de Reunião
+    ctx.strokeRect(16, 16, 192, 192);
+
+    // Divisória da Área de Lazer
+    ctx.strokeRect(560, 320, 176, 184);
+}
+
+function drawOfficeFurniture() {
+    // Estantes e Armários do Topo
+    drawSprite('bookshelf', 224, 16);
+    drawSprite('cabinet', 256, 16);
+    drawSprite('cabinet', 288, 16);
+
+    // Sala de Reunião
+    drawSprite('meeting_table', 64, 80);
+    drawSprite('office_chair', 80, 56);
+    drawSprite('office_chair', 112, 56);
+    drawSprite('office_chair', 80, 128);
+    drawSprite('office_chair', 112, 128);
+    drawSprite('plant_large', 24, 24);
+
+    // Mesas de Trabalho dos Agentes (Dual Desks + Chairs + Monitores)
+    // Alex (Dev)
+    drawSprite('desk_dual', 240, 192);
+    drawSprite('office_chair', 272, 176);
+    drawSprite('monitor', 256, 185);
+
+    // Sophia (PM)
+    drawSprite('desk_dual', 448, 192);
+    drawSprite('office_chair', 480, 176);
+    drawSprite('monitor', 464, 185);
+
+    // Carlos (Data)
+    drawSprite('desk_dual', 240, 368);
+    drawSprite('office_chair', 272, 352);
+    drawSprite('monitor', 256, 361);
+
+    // Beatriz (HR)
+    drawSprite('desk_dual', 448, 368);
+    drawSprite('office_chair', 480, 352);
+    drawSprite('monitor', 464, 361);
+
+    // Lounge Central (Sofás e Mesa de Café)
+    drawSprite('sofa_blue', 340, 260);
+    drawSprite('coffee_table_round', 360, 290);
+
+    // Área de Lazer / Descompressão
+    drawSprite('pool_table', 580, 350);
+    drawSprite('foosball', 580, 430);
+    drawSprite('sofa_orange', 670, 350);
+    drawSprite('plant_large', 700, 470);
+    drawSprite('plant_large', 16, 470);
+}
+
+function drawSprite(imgKey, x, y) {
+    if (images[imgKey] && images[imgKey].complete) {
+        ctx.drawImage(images[imgKey], x, y);
+    }
 }
 
 function drawCharacter(charKey, dir, frame, x, y, name, color) {
@@ -433,7 +488,6 @@ function drawCharacter(charKey, dir, frame, x, y, name, color) {
         const img = sheet[dir][frame];
         ctx.drawImage(img, x - 16, y - 24, 32, 32);
     } else {
-        // Fallback genérico caso sprite falhe
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(x, y, 14, 0, Math.PI * 2);
@@ -449,7 +503,7 @@ function drawCharacter(charKey, dir, frame, x, y, name, color) {
     ctx.fillText(name.split(' ')[0], x, y - 26);
 }
 
-// CHAT E MENSAGENS
+// DIÁLOGOS & CHAT
 function openChatModal(agent) {
     activeAgent = agent;
     document.getElementById('modal-agent-name').innerText = agent.name;
