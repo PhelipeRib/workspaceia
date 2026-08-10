@@ -7,14 +7,12 @@ const PLAYER_RADIUS=13;
 let camera={x:0,y:0},keys={},activeAgent=null,last=performance.now(),walkClock=0,idleClock=0;
 let atlasAssets={},characterAssets={},sceneObjects=[],staticColliders=[];
 
-// Configurações do Render mantidas intactas
-let settings = JSON.parse(localStorage.getItem('startup_hq_settings') || '{"aiMode":"custom-webhook","webhookUrl":"https://workspaceia.onrender.com/agent-chat","apiKey":""}');
+let settings = JSON.parse(localStorage.getItem('startup_hq_settings') || '{"aiMode":"custom-webhook","webhookUrl":"[https://workspaceia.onrender.com/agent-chat](https://workspaceia.onrender.com/agent-chat)","apiKey":""}');
 if (!settings.webhookUrl || settings.webhookUrl.includes('ngrok')) {
-  settings.webhookUrl = 'https://workspaceia.onrender.com/agent-chat';
+  settings.webhookUrl = '[https://workspaceia.onrender.com/agent-chat](https://workspaceia.onrender.com/agent-chat)';
   settings.aiMode = 'custom-webhook';
 }
 
-// Mapeamento usando apenas os sprites sem corte do seu repositório
 const DEFAULT=[
 {id:'dev',name:'Brad',role:'Tech Lead / Dev',short:'Tech Lead',desc:'Análise de código, Pull Requests e automação de builds.',character:'char_01',direction:'down',x:680,y:335,status:'Ocioso',skills:['Review de PR','Gerar Testes Unitários','Deploy Staging','Debug Endpoint'],history:[{sender:'agent',text:'E aí! Sou o Brad, seu Lead de Eng. Qual repositório ou tarefa de código vamos rodar?'}]},
 {id:'pm',name:'Alison',role:'Product Owner',short:'Product',desc:'Definição de estórias de usuário e planejamento de Sprints.',character:'char_04',direction:'down',x:850,y:335,status:'Ocioso',skills:['Escrever User Stories','Priorizar Backlog','Roadmap Q3'],history:[{sender:'agent',text:'Oi! Alison por aqui. Pronta para mapear requisitos e alinhar a visão de produto.'}]},
@@ -25,13 +23,9 @@ const DEFAULT=[
 let agents=JSON.parse(localStorage.getItem('startup_hq_agents')||'null')||DEFAULT;
 for(const d of DEFAULT){
   const a=agents.find(x=>x.id===d.id);
-  if(a){
-    a.character=d.character;
-    a.direction=a.direction||'down';
-  }
+  if(a){ a.character=d.character; a.direction=a.direction||'down'; }
 }
 
-// O Player utiliza o modelo 'char_02' que está completo e com cabeça inteira no repositório
 let player={x:700,y:560,targetX:700,targetY:560,speed:220,direction:'down',moving:false,character:'char_02'};
 
 const doors=[
@@ -359,19 +353,49 @@ function openChat(a){
  }
 }
 
+// RENDERIZADOR DE CHAT CORRIGIDO (BALÕES SEPARADOS E SUPORTE A MARKDOWN/QUEBRAS)
 function renderChat(){
  const el=$('messages') || $('chat-messages');if(!el)return;
  el.innerHTML='';
+
  activeAgent.history.forEach(m=>{
-   const d=document.createElement('div');
-   d.className='msg '+(m.sender==='user'?'user':'agent');
-   d.textContent=m.text;
-   el.appendChild(d)
+   const msgDiv=document.createElement('div');
+   msgDiv.style.display = 'flex';
+   msgDiv.style.marginBottom = '12px';
+   msgDiv.style.justifyContent = m.sender==='user' ? 'flex-end' : 'flex-start';
+
+   const bubble = document.createElement('div');
+   bubble.style.maxWidth = '85%';
+   bubble.style.padding = '12px 16px';
+   bubble.style.borderRadius = '16px';
+   bubble.style.fontSize = '13px';
+   bubble.style.lineHeight = '1.6';
+   bubble.style.whiteSpace = 'pre-wrap';
+
+   if(m.sender === 'user'){
+     bubble.style.backgroundColor = '#4f46e5';
+     bubble.style.color = '#ffffff';
+     bubble.style.borderTopRightRadius = '2px';
+   } else {
+     bubble.style.backgroundColor = '#1e293b';
+     bubble.style.color = '#f1f5f9';
+     bubble.style.border = '1px solid #334155';
+     bubble.style.borderTopLeftRadius = '2px';
+   }
+
+   let formattedText = m.text
+     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+     .replace(/### (.*?)\n/g, '<h4 style="font-weight:bold; color:#818cf8; margin-top:8px;">$1</h4>')
+     .replace(/```([\s\S]*?)```/g, '<pre style="background:#0f172a; padding:10px; border-radius:8px; overflow-x:auto; font-family:monospace; color:#38bdf8; margin:8px 0;"><code>$1</code></pre>');
+
+   bubble.innerHTML = formattedText;
+   msgDiv.appendChild(bubble);
+   el.appendChild(msgDiv);
  });
- el.scrollTop=el.scrollHeight
+
+ el.scrollTop=el.scrollHeight;
 }
 
-// 🧠 CONEXÃO CORRIGIDA COM A API DO RENDER + GROQ
 async function queryAI(a, p) {
   if (settings.aiMode === 'custom-webhook' && settings.webhookUrl) {
     try {
@@ -379,7 +403,7 @@ async function queryAI(a, p) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          agentId: a.id || 'agent-dev',
+          agentId: a.id || 'dev',
           agentRole: a.role || 'Assistente',
           prompt: p
         })
@@ -387,7 +411,6 @@ async function queryAI(a, p) {
       
       const data = await r.json();
       
-      // Tratamento seguro da resposta da Groq
       if (data && data.reply) return data.reply;
       if (typeof data === 'string') return data;
       return data.response || data.message || 'Resposta recebida sem texto.';
@@ -459,7 +482,7 @@ if(saveSetBtn) saveSetBtn.onclick=()=>{
 
  settings={
    aiMode: modeEl ? modeEl.value : 'custom-webhook',
-   webhookUrl: webEl ? webEl.value : 'https://workspaceia.onrender.com/agent-chat',
+   webhookUrl: webEl ? webEl.value : '[https://workspaceia.onrender.com/agent-chat](https://workspaceia.onrender.com/agent-chat)',
    apiKey: apiEl ? apiEl.value : ''
  };
  localStorage.setItem('startup_hq_settings',JSON.stringify(settings));
