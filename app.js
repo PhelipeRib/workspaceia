@@ -7,22 +7,32 @@ const PLAYER_RADIUS=13;
 let camera={x:0,y:0},keys={},activeAgent=null,last=performance.now(),walkClock=0,idleClock=0;
 let atlasAssets={},characterAssets={},sceneObjects=[],staticColliders=[];
 
-// Configurações do Render mantidas
+// Configurações do Render mantidas intactas
 let settings = JSON.parse(localStorage.getItem('startup_hq_settings') || '{"aiMode":"custom-webhook","webhookUrl":"https://workspaceia.onrender.com/agent-chat","apiKey":""}');
 if (!settings.webhookUrl || settings.webhookUrl.includes('ngrok')) {
   settings.webhookUrl = 'https://workspaceia.onrender.com/agent-chat';
   settings.aiMode = 'custom-webhook';
 }
 
+// Mapeamento usando apenas os sprites sem corte do seu repositório
 const DEFAULT=[
 {id:'dev',name:'Brad',role:'Tech Lead / Dev',short:'Tech Lead',desc:'Análise de código, Pull Requests e automação de builds.',character:'char_01',direction:'down',x:680,y:335,status:'Ocioso',skills:['Review de PR','Gerar Testes Unitários','Deploy Staging','Debug Endpoint'],history:[{sender:'agent',text:'E aí! Sou o Brad, seu Lead de Eng. Qual repositório ou tarefa de código vamos rodar?'}]},
 {id:'pm',name:'Alison',role:'Product Owner',short:'Product',desc:'Definição de estórias de usuário e planejamento de Sprints.',character:'char_04',direction:'down',x:850,y:335,status:'Ocioso',skills:['Escrever User Stories','Priorizar Backlog','Roadmap Q3'],history:[{sender:'agent',text:'Oi! Alison por aqui. Pronta para mapear requisitos e alinhar a visão de produto.'}]},
-{id:'cx',name:'Som & Morgan',role:'CX & Product Analytics',short:'CX',desc:'Retenção, feedback de clientes e métricas de uso.',character:'char_06',direction:'down',x:1325,y:670,status:'Ocioso',skills:['Relatório NPS','Métricas de Coorte','Feedbacks Críticos','Análise de Churn'],history:[{sender:'agent',text:'Olá! Estamos monitorando a experiência do cliente e os logs de atendimento.'}]},
-{id:'arch',name:'Jinen & Steven',role:'Arquitetos & Estratégia',short:'Strategy',desc:'Design de sistemas e arquitetura de integração.',character:'char_05',direction:'down',x:355,y:650,status:'Ocioso',skills:['Mapeamento de APIs','Desenho de BD','Refatoração Core','Plano Cloud'],history:[{sender:'agent',text:'Pausa para o café! Quer revisar a arquitetura da infraestrutura ou banco?'}]}
+{id:'cx',name:'Som & Morgan',role:'CX & Product Analytics',short:'CX',desc:'Retenção, feedback de clientes e métricas de uso.',character:'char_02',direction:'down',x:1325,y:670,status:'Ocioso',skills:['Relatório NPS','Métricas de Coorte','Feedbacks Críticos','Análise de Churn'],history:[{sender:'agent',text:'Olá! Estamos monitorando a experiência do cliente e os logs de atendimento.'}]},
+{id:'arch',name:'Jinen & Steven',role:'Arquitetos & Estratégia',short:'Strategy',desc:'Design de sistemas e arquitetura de integração.',character:'char_04',direction:'down',x:355,y:650,status:'Ocioso',skills:['Mapeamento de APIs','Desenho de BD','Refatoração Core','Plano Cloud'],history:[{sender:'agent',text:'Pausa para o café! Quer revisar a arquitetura da infraestrutura ou banco?'}]}
 ];
+
 let agents=JSON.parse(localStorage.getItem('startup_hq_agents')||'null')||DEFAULT;
-for(const d of DEFAULT){const a=agents.find(x=>x.id===d.id);if(a){a.character=d.character;a.direction=a.direction||'down'}}
-let player={x:700,y:560,targetX:700,targetY:560,speed:220,direction:'down',moving:false,character:'char_03'};
+for(const d of DEFAULT){
+  const a=agents.find(x=>x.id===d.id);
+  if(a){
+    a.character=d.character;
+    a.direction=a.direction||'down';
+  }
+}
+
+// O Player utiliza o modelo 'char_02' que está completo e com cabeça inteira no repositório
+let player={x:700,y:560,targetX:700,targetY:560,speed:220,direction:'down',moving:false,character:'char_02'};
 
 const doors=[
  {id:'door-lounge',x:510,y:270,w:16,h:74,axis:'v',open:0,target:0,label:'Lounge'},
@@ -35,15 +45,18 @@ async function loadJSON(){
  const r=await fetch('sprite_manifest.json?v=3');const m=await r.json();
  atlasAssets=m.assets||{};characterAssets=m.characters||{};
 }
+
 const imageCache=new Map();
 function img(path){
  if(!imageCache.has(path)){const im=new Image();im.decoding='async';im.src=path;imageCache.set(path,im)}
  return imageCache.get(path)
 }
+
 function preload(){
  Object.values(atlasAssets).forEach(a=>img(a.file));
  Object.values(characterAssets).forEach(c=>['down','up'].forEach(d=>(c[d]||[]).forEach(f=>img(f))));
 }
+
 function resize(){
  const r=canvas.getBoundingClientRect();
  const d=Math.min(devicePixelRatio||1,2);
@@ -60,6 +73,7 @@ function drawAsset(id,x,y,scale=1,anchor=.5){
  const w=a.w*scale,h=a.h*scale;
  ctx.drawImage(im,Math.round(x-w*anchor),Math.round(y-h),Math.round(w),Math.round(h));
 }
+
 function addObject(id,x,y,scale=1,anchor=.5,interactive=null){
  const a=atlasAssets[id];if(!a)return;
  const w=a.w*scale,h=a.h*scale,left=x-w*anchor,top=y-h;
@@ -69,6 +83,7 @@ function addObject(id,x,y,scale=1,anchor=.5,interactive=null){
    staticColliders.push({x:left+c.x*scale,y:top+c.y*scale,w:c.w*scale,h:c.h*scale,type:'object',id});
  }
 }
+
 function shadow(x,y,w=28){ctx.save();ctx.globalAlpha=.22;ctx.fillStyle='#101722';ctx.beginPath();ctx.ellipse(x,y,w,Math.max(3,w*.22),0,0,Math.PI*2);ctx.fill();ctx.restore()}
 
 function characterFrame(a,moving){
@@ -81,34 +96,26 @@ function characterFrame(a,moving){
  return img(frames[idx]);
 }
 
-// RENDERIZAÇÃO DE PERSONAGENS COM CORREÇÃO DE CABEÇAS CORTADAS
 function drawCharacter(a,x,y,moving){
  const im=characterFrame(a,moving);if(!im||!im.complete||!im.naturalWidth)return;
- const dir=a.direction||'down';
- const renderWidth=32;
- const renderHeight=32;
-
- const idleBob=moving?0:Math.round(Math.sin(idleClock/650*Math.PI*2)*1.2);
- const walkBob=moving?Math.round(Math.abs(Math.sin(walkClock/125*Math.PI))*1.5):0;
+ const dir=a.direction||'down',s=1.08;
+ const idleBob=moving?0:Math.sin(idleClock/650*Math.PI*2)*.8;
+ const walkBob=moving?Math.abs(Math.sin(walkClock/125*Math.PI))*.8:0;
  const bob=idleBob-walkBob;
-
- shadow(Math.round(x),Math.round(y+2),16);
+ shadow(x,y+3,16);
  ctx.save();
-
- const drawX=Math.round(x-renderWidth/2);
- const drawY=Math.round(y-renderHeight+bob);
-
  if(dir==='left'||dir==='right'){
    ctx.translate(Math.round(x),Math.round(y+bob));
    if(dir==='left')ctx.scale(-1,1);
-   ctx.drawImage(im,Math.round(-renderWidth/2),Math.round(-renderHeight),renderWidth,renderHeight);
+   ctx.drawImage(im,Math.round(-im.width*s/2),Math.round(-im.height*s),Math.round(im.width*s),Math.round(im.height*s));
  }else{
-   ctx.drawImage(im,drawX,drawY,renderWidth,renderHeight);
+   ctx.drawImage(im,Math.round(x-im.width*s/2),Math.round(y-im.height*s+bob),Math.round(im.width*s),Math.round(im.height*s));
  }
  ctx.restore();
 }
 
 function label(t,x,y){ctx.save();ctx.fillStyle='#fff';ctx.beginPath();ctx.roundRect(x-55,y-12,110,24,12);ctx.fill();ctx.fillStyle='#7b8495';ctx.font='800 9px Arial';ctx.textAlign='center';ctx.fillText(t,x,y+3);ctx.restore()}
+
 function nameBadge(a,x,y){ctx.save();ctx.font='700 10px Arial';const txt=`${a.name} · ${a.short||a.role}`;const tw=ctx.measureText(txt).width+25;ctx.fillStyle='#101827f5';ctx.beginPath();ctx.roundRect(x-tw/2,y-18,tw,19,9);ctx.fill();ctx.fillStyle=a.status==='Executando...'?'#ffb13b':'#35d486';ctx.beginPath();ctx.arc(x-tw/2+9,y-8.5,3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(txt,x-tw/2+16,y-5);ctx.restore()}
 
 function tileFloor(x,y,w,h,tile='floor_beige'){
@@ -116,9 +123,11 @@ function tileFloor(x,y,w,h,tile='floor_beige'){
  const im=img(a.file),tw=a.w,th=a.h;if(!im.complete||!im.naturalWidth)return;
  for(let yy=y;yy<y+h;yy+=th)for(let xx=x;xx<x+w;xx+=tw)ctx.drawImage(im,xx,yy,Math.min(tw,x+w-xx),Math.min(th,y+h-yy));
 }
+
 function wallRect(x,y,w,h,draw=true){
  if(draw){ctx.fillStyle='#737a84';ctx.fillRect(x,y,w,h);ctx.fillStyle='#9aa1ac';if(w>h)ctx.fillRect(x,y,w,3);else ctx.fillRect(x,y,3,h)}
 }
+
 function drawRoom(x,y,w,h,tile='floor_beige'){
  tileFloor(x,y,w,h,tile);
 }
@@ -362,28 +371,35 @@ function renderChat(){
  el.scrollTop=el.scrollHeight
 }
 
-// 🧠 CONEXÃO REAL COM A API DO RENDER + GROQ
-async function queryAI(a,p){
- if(settings.aiMode==='custom-webhook' && settings.webhookUrl){
-  try{
-    const r=await fetch(settings.webhookUrl, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        agentId: a.id,
-        agentName: a.name,
-        role: a.role,
-        prompt: p
-      })
-    });
-    const d=await r.json();
-    return d.reply || d.response || d.message || 'Resposta recebida sem texto.';
-  }catch(e){
-    return '[WEBHOOK] Não foi possível conectar ao backend do Render.';
+// 🧠 CONEXÃO CORRIGIDA COM A API DO RENDER + GROQ
+async function queryAI(a, p) {
+  if (settings.aiMode === 'custom-webhook' && settings.webhookUrl) {
+    try {
+      const r = await fetch(settings.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agentId: a.id || 'agent-dev',
+          agentRole: a.role || 'Assistente',
+          prompt: p
+        })
+      });
+      
+      const data = await r.json();
+      
+      // Tratamento seguro da resposta da Groq
+      if (data && data.reply) return data.reply;
+      if (typeof data === 'string') return data;
+      return data.response || data.message || 'Resposta recebida sem texto.';
+      
+    } catch (e) {
+      console.error("Erro no Webhook do Render:", e);
+      return '[WEBHOOK] Não foi possível conectar ao backend do Render.';
+    }
   }
- }
- await new Promise(r=>setTimeout(r,700));
- return `[AGENTE ${a.name.toUpperCase()}]\n\nRecebi: "${p}".\n\nModo de demonstração ativo. Configure o webhook para executar a tarefa no seu backend.`;
+
+  await new Promise(r => setTimeout(r, 700));
+  return `[AGENTE ${a.name.toUpperCase()}]\n\nRecebi: "${p}".`;
 }
 
 async function sendMessage(){
@@ -426,7 +442,7 @@ if(closeBtn) closeBtn.onclick=()=> {
 const setBtn = $('settingsBtn') || $('btn-settings');
 if(setBtn) setBtn.onclick=()=>{
  const modal = $('settingsModal') || $('settings-modal');
- if(modal) modal.classList.remove('hidden'), modal.classList.open('open');
+ if(modal) modal.classList.remove('hidden'), modal.classList.add('open');
 };
 
 const closeSetBtn = $('closeSettings') || $('btn-close-settings');
