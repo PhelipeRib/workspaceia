@@ -1,4 +1,4 @@
-// --- CONFIGURAÇÃO COM O RENDER & GROQ ---
+// --- CONFIGURAÇÃO CONECTADA AO RENDER & GROQ ---
 const DEFAULT_SETTINGS = {
     aiMode: 'custom-webhook',
     apiKey: '',
@@ -7,31 +7,31 @@ const DEFAULT_SETTINGS = {
 
 let appSettings = { ...DEFAULT_SETTINGS };
 
-// DADOS DOS AGENTES
+// DADOS DOS AGENTES (Posicionados nas salas correspondentes)
 const DEFAULT_AGENTS = [
     {
         id: 'agent-dev',
-        name: 'Alex (Dev Lead)',
-        role: 'Tech Lead / Code Reviewer',
-        desc: 'Especialista em arquitetura, CI/CD, revisão de PRs e relatórios de código.',
+        name: 'Brad (Tech Lead)',
+        role: 'Tech Lead / Dev',
+        desc: 'Especialista em arquitetura, CI/CD, revisão de PRs e engenharia de software.',
         avatar: '👨‍💻',
         color: '#6366f1',
-        x: 272,
-        y: 200,
+        x: 420,
+        y: 190,
         skills: ['Review de PRs', 'Status da Sprint', 'Arquitetura Cloud'],
         history: [
-            { sender: 'agent', text: 'Olá! Sou o Alex, Tech Lead. Como posso ajudar com a arquitetura ou o progresso do código hoje?' }
+            { sender: 'agent', text: 'Olá! Sou o Brad, Tech Lead. Como posso ajudar com a arquitetura ou o código hoje?' }
         ]
     },
     {
         id: 'agent-pm',
-        name: 'Sophia (Product Manager)',
-        role: 'PM & Agile Specialist',
+        name: 'Alison (Product Owner)',
+        role: 'Product Owner',
         desc: 'Organiza backlog, métricas de roadmap, priorização de features e OKRs.',
         avatar: '👩‍💼',
         color: '#ec4899',
-        x: 480,
-        y: 200,
+        x: 540,
+        y: 190,
         skills: ['Roadmap 2026', 'Priorizar Backlog', 'Métricas de OKR'],
         history: [
             { sender: 'agent', text: 'Oi! Tudo bem? Quer alinhar entregáveis de produto ou rodar uma priorização?' }
@@ -39,38 +39,38 @@ const DEFAULT_AGENTS = [
     },
     {
         id: 'agent-data',
-        name: 'Carlos (Data Scientist)',
-        role: 'Analytics & BI',
+        name: 'Sam & Morgan (CX & Data)',
+        role: 'CX & Product Analytics',
         desc: 'Executa queries em SQL, gera gráficos de ROI e relatórios de métricas.',
         avatar: '📊',
         color: '#10b981',
-        x: 272,
-        y: 380,
+        x: 880,
+        y: 420,
         skills: ['Relatório de Churn', 'Consultar SQL', 'Métricas CAC/LTV'],
         history: [
-            { sender: 'agent', text: 'E aí! Os dados de BI estão atualizados. O que você gostaria de analisar?' }
+            { sender: 'agent', text: 'E aí! Os dados de BI e CX estão atualizados. O que você gostaria de analisar?' }
         ]
     },
     {
         id: 'agent-hr',
-        name: 'Beatriz (People & Ops)',
-        role: 'HR & Work Culture',
+        name: 'Jiren & Steven (Strategy)',
+        role: 'Arquitetos & Estratégia',
         desc: 'Gerencia onboarding, agendamento de reuniões de time e clima organizacional.',
         avatar: '🤝',
         color: '#f59e0b',
-        x: 480,
-        y: 380,
+        x: 180,
+        y: 420,
         skills: ['Onboarding Time', 'Agendar All-Hands', 'Políticas Internas'],
         history: [
-            { sender: 'agent', text: 'Boas-vindas ao escritório virtual! Como posso te ajudar com a equipe hoje?' }
+            { sender: 'agent', text: 'Boas-vindas ao escritório virtual! Como posso te ajudar com a estratégia ou equipe?' }
         ]
     }
 ];
 
 let agents = [];
 let player = {
-    x: 376,
-    y: 280,
+    x: 200,
+    y: 490,
     radius: 12,
     speed: 3.5,
     dir: 'down',
@@ -84,18 +84,18 @@ let ttsEnabled = true;
 let isListeningVoice = false;
 let recognition = null;
 
-// CANVAS
+// CANVAS (Resolução Grande do Mapa Antigo)
 const canvas = document.getElementById('officeCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
-const CANVAS_WIDTH = 752;
-const CANVAS_HEIGHT = 520;
+const CANVAS_WIDTH = 1100;
+const CANVAS_HEIGHT = 640;
 
 if (canvas) {
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
 }
 
-// IMAGENS DOS MÓVEIS
+// CARREGAMENTO DE MÓVEIS E SPRITES
 const images = {};
 const imageSources = {
     floor_beige: 'floor_beige.png',
@@ -123,7 +123,6 @@ const imageSources = {
     monitor: 'monitor.png'
 };
 
-// SPRITES DOS PERSONAGENS
 const spriteSheets = {
     player: {
         down: ['char_01_down_0.png', 'char_01_down_1.png', 'char_01_down_2.png', 'char_01_down_3.png'],
@@ -320,7 +319,7 @@ function setupControls() {
     }
 }
 
-// LOOP DO JOGO E MOVIMENTAÇÃO
+// LOOP DO JOGO
 function gameLoop() {
     const chatModal = document.getElementById('chat-modal');
     if (chatModal && chatModal.classList.contains('hidden')) {
@@ -340,8 +339,15 @@ function gameLoop() {
         }
 
         if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
-        player.x = Math.max(25, Math.min(CANVAS_WIDTH - 25, player.x + dx * player.speed));
-        player.y = Math.max(25, Math.min(CANVAS_HEIGHT - 25, player.y + dy * player.speed));
+        
+        let newX = Math.max(90, Math.min(1010, player.x + dx * player.speed));
+        let newY = Math.max(70, Math.min(590, player.y + dy * player.speed));
+
+        // Aplicação de Colisão Simples com Paredes
+        if (!checkWallCollision(newX, newY)) {
+            player.x = newX;
+            player.y = newY;
+        }
     }
 
     let foundAgent = null;
@@ -369,141 +375,188 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// DESENHO COMPLETO DO ESCRITÓRIO
-function drawScene() {
-    if (!ctx) return;
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    // 1. CHÃO & PISOS DAS SALAS
-    drawOfficeFloor();
-
-    // 2. PAREDES & DIVISÓRIAS
-    drawWalls();
-
-    // 3. MÓVEIS E DECORAÇÃO
-    drawOfficeFurniture();
-
-    // 4. AGENTES (SPRITES)
-    agents.forEach(agent => {
-        drawCharacter(agent.id, 'down', 0, agent.x, agent.y, agent.name, agent.color);
-    });
-
-    // 5. PLAYER (SPRITE)
-    drawCharacter('player', player.dir, player.frame, player.x, player.y, 'Você', '#6366f1');
+function checkWallCollision(x, y) {
+    // Paredes Internas
+    if (x > 330 && x < 340 && y < 310) return true; // Divisória vertical Lounge/Product
+    if (x > 670 && x < 680) return true; // Divisória vertical Product/Meeting
+    if (y > 310 && y < 320) return true; // Divisória horizontal
+    return false;
 }
 
-function drawOfficeFloor() {
-    // Fundo Bege na Área Principal
-    if (images.floor_beige && images.floor_beige.complete) {
-        const patternBeige = ctx.createPattern(images.floor_beige, 'repeat');
-        ctx.fillStyle = patternBeige;
-        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+// RENDERIZADOR COMPLETO DO MAPA DE 4 SALAS (OTIMIZADO PIXEL-PERFECT)
+function drawScene() {
+    if (!ctx) return;
+
+    // Configura Otimização de Pixel Art (Sem Desfoque/Bordas Comidas)
+    ctx.imageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.msImageSmoothingEnabled = false;
+
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    // 1. Gramado de Fundo Em Volta do Prédio
+    ctx.fillStyle = '#86efac';
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    // 2. Pisos das 4 Salas Diferenciadas
+    drawFloors();
+
+    // 3. Paredes Externas e Divisórias Internas
+    drawWalls();
+
+    // 4. Placas de Identificação das Salas
+    drawRoomLabels();
+
+    // 5. Móveis e Decoração
+    drawFurniture();
+
+    // 6. Desenho de Agentes e Player com Profundidade (Y-Sorting)
+    const renderables = [
+        ...agents.map(a => ({ type: 'agent', y: a.y, data: a })),
+        { type: 'player', y: player.y, data: player }
+    ].sort((a, b) => a.y - b.y);
+
+    renderables.forEach(item => {
+        if (item.type === 'agent') {
+            drawCharacter(item.data.id, 'down', 0, item.data.x, item.data.y, item.data.name, item.data.color);
+        } else {
+            drawCharacter('player', player.dir, player.frame, player.x, player.y, 'Você', '#6366f1');
+        }
+    });
+}
+
+function drawFloors() {
+    // Sala 1: Lounge (Topo Esquerdo)
+    drawTilePattern(images.floor_purple, 80, 50, 250, 260);
+
+    // Sala 2: Product Team (Topo Centro/Direita)
+    drawTilePattern(images.floor_beige, 340, 50, 330, 260);
+
+    // Sala 3: Meeting Room (Topo Direita)
+    drawTilePattern(images.floor_beige, 680, 50, 340, 260);
+
+    // Sala 4: Game Room & Analytics (Base)
+    drawTilePattern(images.floor_gray, 80, 320, 940, 280);
+}
+
+function drawTilePattern(img, x, y, width, height) {
+    if (img && img.complete) {
+        const pattern = ctx.createPattern(img, 'repeat');
+        ctx.fillStyle = pattern;
+        ctx.fillRect(x, y, width, height);
     } else {
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    }
-
-    // Carpete Roxo na Sala de Reunião (Lado Esquerdo Superior)
-    if (images.floor_purple && images.floor_purple.complete) {
-        const patternPurple = ctx.createPattern(images.floor_purple, 'repeat');
-        ctx.fillStyle = patternPurple;
-        ctx.fillRect(16, 16, 192, 192);
-    }
-
-    // Carpete Cinza na Área de Lazer (Lado Direito Inferior)
-    if (images.floor_gray && images.floor_gray.complete) {
-        const patternGray = ctx.createPattern(images.floor_gray, 'repeat');
-        ctx.fillStyle = patternGray;
-        ctx.fillRect(560, 320, 176, 184);
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(x, y, width, height);
     }
 }
 
 function drawWalls() {
-    ctx.strokeStyle = '#334155';
-    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 6;
 
-    // Divisória da Sala de Reunião
-    ctx.strokeRect(16, 16, 192, 192);
+    // Parede Externa do Prédio
+    ctx.strokeRect(80, 50, 940, 550);
 
-    // Divisória da Área de Lazer
-    ctx.strokeRect(560, 320, 176, 184);
+    // Divisórias Internas
+    ctx.beginPath();
+    // Divisória do Lounge
+    ctx.moveTo(330, 50); ctx.lineTo(330, 310);
+    // Divisória do Meeting Room
+    ctx.moveTo(670, 50); ctx.lineTo(670, 310);
+    // Divisória Horizontal do Corredor
+    ctx.moveTo(80, 310); ctx.lineTo(1020, 310);
+    ctx.stroke();
 }
 
-function drawOfficeFurniture() {
-    // Estantes e Armários do Topo
-    drawSprite('bookshelf', 224, 16);
-    drawSprite('cabinet', 256, 16);
-    drawSprite('cabinet', 288, 16);
+function drawRoomLabels() {
+    const labels = [
+        { text: 'LOUNGE', x: 205, y: 70 },
+        { text: 'PRODUCT TEAM', x: 505, y: 70 },
+        { text: 'MEETING', x: 850, y: 70 },
+        { text: 'GAME ROOM & ANALYTICS', x: 205, y: 340 }
+    ];
 
-    // Sala de Reunião
-    drawSprite('meeting_table', 64, 80);
-    drawSprite('office_chair', 80, 56);
-    drawSprite('office_chair', 112, 56);
-    drawSprite('office_chair', 80, 128);
-    drawSprite('office_chair', 112, 128);
-    drawSprite('plant_large', 24, 24);
+    labels.forEach(l => {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.beginPath();
+        ctx.roundRect(l.x - 50, l.y - 10, 100, 20, 10);
+        ctx.fill();
 
-    // Mesas de Trabalho dos Agentes (Dual Desks + Chairs + Monitores)
-    // Alex (Dev)
-    drawSprite('desk_dual', 240, 192);
-    drawSprite('office_chair', 272, 176);
-    drawSprite('monitor', 256, 185);
-
-    // Sophia (PM)
-    drawSprite('desk_dual', 448, 192);
-    drawSprite('office_chair', 480, 176);
-    drawSprite('monitor', 464, 185);
-
-    // Carlos (Data)
-    drawSprite('desk_dual', 240, 368);
-    drawSprite('office_chair', 272, 352);
-    drawSprite('monitor', 256, 361);
-
-    // Beatriz (HR)
-    drawSprite('desk_dual', 448, 368);
-    drawSprite('office_chair', 480, 352);
-    drawSprite('monitor', 464, 361);
-
-    // Lounge Central (Sofás e Mesa de Café)
-    drawSprite('sofa_blue', 340, 260);
-    drawSprite('coffee_table_round', 360, 290);
-
-    // Área de Lazer / Descompressão
-    drawSprite('pool_table', 580, 350);
-    drawSprite('foosball', 580, 430);
-    drawSprite('sofa_orange', 670, 350);
-    drawSprite('plant_large', 700, 470);
-    drawSprite('plant_large', 16, 470);
+        ctx.fillStyle = '#1e293b';
+        ctx.font = 'bold 9px Plus Jakarta Sans';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(l.text, l.x, l.y);
+    });
 }
 
-function drawSprite(imgKey, x, y) {
+function drawFurniture() {
+    // LOUNGE (Topo Esquerdo)
+    drawSpritePixelPerfect('sofa_blue', 110, 90);
+    drawSpritePixelPerfect('sofa_orange', 120, 200);
+    drawSpritePixelPerfect('coffee_table_round', 200, 170);
+    drawSpritePixelPerfect('plant_large', 275, 90);
+    drawSpritePixelPerfect('bookshelf', 270, 55);
+
+    // PRODUCT TEAM (Topo Centro)
+    drawSpritePixelPerfect('desk_dual', 380, 120);
+    drawSpritePixelPerfect('desk_dual', 500, 120);
+    drawSpritePixelPerfect('desk_dual', 380, 220);
+    drawSpritePixelPerfect('desk_dual', 500, 220);
+
+    // MEETING ROOM (Topo Direito)
+    drawSpritePixelPerfect('round_meeting_table', 810, 130);
+    drawSpritePixelPerfect('sofa_orange_2', 740, 200);
+    drawSpritePixelPerfect('sofa_orange_2', 860, 200);
+    drawSpritePixelPerfect('plant_large', 980, 90);
+
+    // GAME ROOM (Base Esquerda)
+    drawSpritePixelPerfect('foosball', 100, 420);
+    drawSpritePixelPerfect('pool_table', 150, 400);
+    drawSpritePixelPerfect('sofa_orange', 120, 520);
+    drawSpritePixelPerfect('plant_large', 280, 360);
+
+    // ANALYTICS & CX (Base Direita)
+    drawSpritePixelPerfect('desk_dual', 740, 370);
+    drawSpritePixelPerfect('desk_dual', 860, 370);
+    drawSpritePixelPerfect('desk_dual', 740, 470);
+    drawSpritePixelPerfect('desk_dual', 860, 470);
+}
+
+function drawSpritePixelPerfect(imgKey, x, y) {
     if (images[imgKey] && images[imgKey].complete) {
-        ctx.drawImage(images[imgKey], x, y);
+        // Math.floor garante que coordenadas inteiras não deformem as bordas da Pixel Art
+        ctx.drawImage(images[imgKey], Math.floor(x), Math.floor(y));
     }
 }
 
 function drawCharacter(charKey, dir, frame, x, y, name, color) {
     const sheet = spriteSheets[charKey];
+    const px = Math.floor(x);
+    const py = Math.floor(y);
+
     if (sheet && sheet[dir] && sheet[dir][frame] && sheet[dir][frame].complete) {
         const img = sheet[dir][frame];
-        ctx.drawImage(img, x - 16, y - 24, 32, 32);
+        ctx.drawImage(img, px - 16, py - 24, 32, 32);
     } else {
         ctx.fillStyle = color;
         ctx.beginPath();
-        ctx.arc(x, y, 14, 0, Math.PI * 2);
+        ctx.arc(px, py, 14, 0, Math.PI * 2);
         ctx.fill();
     }
 
-    // Label do Nome
+    // Nomes acima dos personagens
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(x - 40, y - 36, 80, 14);
+    ctx.fillRect(px - 45, py - 36, 90, 15);
     ctx.fillStyle = '#f8fafc';
     ctx.font = 'bold 9px Plus Jakarta Sans';
     ctx.textAlign = 'center';
-    ctx.fillText(name.split(' ')[0], x, y - 26);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name.split(' ')[0], px, py - 28);
 }
 
-// DIÁLOGOS & CHAT
+// DIÁLOGOS E CHAT
 function openChatModal(agent) {
     activeAgent = agent;
     document.getElementById('modal-agent-name').innerText = agent.name;
