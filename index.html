@@ -3,157 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Virtual Office 2D - Agentes Autônomos</title>
+    <title>STARTUP HQ - AI Virtual Office 2D</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
         .font-pixel { font-family: 'Press Start 2P', cursive; }
         .font-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
 
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1e1e2e; }
-        ::-webkit-scrollbar-thumb { background: #45475a; border-radius: 3px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 
-        canvas { image-rendering: pixelated; crisp-edges; }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 0.4; }
-            100% { transform: scale(0.95); opacity: 0.8; }
+        /* Estilização para o Canvas ocupar 100% da área do jogo sem deformar */
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #0f172a;
         }
-        .pulse-active { animation: pulse-ring 2s infinite ease-in-out; }
+
+        #officeCanvas {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain;
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* Estilos dos popups nativos do mapa antigo */
+        #proximity {
+            position: absolute;
+            display: none;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid #475569;
+            color: #f8fafc;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 30;
+            white-space: nowrap;
+            transform: translate(-50%, -100%);
+        }
+
+        #proximity .key {
+            background: #1e293b;
+            border: 1px solid #64748b;
+            color: #818cf8;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            margin-left: 6px;
+        }
+
+        #proximity .online {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #34d399;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .agentCard {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(51, 65, 85, 0.6);
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .agentCard:hover {
+            background: rgba(30, 41, 59, 0.95);
+            border-color: #6366f1;
+        }
+
+        .agentCard img.mini {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.5);
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans h-screen overflow-hidden flex flex-col select-none">
 
-    <!-- Top Navigation Header -->
-    <header class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between z-20">
+    <!-- Top Bar Navigation -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-2 flex items-center justify-between z-20 shrink-0">
         <div class="flex items-center gap-3">
             <div class="bg-indigo-600/20 border border-indigo-500/40 p-2 rounded-lg text-indigo-400">
                 <i data-lucide="bot" class="w-5 h-5"></i>
             </div>
             <div>
-                <h1 class="font-pixel text-xs text-indigo-400 tracking-wide">AI-OFFICE // 2D VIRTUAL HUB</h1>
-                <p class="text-xs text-slate-400">Escritório Interativo de Agentes de IA & Meeting Room</p>
+                <h1 id="modeLabel" class="font-pixel text-[11px] text-indigo-400 tracking-wide">STARTUP HQ // VIRTUAL OFFICE</h1>
+                <p id="globalLog" class="text-[11px] text-slate-400">Aproxime-se dos agentes de IA para comandar operações.</p>
             </div>
         </div>
 
-        <!-- Controls & Status Bar -->
         <div class="flex items-center gap-3">
             <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 flex items-center gap-2 text-xs">
                 <span id="connection-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span id="connection-status-text" class="text-slate-300 font-medium">Motor: Custom Webhook (Render/Groq)</span>
             </div>
 
-            <button id="btn-settings" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition">
+            <button id="settingsBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition">
                 <i data-lucide="settings" class="w-4 h-4"></i> Configurar Chaves/APIs
             </button>
 
-            <button id="btn-reset-cache" class="bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/50 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Limpar Cache Local">
+            <button id="btn-reset-cache" onclick="localStorage.clear(); location.reload();" class="bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/50 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
                 <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Resetar
             </button>
         </div>
     </header>
 
-    <!-- Main Game Canvas + Overlay Container -->
-    <div class="relative flex-1 bg-slate-900 overflow-hidden flex">
+    <!-- Main Game Area -->
+    <div id="layout" class="relative flex-1 bg-slate-950 overflow-hidden flex">
 
-        <!-- Canvas Container -->
-        <div id="game-container" class="relative flex-1 flex items-center justify-center bg-slate-950">
-            <canvas id="officeCanvas" class="rounded-xl border border-slate-800 shadow-2xl cursor-crosshair"></canvas>
+        <!-- Area do Canvas (Full Area) -->
+        <div id="game-container" class="relative flex-1 h-full w-full">
+            <canvas id="officeCanvas"></canvas>
 
-            <!-- Instructions Bar -->
-            <div class="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur border border-slate-800 px-4 py-2 rounded-lg text-xs text-slate-300 flex items-center gap-4 shadow-lg pointer-events-none">
-                <div class="flex items-center gap-1">
-                    <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">W A S D</span> /
-                    <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">Setas</span>
-                    <span class="ml-1">Mover Avatar</span>
-                </div>
-                <div class="w-px h-3 bg-slate-700"></div>
-                <div>Aproxime-se dos Agentes para iniciar reuniões ou pedir status!</div>
-            </div>
+            <!-- Proximity Tooltip Popup -->
+            <div id="proximity"></div>
 
-            <!-- Active Proximity Indicator Badge -->
-            <div id="proximity-badge" class="hidden absolute top-6 left-1/2 -translate-x-1/2 bg-indigo-600/90 text-white px-4 py-2 rounded-full font-medium text-xs shadow-xl border border-indigo-400/50 flex items-center gap-2 transition-all">
-                <i data-lucide="radio" class="w-4 h-4 animate-spin text-indigo-200"></i>
-                <span id="proximity-text">Você entrou no alcance do Agente!</span>
+            <!-- Instrucoes na tela -->
+            <div class="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur border border-slate-800 px-3.5 py-2 rounded-xl text-xs text-slate-300 flex items-center gap-3 shadow-2xl pointer-events-none z-10">
+                <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">WASD / Setas</span>
+                <span>Caminhar</span>
+                <span class="text-slate-600">•</span>
+                <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">Clique</span>
+                <span>Mover</span>
+                <span class="text-slate-600">•</span>
+                <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">Espaço</span>
+                <span>Conversar</span>
             </div>
         </div>
 
-        <!-- Sidebar Panel: Agent Roster -->
-        <aside class="w-80 bg-slate-900/95 border-l border-slate-800 flex flex-col z-10">
+        <!-- Sidebar Roster de Agentes -->
+        <aside class="w-80 bg-slate-900/95 border-l border-slate-800 flex flex-col z-10 shrink-0">
             <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i> Agentes na Sala
+                    <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i> COLABORADORES DE IA
                 </h2>
-                <span id="agent-count-badge" class="bg-slate-800 text-indigo-400 text-xs px-2 py-0.5 rounded-full font-mono">4</span>
+                <span id="agentCount" class="bg-slate-800 text-indigo-400 text-xs px-2 py-0.5 rounded-full font-mono">4</span>
             </div>
 
-            <div id="agents-list" class="flex-1 overflow-y-auto p-3 space-y-2.5">
-                <!-- Injetado dinamicamente -->
-            </div>
-
-            <div class="p-3 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-400">
-                <div class="flex justify-between items-center mb-1">
-                    <span>Espaço Atual:</span>
-                    <span class="text-indigo-400 font-medium">Main Coworking Zone</span>
-                </div>
-                <div class="flex justify-between items-center text-[11px] text-slate-500">
-                    <span>Protocolo:</span>
-                    <span>REST / WebSockets / MCP Ready</span>
-                </div>
+            <div id="agents" class="flex-1 overflow-y-auto p-3">
+                <!-- Cards injetados dinamicamente -->
             </div>
         </aside>
     </div>
 
-    <!-- Agent Dialogue / Meeting Modal -->
-    <div id="chat-modal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[600px]">
-            
-            <!-- Modal Header -->
+    <!-- Modal de Chat -->
+    <div id="chatModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[580px]">
             <div class="bg-slate-800/80 px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div id="modal-agent-avatar" class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-xl">
-                        🤖
-                    </div>
+                    <img id="modalAvatar" class="w-10 h-10 rounded-xl bg-slate-950 p-1 border border-slate-700 object-contain" src="">
                     <div>
-                        <div class="flex items-center gap-2">
-                            <h3 id="modal-agent-name" class="font-bold text-slate-100 text-base">Agente Dev Lead</h3>
-                            <span id="modal-agent-role" class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Dev Ops</span>
-                        </div>
-                        <p id="modal-agent-desc" class="text-xs text-slate-400">Especialista em revisão de código e arquitetura.</p>
+                        <h3 id="modalName" class="font-bold text-slate-100 text-base">Agente</h3>
+                        <p id="modalRole" class="text-xs text-indigo-400 font-medium">Função</p>
                     </div>
                 </div>
-
-                <div class="flex items-center gap-2">
-                    <button id="btn-toggle-tts" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 border border-slate-600 text-xs flex items-center gap-1 transition" title="Ativar/Desativar Resposta por Voz">
-                        <i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i> Voz: ON
-                    </button>
-                    <button id="btn-close-modal" class="p-2 rounded-lg bg-slate-700/50 hover:bg-rose-900/60 text-slate-400 hover:text-rose-200 border border-slate-600 transition">
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
+                <button id="closeChat" class="p-2 rounded-lg bg-slate-700/50 hover:bg-rose-900/60 text-slate-400 hover:text-rose-200 border border-slate-600 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
 
-            <!-- Dialogue History -->
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/40 font-sans"></div>
+            <p id="modalDesc" class="px-5 py-2 text-xs text-slate-400 bg-slate-950/50 border-b border-slate-800/80"></p>
 
-            <!-- Quick Action Chips -->
-            <div id="command-chips" class="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto text-xs"></div>
+            <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/30"></div>
 
-            <!-- Input Bar -->
+            <div id="chips" class="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto"></div>
+
             <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
-                <button id="btn-voice-input" class="p-3 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-xl border border-slate-700 transition shrink-0" title="Falar por Voz (Microfone)">
-                    <i data-lucide="mic" class="w-5 h-5"></i>
-                </button>
-
-                <input id="chat-input" type="text" placeholder="Escreva uma instrução ou pergunta para o agente..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition">
-
-                <button id="btn-send-message" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-3 rounded-xl transition flex items-center gap-2 shrink-0">
+                <input id="chatInput" type="text" placeholder="Escreva uma mensagem..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none">
+                <button id="send" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-3 rounded-xl transition flex items-center gap-2">
                     <span>Enviar</span>
                     <i data-lucide="send" class="w-4 h-4"></i>
                 </button>
@@ -161,48 +202,48 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <!-- Modal de Configurações -->
+    <div id="settingsModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-5">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h3 class="font-bold text-slate-100 text-lg flex items-center gap-2">
-                    <i data-lucide="sliders" class="w-5 h-5 text-indigo-400"></i> Configurações do Sistema
+                    <i data-lucide="sliders" class="w-5 h-5 text-indigo-400"></i> Configurações de Conexão
                 </h3>
-                <button id="btn-close-settings" class="text-slate-400 hover:text-white">
+                <button id="closeSettings" class="text-slate-400 hover:text-white">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
             <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Modo de Operação de IA:</label>
-                    <select id="setting-ai-mode" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
-                        <option value="custom-webhook" selected>Custom Webhook / MCP Server (Seu Backend Render)</option>
-                        <option value="simulated">Modo Simulado / Demonstrativo (Offline)</option>
-                        <option value="claude-api">Claude API Direct (Anthropic)</option>
+                    <label class="block font-semibold text-slate-300 mb-1">Modo de Operação:</label>
+                    <select id="aiMode" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                        <option value="custom-webhook" selected>Custom Webhook / MCP Server (Render/Groq)</option>
+                        <option value="simulated">Modo Simulado (Offline)</option>
+                        <option value="claude-api">Claude API Direct</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">URL Endpoint do Webhook (Seu Backend Render):</label>
-                    <input id="setting-webhook-url" type="text" value="https://workspaceia.onrender.com/agent-chat" placeholder="https://workspaceia.onrender.com/agent-chat" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                    <label class="block font-semibold text-slate-300 mb-1">URL do Webhook (Render):</label>
+                    <input id="webhook" type="text" value="https://workspaceia.onrender.com/agent-chat" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Chave de API do Claude (opcional):</label>
-                    <input id="setting-api-key" type="password" placeholder="sk-ant-api03-..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                    <label class="block font-semibold text-slate-300 mb-1">Chave de API (Opcional):</label>
+                    <input id="apiKey" type="password" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
                 </div>
             </div>
 
             <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
-                <button id="btn-save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-lg text-xs transition">
+                <button id="saveSettings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-lg text-xs transition">
                     Salvar Alterações
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Script Principal -->
+    <!-- Script da Aplicação -->
     <script src="app.js"></script>
 </body>
 </html>
