@@ -1,54 +1,208 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>STARTUP HQ — Gather Pixel Office</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-:root{--bg:#070b18;--panel:#0c1324;--panel2:#111a2e;--line:#263452;--text:#e8eefb;--muted:#8793ad;--accent:#6d70ff;--green:#35d486}
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif}body{user-select:none}
-.topbar{height:62px;background:#0c1325;border-bottom:1px solid #202c47;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:relative;z-index:20}
-.brand{display:flex;gap:12px;align-items:center}.logo{width:40px;height:40px;border:1px solid #5159bd;background:#171d45;border-radius:10px;display:grid;place-items:center;color:#8e92ff;font-weight:800}
-.brand h1{font-size:14px;margin:0}.brand p{font-size:11px;color:#75819c;margin:3px 0 0}.pill{font-size:9px;color:#8d91ff;border:1px solid #454ca0;background:#191d4a;padding:4px 8px;border-radius:999px;margin-left:6px}
-.actions{display:flex;gap:8px;align-items:center}.status{font-size:11px;color:#a7b1c7;border:1px solid #263452;background:#121a2d;padding:7px 10px;border-radius:8px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#35d486;box-shadow:0 0 10px #35d486;margin-right:6px}
-.btn{border:1px solid #344260;background:#171f34;color:#dbe4f7;border-radius:8px;padding:8px 11px;cursor:pointer}.btn:hover{background:#202a44}.btn.primary{background:#5b5fe8;border-color:#7074ff;color:#fff}
-.layout{height:calc(100vh - 62px);display:flex}.viewport{position:relative;flex:1;min-width:0;background:#050918;overflow:hidden;padding:10px}.canvasWrap{position:relative;width:100%;height:100%;border:1px solid #202d48;border-radius:12px;overflow:hidden;background:#071020;box-shadow:0 18px 60px #0008}
-canvas{width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges;cursor:crosshair}
-.hint{position:absolute;left:16px;top:16px;background:#0d1424e8;border:1px solid #2b3856;border-radius:8px;padding:8px 10px;font-size:10px;color:#aeb8cd;backdrop-filter:blur(8px);z-index:5}.hint b{color:#fff}
-.badge{position:absolute;transform:translate(-50%,-100%);background:#101827f2;border:1px solid #3a4967;color:#f6f8ff;border-radius:999px;padding:6px 10px;font-size:10px;font-weight:700;pointer-events:auto;white-space:nowrap;box-shadow:0 8px 20px #0007;z-index:6}.badge .online{display:inline-block;width:7px;height:7px;border-radius:50%;background:#35d486;margin-right:6px}.badge .key{margin-left:8px;color:#9ca7bd;font-weight:500}
-.log{position:absolute;bottom:12px;left:12px;right:12px;background:#0d1424e8;border:1px solid #263452;border-radius:8px;padding:8px 10px;font:10px ui-monospace,monospace;color:#8290aa;backdrop-filter:blur(8px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;z-index:5}
-aside{width:305px;background:#0c1324;border-left:1px solid #202c47;display:flex;flex-direction:column}.sideHead{padding:15px;border-bottom:1px solid #202c47;display:flex;justify-content:space-between}.sideHead h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin:0;color:#9aa6bd}.count{background:#191d4a;color:#8f93ff;border:1px solid #3e448d;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:800}.agents{padding:10px;overflow:auto;flex:1}.agentCard{display:flex;align-items:center;gap:10px;padding:9px;border:1px solid #25324c;background:#111a2e;border-radius:10px;margin-bottom:7px;cursor:pointer}.agentCard:hover{border-color:#5359bd;background:#171f38}.mini{width:42px;height:50px;object-fit:contain;image-rendering:pixelated;background:#171f36;border-radius:8px;padding:3px}.agentCard strong{display:block;font-size:11px}.agentCard span{font-size:10px;color:#78859f}.sideFoot{border-top:1px solid #202c47;padding:12px;color:#78859f;font-size:10px;line-height:1.6}
-.modal{position:fixed;inset:0;background:#020611b8;backdrop-filter:blur(7px);display:none;place-items:center;z-index:100;padding:14px}.modal.open{display:grid}.dialog{width:min(680px,96vw);max-height:86vh;background:#0d1527;border:1px solid #30405f;border-radius:14px;box-shadow:0 30px 100px #000c;display:flex;flex-direction:column;overflow:hidden}.dialogHead{padding:12px 14px;border-bottom:1px solid #25324b;display:flex;justify-content:space-between;align-items:center}.agentTitle{display:flex;align-items:center;gap:10px}.agentTitle img{width:42px;height:50px;object-fit:contain;image-rendering:pixelated;background:#18213a;border-radius:9px;padding:3px}.role{font-size:9px;color:#999dff;border:1px solid #474ca0;background:#1b204d;border-radius:999px;padding:3px 7px}.messages{padding:14px;overflow:auto;min-height:260px;flex:1;background:#080e1d}.msg{max-width:82%;padding:9px 11px;border-radius:10px;margin-bottom:8px;font-size:11px;line-height:1.5}.msg.agent{background:#151f35;border:1px solid #273653}.msg.user{background:#5b5fe8;margin-left:auto}.chips{padding:8px;border-top:1px solid #25324b;display:flex;gap:6px;overflow:auto}.chip{white-space:nowrap;background:#141e33;border:1px solid #2c3a56;color:#aab4ff;padding:6px 8px;border-radius:7px;font-size:9px;cursor:pointer}.composer{display:flex;gap:7px;padding:10px;border-top:1px solid #25324b}.composer input{flex:1;background:#080e1d;border:1px solid #2b3955;color:#fff;border-radius:8px;padding:10px;outline:none}.close{background:none;border:0;color:#8995aa;font-size:20px;cursor:pointer}
-.settings{padding:18px}.settings label{display:block;color:#aab5ca;font-size:10px;font-weight:700;margin:10px 0 5px}.settings input,.settings select{width:100%;background:#080e1d;border:1px solid #2b3955;color:#dce5f6;padding:9px;border-radius:7px;outline:none}
-@media(max-width:900px){aside{position:absolute;right:0;top:0;bottom:0;width:min(305px,90vw);z-index:30;transform:translateX(100%);transition:.25s}.layout.sidebar-open aside{transform:translateX(0)}.status{display:none}.brand p{display:none}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Virtual Office 2D - Agentes Autônomos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+        .font-pixel { font-family: 'Press Start 2P', cursive; }
+        .font-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e1e2e; }
+        ::-webkit-scrollbar-thumb { background: #45475a; border-radius: 3px; }
+
+        canvas { image-rendering: pixelated; crisp-edges; }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 0.4; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .pulse-active { animation: pulse-ring 2s infinite ease-in-out; }
+    </style>
 </head>
-<body>
-<header class="topbar">
-  <div class="brand"><div class="logo">▦</div><div><h1>STARTUP HQ <span class="pill">GATHER PIXEL-ART 2D</span></h1><p>Aproxime-se dos agentes de IA para comandar operações</p></div></div>
-  <div class="actions"><div class="status"><span class="dot"></span>Escritório online</div><button class="btn" id="rosterBtn">Agentes</button><button class="btn primary" id="settingsBtn">⚙ Conexões</button></div>
-</header>
-<div class="layout" id="layout">
-<section class="viewport"><div class="canvasWrap">
-  <canvas id="officeCanvas"></canvas>
-  <div class="hint"><b>WASD / Setas</b> caminhar · <b>Clique</b> mover · <b>E</b> interagir · <b>Espaço</b> conversar</div>
-  <div id="proximity" class="badge" style="display:none"></div>
-  <div class="log" id="globalLog">[SISTEMA] Escritório virtual conectado. Portas abrem por proximidade e objetos têm colisão.</div>
-</div></section>
-<aside><div class="sideHead"><h2>Colaboradores de IA</h2><span class="count" id="agentCount">4</span></div><div class="agents" id="agents"></div><div class="sideFoot">Modo: <b id="modeLabel">Simulação Local</b><br>Movimento: WASD, setas ou clique<br>Interação: E · conversa: Espaço<br>Física: colisão + portas automáticas</div></aside>
-</div>
-<div class="modal" id="chatModal"><div class="dialog">
-  <div class="dialogHead"><div class="agentTitle"><img id="modalAvatar"><div><strong id="modalName">Brad</strong><div id="modalRole" class="role">Tech Lead</div><div id="modalDesc" style="font-size:9px;color:#7f8ca4;margin-top:3px"></div></div></div><button class="close" id="closeChat">×</button></div>
-  <div class="messages" id="messages"></div><div class="chips" id="chips"></div>
-  <div class="composer"><input id="chatInput" placeholder="Escreva o prompt ou comando..."><button class="btn primary" id="send">Enviar</button></div>
-</div></div>
-<div class="modal" id="settingsModal"><div class="dialog"><div class="dialogHead"><strong>Conexão dos Agentes</strong><button class="close" id="closeSettings">×</button></div><div class="settings">
-<label>Modo do Motor de IA</label><select id="aiMode"><option value="simulated">Simulação Offline</option><option value="custom-webhook">Custom Webhook / Ngrok</option><option value="claude-api">Claude API Direct</option></select>
-<label>Endpoint Webhook / URL Ngrok</label><input id="webhook" placeholder="https://seu-endpoint/api/agent">
-<label>API Key Anthropic</label><input id="apiKey" type="password" placeholder="sk-ant-...">
-<div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn primary" id="saveSettings">Salvar alterações</button></div>
-</div></div></div>
-<script src="app.js?v=3"></script>
+<body class="bg-slate-950 text-slate-100 font-sans h-screen overflow-hidden flex flex-col select-none">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between z-20">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-600/20 border border-indigo-500/40 p-2 rounded-lg text-indigo-400">
+                <i data-lucide="bot" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="font-pixel text-xs text-indigo-400 tracking-wide">AI-OFFICE // 2D VIRTUAL HUB</h1>
+                <p class="text-xs text-slate-400">Escritório Interativo de Agentes de IA & Meeting Room</p>
+            </div>
+        </div>
+
+        <!-- Controls & Status Bar -->
+        <div class="flex items-center gap-3">
+            <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 flex items-center gap-2 text-xs">
+                <span id="connection-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="connection-status-text" class="text-slate-300 font-medium">Motor: Custom Webhook (Render/Groq)</span>
+            </div>
+
+            <button id="btn-settings" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition">
+                <i data-lucide="settings" class="w-4 h-4"></i> Configurar Chaves/APIs
+            </button>
+
+            <button id="btn-reset-cache" class="bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/50 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition" title="Limpar Cache Local">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Resetar
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Game Canvas + Overlay Container -->
+    <div class="relative flex-1 bg-slate-900 overflow-hidden flex">
+
+        <!-- Canvas Container -->
+        <div id="game-container" class="relative flex-1 flex items-center justify-center bg-slate-950">
+            <canvas id="officeCanvas" class="rounded-xl border border-slate-800 shadow-2xl cursor-crosshair"></canvas>
+
+            <!-- Instructions Bar -->
+            <div class="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur border border-slate-800 px-4 py-2 rounded-lg text-xs text-slate-300 flex items-center gap-4 shadow-lg pointer-events-none">
+                <div class="flex items-center gap-1">
+                    <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">W A S D</span> /
+                    <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">Setas</span>
+                    <span class="ml-1">Mover Avatar</span>
+                </div>
+                <div class="w-px h-3 bg-slate-700"></div>
+                <div>Aproxime-se dos Agentes para iniciar reuniões ou pedir status!</div>
+            </div>
+
+            <!-- Active Proximity Indicator Badge -->
+            <div id="proximity-badge" class="hidden absolute top-6 left-1/2 -translate-x-1/2 bg-indigo-600/90 text-white px-4 py-2 rounded-full font-medium text-xs shadow-xl border border-indigo-400/50 flex items-center gap-2 transition-all">
+                <i data-lucide="radio" class="w-4 h-4 animate-spin text-indigo-200"></i>
+                <span id="proximity-text">Você entrou no alcance do Agente!</span>
+            </div>
+        </div>
+
+        <!-- Sidebar Panel: Agent Roster -->
+        <aside class="w-80 bg-slate-900/95 border-l border-slate-800 flex flex-col z-10">
+            <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                    <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i> Agentes na Sala
+                </h2>
+                <span id="agent-count-badge" class="bg-slate-800 text-indigo-400 text-xs px-2 py-0.5 rounded-full font-mono">4</span>
+            </div>
+
+            <div id="agents-list" class="flex-1 overflow-y-auto p-3 space-y-2.5">
+                <!-- Injetado dinamicamente -->
+            </div>
+
+            <div class="p-3 bg-slate-950/60 border-t border-slate-800 text-xs text-slate-400">
+                <div class="flex justify-between items-center mb-1">
+                    <span>Espaço Atual:</span>
+                    <span class="text-indigo-400 font-medium">Main Coworking Zone</span>
+                </div>
+                <div class="flex justify-between items-center text-[11px] text-slate-500">
+                    <span>Protocolo:</span>
+                    <span>REST / WebSockets / MCP Ready</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Agent Dialogue / Meeting Modal -->
+    <div id="chat-modal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[600px]">
+            
+            <!-- Modal Header -->
+            <div class="bg-slate-800/80 px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div id="modal-agent-avatar" class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-xl">
+                        🤖
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 id="modal-agent-name" class="font-bold text-slate-100 text-base">Agente Dev Lead</h3>
+                            <span id="modal-agent-role" class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Dev Ops</span>
+                        </div>
+                        <p id="modal-agent-desc" class="text-xs text-slate-400">Especialista em revisão de código e arquitetura.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="btn-toggle-tts" class="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 border border-slate-600 text-xs flex items-center gap-1 transition" title="Ativar/Desativar Resposta por Voz">
+                        <i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i> Voz: ON
+                    </button>
+                    <button id="btn-close-modal" class="p-2 rounded-lg bg-slate-700/50 hover:bg-rose-900/60 text-slate-400 hover:text-rose-200 border border-slate-600 transition">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dialogue History -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/40 font-sans"></div>
+
+            <!-- Quick Action Chips -->
+            <div id="command-chips" class="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto text-xs"></div>
+
+            <!-- Input Bar -->
+            <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
+                <button id="btn-voice-input" class="p-3 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-xl border border-slate-700 transition shrink-0" title="Falar por Voz (Microfone)">
+                    <i data-lucide="mic" class="w-5 h-5"></i>
+                </button>
+
+                <input id="chat-input" type="text" placeholder="Escreva uma instrução ou pergunta para o agente..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none transition">
+
+                <button id="btn-send-message" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-3 rounded-xl transition flex items-center gap-2 shrink-0">
+                    <span>Enviar</span>
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-5">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-slate-100 text-lg flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-5 h-5 text-indigo-400"></i> Configurações do Sistema
+                </h3>
+                <button id="btn-close-settings" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Modo de Operação de IA:</label>
+                    <select id="setting-ai-mode" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                        <option value="custom-webhook" selected>Custom Webhook / MCP Server (Seu Backend Render)</option>
+                        <option value="simulated">Modo Simulado / Demonstrativo (Offline)</option>
+                        <option value="claude-api">Claude API Direct (Anthropic)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">URL Endpoint do Webhook (Seu Backend Render):</label>
+                    <input id="setting-webhook-url" type="text" value="https://workspaceia.onrender.com/agent-chat" placeholder="https://workspaceia.onrender.com/agent-chat" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Chave de API do Claude (opcional):</label>
+                    <input id="setting-api-key" type="password" placeholder="sk-ant-api03-..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button id="btn-save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-lg text-xs transition">
+                    Salvar Alterações
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Principal -->
+    <script src="app.js"></script>
 </body>
 </html>
