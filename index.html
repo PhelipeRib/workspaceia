@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STARTUP HQ - AI Virtual Office 2D</title>
+    <title>WEON OMNICHANNEL - AI Virtual Office 2D</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,6 +13,16 @@
     
     <!-- html2pdf.js para Exportação Automática de PDFs Reais -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <!-- Mermaid.js para Renderização Gráfica de Fluxogramas -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (window.mermaid) {
+                mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+            }
+        });
+    </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -117,7 +127,7 @@
                 <i data-lucide="bot" class="w-5 h-5"></i>
             </div>
             <div>
-                <h1 id="modeLabel" class="font-pixel text-[11px] text-indigo-400 tracking-wide">STARTUP HQ // VIRTUAL OFFICE</h1>
+                <h1 id="modeLabel" class="font-pixel text-[11px] text-indigo-400 tracking-wide">WEON OMNICHANNEL // VIRTUAL HQ</h1>
                 <p id="globalLog" class="text-[11px] text-slate-400">Aproxime-se dos agentes de IA para comandar operações.</p>
             </div>
         </div>
@@ -165,7 +175,7 @@
         <aside class="w-80 bg-slate-900/95 border-l border-slate-800 flex flex-col z-10 shrink-0">
             <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i> COLABORADORES DE IA
+                    <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i> COLABORADORES WEON
                 </h2>
                 <span id="agentCount" class="bg-slate-800 text-indigo-400 text-xs px-2 py-0.5 rounded-full font-mono">4</span>
             </div>
