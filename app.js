@@ -13,19 +13,21 @@ if (!settings.webhookUrl || settings.webhookUrl.includes('ngrok')) {
   settings.aiMode = 'custom-webhook';
 }
 
+// 🐒 NOMES ATUALIZADOS DOS AGENTES DA WEON
 const DEFAULT=[
-{id:'dev',name:'Brad',role:'Tech Lead / Dev',short:'Tech Lead',desc:'Análise de código, Pull Requests e automação de builds.',character:'char_01',direction:'down',x:680,y:335,status:'Ocioso',skills:['Review de PR','Gerar Testes Unitários','Deploy Staging','Debug Endpoint'],history:[{sender:'agent',text:'E aí! Sou o Brad, seu Lead de Eng. Qual repositório ou tarefa de código vamos rodar?'}]},
-{id:'pm',name:'Alison',role:'Product Owner',short:'Product',desc:'Definição de estórias de usuário e planejamento de Sprints.',character:'char_04',direction:'down',x:850,y:335,status:'Ocioso',skills:['Escrever User Stories','Priorizar Backlog','Roadmap Q3'],history:[{sender:'agent',text:'Oi! Alison por aqui. Pronta para mapear requisitos e alinhar a visão de produto.'}]},
-{id:'cx',name:'Som & Morgan',role:'CX & Product Analytics',short:'CX',desc:'Retenção, feedback de clientes e métricas de uso.',character:'char_02',direction:'down',x:1325,y:670,status:'Ocioso',skills:['Relatório NPS','Métricas de Coorte','Feedbacks Críticos','Análise de Churn'],history:[{sender:'agent',text:'Olá! Estamos monitorando a experiência do cliente e os logs de atendimento.'}]},
-{id:'arch',name:'Jinen & Steven',role:'Arquitetos & Estratégia',short:'Strategy',desc:'Design de sistemas e arquitetura de integração.',character:'char_04',direction:'down',x:355,y:650,status:'Ocioso',skills:['Mapeamento de APIs','Desenho de BD','Refatoração Core','Plano Cloud'],history:[{sender:'agent',text:'Pausa para o café! Quer revisar a arquitetura da infraestrutura ou banco?'}]}
+{id:'dev',name:'Rafacaco',role:'Tech Lead / Dev',short:'Tech Lead',desc:'Análise de código, Pull Requests, WeAction API e integrações.',character:'char_01',direction:'down',x:680,y:335,status:'Ocioso',skills:['Review de PR','Consultar WeAction API','Setup Gupshup/COEX','Debug Endpoint'],history:[{sender:'agent',text:'E aí! Sou o Rafacaco, seu Tech Lead. Bora revisar código ou olhar as APIs da WeON?'}]},
+{id:'pm',name:'Maycaco',role:'Product Owner',short:'Product',desc:'Requisitos de Kick-Off, estórias de usuário e bots Node-RED.',character:'char_04',direction:'down',x:850,y:335,status:'Ocioso',skills:['User Stories','Forms Kick-Off','Node-RED Bot','Priorizar Backlog'],history:[{sender:'agent',text:'Oi! Maycaco na área. Pronta para mapear o Kick-off e alinhar requisitos de produto.'}]},
+{id:'cx',name:'Amandacaco',role:'CX & Product Analytics',short:'CX',desc:'Retenção, relatórios de SLA, CSAT e métricas do cliente.',character:'char_02',direction:'down',x:1325,y:670,status:'Ocioso',skills:['Relatório NPS','Análise de Churn','Métricas SLA','Logs de Atendimento'],history:[{sender:'agent',text:'Olá! Amandacaco por aqui. Monitorando os indicadores de atendimento da WeON.'}]},
+{id:'arch',name:'Phemonkey',role:'Arquitetos & Estratégia',short:'Strategy',desc:'Arquitetura de soluções, Business Plan e formulários estratégicos.',character:'char_04',direction:'down',x:355,y:650,status:'Ocioso',skills:['Business Plan','Kick-Off Inicial','Desenho de BD','Plano Cloud'],history:[{sender:'agent',text:'Fala mestre! Phemonkey no comando da estratégia e arquitetura de negócios.'}]}
 ];
 
 let agents=JSON.parse(localStorage.getItem('startup_hq_agents')||'null')||DEFAULT;
 for(const d of DEFAULT){
   const a=agents.find(x=>x.id===d.id);
-  if(a){ a.character=d.character; a.direction=a.direction||'down'; }
+  if(a){ a.character=d.character; a.direction=a.direction||'down'; a.name=d.name; a.role=d.role; }
 }
 
+// 👑 O CEO AGORA É O MACACO MESTRE
 let player={x:700,y:560,targetX:700,targetY:560,speed:220,direction:'down',moving:false,character:'char_02'};
 
 const doors=[
@@ -235,7 +237,7 @@ function drawWorld(){
  const drawables=[
    ...sceneObjects.map(o=>({y:o.y,fn:()=>{drawAsset(o.id,o.x,o.y,o.scale,o.anchor);if(o.pulse&&performance.now()<o.pulse){ctx.save();ctx.strokeStyle='#f8e36b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(o.x,o.y-20,32,0,Math.PI*2);ctx.stroke();ctx.restore()}}})),
    ...agents.map(a=>({y:a.y,fn:()=>{drawCharacter(a,a.x,a.y,a.moving);nameBadge(a,a.x,a.y-65)}})),
-   {y:player.y,fn:()=>{drawCharacter({character:player.character,direction:player.direction},player.x,player.y,player.moving);nameBadge({name:'You',short:'CEO',status:'Online'},player.x,player.y-65)}}
+   {y:player.y,fn:()=>{drawCharacter({character:player.character,direction:player.direction},player.x,player.y,player.moving);nameBadge({name:'MACACO MESTRE',short:'CEO',status:'Online'},player.x,player.y-65)}}
  ].sort((a,b)=>a.y-b.y);
  drawables.forEach(d=>d.fn());
  doors.forEach(drawDoor);
@@ -353,26 +355,24 @@ function openChat(a){
  }
 }
 
-// FUNÇÃO PARA EXPORTAR PDF DIRETO PELA INTERFACE
 window.downloadPDF = function(index) {
   if(!activeAgent || !activeAgent.history[index]) return;
   const msgText = activeAgent.history[index].text;
   
-  // Cria elemento HTML temporário formatado para o PDF
   const element = document.createElement('div');
   element.style.padding = '30px';
   element.style.fontFamily = 'Arial, sans-serif';
   element.style.color = '#1e293b';
   element.innerHTML = `
-    <h1 style="color: #4f46e5; border-b: 2px solid #e2e8f0; padding-bottom: 10px;">${activeAgent.name} - Documento Oficial</h1>
+    <h1 style="color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">${activeAgent.name} - Documento Oficial WeON</h1>
     <p style="font-size: 12px; color: #64748b;">Função: ${activeAgent.role} | Gerado via AI Virtual Office 2D</p>
-    <hr style="margin-bottom: 200px; border: 0; border-top: 1px solid #cbd5e1;">
+    <hr style="margin-bottom: 20px; border: 0; border-top: 1px solid #cbd5e1;">
     <div style="font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${msgText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</div>
   `;
 
   const opt = {
     margin:       10,
-    filename:     `Documento_${activeAgent.name.replace(/\s+/g, '_')}.pdf`,
+    filename:     `Documento_WeON_${activeAgent.name.replace(/\s+/g, '_')}.pdf`,
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { scale: 2 },
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -385,7 +385,6 @@ window.downloadPDF = function(index) {
   }
 };
 
-// RENDERIZADOR DE CHAT COM BOTÃO DE EXPORTAR PDF
 function renderChat(){
  const el=$('messages') || $('chat-messages');if(!el)return;
  el.innerHTML='';
@@ -419,154 +418,4 @@ function renderChat(){
    let formattedText = m.text
      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
      .replace(/### (.*?)\n/g, '<h4 style="font-weight:bold; color:#818cf8; margin-top:8px;">$1</h4>')
-     .replace(/```([\s\S]*?)```/g, '<pre style="background:#0f172a; padding:10px; border-radius:8px; overflow-x:auto; font-family:monospace; color:#38bdf8; margin:8px 0;"><code>$1</code></pre>');
-
-   bubble.innerHTML = formattedText;
-   msgDiv.appendChild(bubble);
-
-   // Se for mensagem da IA, adiciona o Botão de Baixar PDF
-   if(m.sender === 'agent' && idx > 0){
-     const btnExport = document.createElement('button');
-     btnExport.innerHTML = '📥 Baixar como PDF';
-     btnExport.style.fontSize = '11px';
-     btnExport.style.color = '#a5b4fc';
-     btnExport.style.marginTop = '4px';
-     btnExport.style.background = 'transparent';
-     btnExport.style.border = 'none';
-     btnExport.style.cursor = 'pointer';
-     btnExport.onclick = () => window.downloadPDF(idx);
-     msgDiv.appendChild(btnExport);
-   }
-
-   el.appendChild(msgDiv);
- });
-
- el.scrollTop=el.scrollHeight;
-}
-
-// LEITURA DE ARQUIVO IMPORTADO (PDF / TXT)
-const fileInput = $('fileInput');
-if(fileInput) {
-  fileInput.onchange = function(e) {
-    const file = e.target.files[0];
-    if(!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      const textContent = evt.target.result;
-      const chatInp = $('chatInput') || $('chat-input');
-      if(chatInp) {
-        chatInp.value = `[ARQUIVO ANEXADO: ${file.name}]\n${textContent.slice(0, 1500)}`;
-      }
-    };
-    reader.readAsText(file);
-  };
-}
-
-async function queryAI(a, p) {
-  if (settings.aiMode === 'custom-webhook' && settings.webhookUrl) {
-    try {
-      const r = await fetch(settings.webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          agentId: a.id || 'dev',
-          agentRole: a.role || 'Assistente',
-          prompt: p
-        })
-      });
-      
-      const data = await r.json();
-      
-      if (data && data.reply) return data.reply;
-      if (typeof data === 'string') return data;
-      return data.response || data.message || 'Resposta recebida sem texto.';
-      
-    } catch (e) {
-      console.error("Erro no Webhook do Render:", e);
-      return '[WEBHOOK] Não foi possível conectar ao backend do Render.';
-    }
-  }
-
-  await new Promise(r => setTimeout(r, 700));
-  return `[AGENTE ${a.name.toUpperCase()}]\n\nRecebi: "${p}".`;
-}
-
-async function sendMessage(){
- const input=$('chatInput') || $('chat-input');
- if(!input) return;
- const p=input.value.trim();
- if(!p||!activeAgent)return;
-
- activeAgent.history.push({sender:'user',text:p});
- activeAgent.status='Executando...';
- input.value='';
- renderChat();
- renderAgents();
-
- const log = $('globalLog');
- if(log) log.textContent=`[AGENTE ${activeAgent.name.toUpperCase()}] Processando ordem "${p}"...`;
-
- const reply=await queryAI(activeAgent,p);
- activeAgent.status='Ocioso';
- activeAgent.history.push({sender:'agent',text:reply});
- localStorage.setItem('startup_hq_agents',JSON.stringify(agents));
- renderChat();
- renderAgents();
-
- if(log) log.textContent=`[AGENTE ${activeAgent.name.toUpperCase()}] Tarefa concluída.`;
-}
-
-const sendBtn = $('send') || $('btn-send-message');
-if(sendBtn) sendBtn.onclick=sendMessage;
-
-const chatInp = $('chatInput') || $('chat-input');
-if(chatInp) chatInp.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage()});
-
-const closeBtn = $('closeChat') || $('btn-close-modal');
-if(closeBtn) closeBtn.onclick=()=> {
- const modal = $('chatModal') || $('chat-modal');
- if(modal) modal.classList.remove('open'), modal.classList.add('hidden');
-};
-
-const setBtn = $('settingsBtn') || $('btn-settings');
-if(setBtn) setBtn.onclick=()=>{
- const modal = $('settingsModal') || $('settings-modal');
- if(modal) modal.classList.remove('hidden'), modal.classList.add('open');
-};
-
-const closeSetBtn = $('closeSettings') || $('btn-close-settings');
-if(closeSetBtn) closeSetBtn.onclick=()=>{
- const modal = $('settingsModal') || $('settings-modal');
- if(modal) modal.classList.add('hidden'), modal.classList.remove('open');
-};
-
-const saveSetBtn = $('saveSettings') || $('btn-save-settings');
-if(saveSetBtn) saveSetBtn.onclick=()=>{
- const modeEl = $('aiMode') || $('setting-ai-mode');
- const webEl = $('webhook') || $('setting-webhook-url');
- const apiEl = $('apiKey') || $('setting-apiKey');
-
- settings={
-   aiMode: modeEl ? modeEl.value : 'custom-webhook',
-   webhookUrl: webEl ? webEl.value : 'https://workspaceia.onrender.com/agent-chat',
-   apiKey: apiEl ? apiEl.value : ''
- };
- localStorage.setItem('startup_hq_settings',JSON.stringify(settings));
- const modal = $('settingsModal') || $('settings-modal');
- if(modal) modal.classList.add('hidden'), modal.classList.remove('open');
-};
-
-(async()=>{
- try{
-   await loadJSON();
-   preload();
-   buildScene();
-   renderAgents();
-   requestAnimationFrame(animate);
- }catch(err){
-   console.error(err);
-   const log = $('globalLog');
-   if(log) log.textContent='[ERRO] Não foi possível carregar sprite_manifest.json.';
- }
-})();
+     .replace(/```([\s\S]*?)
