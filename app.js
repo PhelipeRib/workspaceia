@@ -13,7 +13,6 @@ if (!settings.webhookUrl || settings.webhookUrl.includes('ngrok')) {
   settings.aiMode = 'custom-webhook';
 }
 
-// 🐒 AGENTES COM NOMES ATUALIZADOS
 const DEFAULT=[
   {id:'dev',name:'Rafacaco',role:'Tech Lead / Dev',short:'Tech Lead',desc:'Análise de código, Pull Requests, WeAction API e integrações.',character:'char_01',direction:'down',x:680,y:335,status:'Ocioso',skills:['Review de PR','Consultar WeAction API','Setup Gupshup/COEX','Debug Endpoint'],history:[{sender:'agent',text:'E aí! Sou o Rafacaco, seu Tech Lead. Bora revisar código ou olhar as APIs da WeON?'}]},
   {id:'pm',name:'Maycaco',role:'Product Owner',short:'Product',desc:'Requisitos de Kick-Off, estórias de usuário e bots Node-RED.',character:'char_04',direction:'down',x:850,y:335,status:'Ocioso',skills:['User Stories','Forms Kick-Off','Node-RED Bot','Priorizar Backlog'],history:[{sender:'agent',text:'Oi! Maycaco na área. Pronta para mapear o Kick-off e alinhar requisitos de produto.'}]},
@@ -27,7 +26,6 @@ for(const d of DEFAULT){
   if(a){ a.character=d.character; a.direction=a.direction||'down'; a.name=d.name; a.role=d.role; }
 }
 
-// 👑 MACACO MESTRE (PLAYER)
 let player={x:700,y:560,targetX:700,targetY:560,speed:220,direction:'down',moving:false,character:'char_02'};
 
 const doors=[
@@ -331,7 +329,7 @@ function animate(now){
 
  let found=null;for(const a of agents)if(Math.hypot(player.x-a.x,player.y-a.y)<82){found=a;break}
  const interactObj=nearestInteractive();
- const b=$('proximity') || $('proximity-badge');
+ const b=$('proximity') \vert{}\vert{}$('proximity-badge');
  if(b){
    if(found){
      b.style.display='block';
@@ -362,9 +360,9 @@ if(canvas){
 }
 
 function renderAgents(){
- const el=$('agents') || $('agents-list');if(!el)return;
+ const el=$('agents') \vert{}\vert{}$('agents-list');if(!el)return;
  el.innerHTML='';
- const countBadge = $('agentCount') || $('agent-count-badge');
+ const countBadge = $('agentCount') \vert{}\vert{}$('agent-count-badge');
  if(countBadge) countBadge.textContent=agents.length;
 
  agents.forEach(a=>{
@@ -439,6 +437,7 @@ window.downloadPDF = function(index) {
   }
 };
 
+// RENDERIZADOR DE CHAT COM SUPORTE A FLUXOGRAMAS MERMAID VISUAIS
 function renderChat(){
  const el=$('messages') || $('chat-messages');if(!el)return;
  el.innerHTML='';
@@ -469,7 +468,37 @@ function renderChat(){
      bubble.style.borderTopLeftRadius = '2px';
    }
 
-   let formattedText = m.text
+   let rawText = m.text;
+   
+   // Se contiver bloco Mermaid, renderiza como elemento gráfico do Mermaid.js
+   if(rawText.includes('```mermaid')){
+     const mermaidContent = rawText.match(/```mermaid([\s\S]*?)```/);
+     if(mermaidContent && mermaidContent[1]){
+       const chartCode = mermaidContent[1].trim();
+       const chartId = `mermaid-${idx}-${Date.now()}`;
+       
+       let cleanText = rawText.replace(/```mermaid[\s\S]*?```/, `<div class="mermaid-box" style="background:#0f172a; padding:15px; border-radius:12px; margin:10px 0; border:1px solid #334155;" id="${chartId}">${chartCode}</div>`);
+       
+       bubble.innerHTML = cleanText
+         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+         .replace(/### (.*?)\n/g, '<h4 style="font-weight:bold; color:#818cf8; margin-top:8px;">$1</h4>');
+         
+       msgDiv.appendChild(bubble);
+       el.appendChild(msgDiv);
+
+       // Executa renderização gráfica do Mermaid após montar o elemento
+       setTimeout(() => {
+         if(window.mermaid){
+           try {
+             mermaid.run({ nodes: [document.getElementById(chartId)] });
+           } catch(err) { console.error('Erro ao renderizar Mermaid:', err); }
+         }
+       }, 100);
+       return;
+     }
+   }
+
+   let formattedText = rawText
      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
      .replace(/### (.*?)\n/g, '<h4 style="font-weight:bold; color:#818cf8; margin-top:8px;">$1</h4>')
      .replace(/```([\s\S]*?)```/g, '<pre style="background:#0f172a; padding:10px; border-radius:8px; overflow-x:auto; font-family:monospace; color:#38bdf8; margin:8px 0;"><code>$1</code></pre>');
@@ -601,7 +630,7 @@ if(saveSetBtn) saveSetBtn.onclick=()=>{
 
  settings={
    aiMode: modeEl ? modeEl.value : 'custom-webhook',
-   webhookUrl: webEl ? webEl.value : 'https://workspaceia.onrender.com/agent-chat',
+   webhookUrl: webEl ? webEl.value : '[https://workspaceia.onrender.com/agent-chat](https://workspaceia.onrender.com/agent-chat)',
    apiKey: apiEl ? apiEl.value : ''
  };
  localStorage.setItem('startup_hq_settings',JSON.stringify(settings));
