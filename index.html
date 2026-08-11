@@ -14,16 +14,6 @@
     <!-- html2pdf.js para Exportação Automática de PDFs Reais -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    <!-- Mermaid.js para Renderização Gráfica de Fluxogramas -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            if (window.mermaid) {
-                mermaid.initialize({ startOnLoad: false, theme: 'dark' });
-            }
-        });
-    </script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
@@ -34,7 +24,6 @@
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
 
-        /* Estilização para o Canvas ocupar 100% da área do jogo sem deformar */
         #game-container {
             position: relative;
             width: 100%;
@@ -52,7 +41,6 @@
             image-rendering: crisp-edges;
         }
 
-        /* Estilos dos popups nativos do mapa */
         #proximity {
             position: absolute;
             display: none;
@@ -80,15 +68,6 @@
             font-family: monospace;
             font-weight: bold;
             margin-left: 6px;
-        }
-
-        #proximity .online {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background-color: #34d399;
-            border-radius: 50%;
-            margin-right: 6px;
         }
 
         .agentCard {
@@ -151,14 +130,10 @@
     <!-- Main Game Area -->
     <div id="layout" class="relative flex-1 bg-slate-950 overflow-hidden flex">
 
-        <!-- Area do Canvas (Full Area) -->
         <div id="game-container" class="relative flex-1 h-full w-full">
             <canvas id="officeCanvas"></canvas>
-
-            <!-- Proximity Tooltip Popup -->
             <div id="proximity"></div>
 
-            <!-- Instrucoes na tela -->
             <div class="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur border border-slate-800 px-3.5 py-2 rounded-xl text-xs text-slate-300 flex items-center gap-3 shadow-2xl pointer-events-none z-10">
                 <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">WASD / Setas</span>
                 <span>Caminhar</span>
@@ -171,7 +146,6 @@
             </div>
         </div>
 
-        <!-- Sidebar Roster de Agentes -->
         <aside class="w-80 bg-slate-900/95 border-l border-slate-800 flex flex-col z-10 shrink-0">
             <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
@@ -180,9 +154,7 @@
                 <span id="agentCount" class="bg-slate-800 text-indigo-400 text-xs px-2 py-0.5 rounded-full font-mono">4</span>
             </div>
 
-            <div id="agents" class="flex-1 overflow-y-auto p-3">
-                <!-- Cards injetados dinamicamente -->
-            </div>
+            <div id="agents" class="flex-1 overflow-y-auto p-3"></div>
         </aside>
     </div>
 
@@ -203,23 +175,15 @@
             </div>
 
             <p id="modalDesc" class="px-5 py-2 text-xs text-slate-400 bg-slate-950/50 border-b border-slate-800/80"></p>
-
             <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/30"></div>
-
             <div id="chips" class="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto"></div>
 
-            <!-- Input Bar com Anexo de Arquivo -->
             <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
-                <!-- Input Oculto para Seleção de Arquivo -->
                 <input type="file" id="fileInput" accept=".pdf,.txt,.json,.md" class="hidden">
-                
-                <!-- Botão de Anexo -->
                 <button id="btnFile" onclick="document.getElementById('fileInput').click()" class="p-3 bg-slate-800 hover:bg-slate-700 text-indigo-400 rounded-xl border border-slate-700 transition shrink-0" title="Anexar arquivo/PDF">
                     📎
                 </button>
-
                 <input id="chatInput" type="text" placeholder="Escreva uma mensagem ou anexe um documento..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none">
-                
                 <button id="send" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-3 rounded-xl transition flex items-center gap-2 shrink-0">
                     <span>Enviar</span>
                     <i data-lucide="send" class="w-4 h-4"></i>
@@ -269,7 +233,6 @@
         </div>
     </div>
 
-    <!-- Script da Aplicação -->
     <script src="app.js"></script>
 </body>
 </html>
