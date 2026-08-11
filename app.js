@@ -42,7 +42,7 @@ async function loadJSON(){
    atlasAssets=m.assets||{};
    characterAssets=m.characters||{};
  } catch(e) {
-   console.warn('Usando fallback do manifest de sprites:', e);
+   console.warn('Erro manifest:', e);
  }
 }
 
@@ -334,7 +334,7 @@ function animate(now){
 
  let found=null;for(const a of agents)if(Math.hypot(player.x-a.x,player.y-a.y)<82){found=a;break}
  const interactObj=nearestInteractive();
- const b=$('proximity') \vert{}\vert{}$('proximity-badge');
+ const b=$('proximity') || $('proximity-badge');
  if(b){
    if(found){
      b.style.display='block';
@@ -365,9 +365,9 @@ if(canvas){
 }
 
 function renderAgents(){
- const el=$('agents') \vert{}\vert{}$('agents-list');if(!el)return;
+ const el=$('agents') || $('agents-list');if(!el)return;
  el.innerHTML='';
- const countBadge = $('agentCount') \vert{}\vert{}$('agent-count-badge');
+ const countBadge = $('agentCount') || $('agent-count-badge');
  if(countBadge) countBadge.textContent=agents.length;
 
  agents.forEach(a=>{
@@ -382,11 +382,11 @@ function renderAgents(){
 
 function openChat(a){
  activeAgent=a;
- const modalName = $('modalName') \vert{}\vert{}$('modal-agent-name');
- const modalRole = $('modalRole') \vert{}\vert{}$('modal-agent-role');
- const modalDesc = $('modalDesc') \vert{}\vert{}$('modal-agent-desc');
- const modalAvatar = $('modalAvatar') \vert{}\vert{}$('modal-agent-avatar');
- const chatModal = $('chatModal') \vert{}\vert{}$('chat-modal');
+ const modalName = $('modalName') || $('modal-agent-name');
+ const modalRole = $('modalRole') || $('modal-agent-role');
+ const modalDesc = $('modalDesc') || $('modal-agent-desc');
+ const modalAvatar = $('modalAvatar') || $('modal-agent-avatar');
+ const chatModal = $('chatModal') || $('chat-modal');
 
  if(modalName) modalName.textContent=a.name;
  if(modalRole) modalRole.textContent=a.role;
@@ -395,7 +395,7 @@ function openChat(a){
  if(chatModal) chatModal.classList.add('open'), chatModal.classList.remove('hidden');
 
  renderChat();
- const c=$('chips') \vert{}\vert{}$('command-chips');
+ const c=$('chips') || $('command-chips');
  if(c){
    c.innerHTML='';
    a.skills.forEach(s=>{
@@ -403,7 +403,7 @@ function openChat(a){
      b.className='chip';
      b.textContent=s;
      b.onclick=()=>{
-       const input = $('chatInput') \vert{}\vert{}$('chat-input');
+       const input = $('chatInput') || $('chat-input');
        if(input) input.value='Executar: '+s;
        sendMessage();
      };
@@ -443,7 +443,7 @@ window.downloadPDF = function(index) {
 };
 
 function renderChat(){
- const el=$('messages') \vert{}\vert{}$('chat-messages');if(!el)return;
+ const el=$('messages') || $('chat-messages');if(!el)return;
  el.innerHTML='';
 
  activeAgent.history.forEach((m, idx)=>{
@@ -472,35 +472,7 @@ function renderChat(){
      bubble.style.borderTopLeftRadius = '2px';
    }
 
-   let rawText = m.text;
-   
-   if(rawText.includes('```mermaid')){
-     const mermaidContent = rawText.match(/```mermaid([\s\S]*?)```/);
-     if(mermaidContent && mermaidContent[1]){
-       const chartCode = mermaidContent[1].trim();
-       const chartId = `mermaid-${idx}-${Date.now()}`;
-       
-       let cleanText = rawText.replace(/```mermaid[\s\S]*?```/, `<div class="mermaid-box" style="background:#0f172a; padding:15px; border-radius:12px; margin:10px 0; border:1px solid #334155;" id="${chartId}">${chartCode}</div>`);
-       
-       bubble.innerHTML = cleanText
-         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-         .replace(/### (.*?)\n/g, '<h4 style="font-weight:bold; color:#818cf8; margin-top:8px;">$1</h4>');
-         
-       msgDiv.appendChild(bubble);
-       el.appendChild(msgDiv);
-
-       setTimeout(() => {
-         if(window.mermaid){
-           try {
-             mermaid.run({ nodes: [document.getElementById(chartId)] });
-           } catch(err) { console.error('Erro ao renderizar Mermaid:', err); }
-         }
-       }, 100);
-       return;
-     }
-   }
-
-   let formattedText = rawText
+   let formattedText = m.text
      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
      .replace(/### (.*?)\n/g, '<h4 style="font-weight:bold; color:#818cf8; margin-top:8px;">$1</h4>')
      .replace(/```([\s\S]*?)```/g, '<pre style="background:#0f172a; padding:10px; border-radius:8px; overflow-x:auto; font-family:monospace; color:#38bdf8; margin:8px 0;"><code>$1</code></pre>');
@@ -632,7 +604,7 @@ if(saveSetBtn) saveSetBtn.onclick=()=>{
 
  settings={
    aiMode: modeEl ? modeEl.value : 'custom-webhook',
-   webhookUrl: webEl ? webEl.value : '[https://workspaceia.onrender.com/agent-chat](https://workspaceia.onrender.com/agent-chat)',
+   webhookUrl: webEl ? webEl.value : 'https://workspaceia.onrender.com/agent-chat',
    apiKey: apiEl ? apiEl.value : ''
  };
  localStorage.setItem('startup_hq_settings',JSON.stringify(settings));
@@ -640,7 +612,6 @@ if(saveSetBtn) saveSetBtn.onclick=()=>{
  if(modal) modal.classList.add('hidden'), modal.classList.remove('open');
 };
 
-// INICIALIZAÇÃO SEGURA
 (async()=>{
  try{
    await loadJSON();
