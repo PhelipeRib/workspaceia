@@ -36,10 +36,14 @@ const doors=[
 ];
 
 async function loadJSON(){
- const r=await fetch('sprite_manifest.json?v=3');
- const m=await r.json();
- atlasAssets=m.assets||{};
- characterAssets=m.characters||{};
+ try {
+   const r=await fetch('sprite_manifest.json?v=4');
+   const m=await r.json();
+   atlasAssets=m.assets||{};
+   characterAssets=m.characters||{};
+ } catch(e) {
+   console.warn('Usando fallback do manifest de sprites:', e);
+ }
 }
 
 const imageCache=new Map();
@@ -85,6 +89,7 @@ function addObject(id,x,y,scale=1,anchor=.5,interactive=null){
 }
 
 function shadow(x,y,w=28){
+ if(!ctx) return;
  ctx.save();
  ctx.globalAlpha=.22;
  ctx.fillStyle='#101722';
@@ -270,7 +275,7 @@ function interact(){
 
 function drawWorld(){
  if(!ctx) return;
- const W=canvas.clientWidth,H=canvas.clientHeight;
+ const W=canvas.clientWidth||800,H=canvas.clientHeight||600;
  ctx.clearRect(0,0,W,H);
  camera.x=Math.max(0,Math.min(WORLD.w-W,player.x-W/2));camera.y=Math.max(0,Math.min(WORLD.h-H,player.y-H/2));
  ctx.save();
@@ -377,11 +382,11 @@ function renderAgents(){
 
 function openChat(a){
  activeAgent=a;
- const modalName = $('modalName') || $('modal-agent-name');
- const modalRole = $('modalRole') || $('modal-agent-role');
- const modalDesc = $('modalDesc') || $('modal-agent-desc');
- const modalAvatar = $('modalAvatar') || $('modal-agent-avatar');
- const chatModal = $('chatModal') || $('chat-modal');
+ const modalName = $('modalName') \vert{}\vert{}$('modal-agent-name');
+ const modalRole = $('modalRole') \vert{}\vert{}$('modal-agent-role');
+ const modalDesc = $('modalDesc') \vert{}\vert{}$('modal-agent-desc');
+ const modalAvatar = $('modalAvatar') \vert{}\vert{}$('modal-agent-avatar');
+ const chatModal = $('chatModal') \vert{}\vert{}$('chat-modal');
 
  if(modalName) modalName.textContent=a.name;
  if(modalRole) modalRole.textContent=a.role;
@@ -390,7 +395,7 @@ function openChat(a){
  if(chatModal) chatModal.classList.add('open'), chatModal.classList.remove('hidden');
 
  renderChat();
- const c=$('chips') || $('command-chips');
+ const c=$('chips') \vert{}\vert{}$('command-chips');
  if(c){
    c.innerHTML='';
    a.skills.forEach(s=>{
@@ -398,7 +403,7 @@ function openChat(a){
      b.className='chip';
      b.textContent=s;
      b.onclick=()=>{
-       const input = $('chatInput') || $('chat-input');
+       const input = $('chatInput') \vert{}\vert{}$('chat-input');
        if(input) input.value='Executar: '+s;
        sendMessage();
      };
@@ -437,9 +442,8 @@ window.downloadPDF = function(index) {
   }
 };
 
-// RENDERIZADOR DE CHAT COM SUPORTE A FLUXOGRAMAS MERMAID VISUAIS
 function renderChat(){
- const el=$('messages') || $('chat-messages');if(!el)return;
+ const el=$('messages') \vert{}\vert{}$('chat-messages');if(!el)return;
  el.innerHTML='';
 
  activeAgent.history.forEach((m, idx)=>{
@@ -470,7 +474,6 @@ function renderChat(){
 
    let rawText = m.text;
    
-   // Se contiver bloco Mermaid, renderiza como elemento gráfico do Mermaid.js
    if(rawText.includes('```mermaid')){
      const mermaidContent = rawText.match(/```mermaid([\s\S]*?)```/);
      if(mermaidContent && mermaidContent[1]){
@@ -486,7 +489,6 @@ function renderChat(){
        msgDiv.appendChild(bubble);
        el.appendChild(msgDiv);
 
-       // Executa renderização gráfica do Mermaid após montar o elemento
        setTimeout(() => {
          if(window.mermaid){
            try {
@@ -638,16 +640,21 @@ if(saveSetBtn) saveSetBtn.onclick=()=>{
  if(modal) modal.classList.add('hidden'), modal.classList.remove('open');
 };
 
+// INICIALIZAÇÃO SEGURA
 (async()=>{
  try{
    await loadJSON();
    preload();
    buildScene();
    renderAgents();
+   if (window.lucide && typeof lucide.createIcons === 'function') {
+     lucide.createIcons();
+   }
    requestAnimationFrame(animate);
  }catch(err){
-   console.error(err);
-   const log = $('globalLog');
-   if(log) log.textContent='[ERRO] Não foi possível carregar sprite_manifest.json.';
+   console.error("Erro na inicialização:", err);
+   buildScene();
+   renderAgents();
+   requestAnimationFrame(animate);
  }
 })();
