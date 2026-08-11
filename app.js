@@ -1,6 +1,6 @@
 const $=id=>document.getElementById(id);
-const canvas=$('officeCanvas'),ctx=canvas.getContext('2d',{alpha:false});
-ctx.imageSmoothingEnabled=false;
+const canvas=$('officeCanvas'),ctx=canvas?canvas.getContext('2d',{alpha:false}):null;
+if(ctx) ctx.imageSmoothingEnabled=false;
 
 const WORLD={w:1800,h:1080};
 const PLAYER_RADIUS=13;
@@ -13,12 +13,12 @@ if (!settings.webhookUrl || settings.webhookUrl.includes('ngrok')) {
   settings.aiMode = 'custom-webhook';
 }
 
-// 🐒 NOMES ATUALIZADOS DOS AGENTES DA WEON
+// 🐒 AGENTES COM NOMES ATUALIZADOS
 const DEFAULT=[
-{id:'dev',name:'Rafacaco',role:'Tech Lead / Dev',short:'Tech Lead',desc:'Análise de código, Pull Requests, WeAction API e integrações.',character:'char_01',direction:'down',x:680,y:335,status:'Ocioso',skills:['Review de PR','Consultar WeAction API','Setup Gupshup/COEX','Debug Endpoint'],history:[{sender:'agent',text:'E aí! Sou o Rafacaco, seu Tech Lead. Bora revisar código ou olhar as APIs da WeON?'}]},
-{id:'pm',name:'Maycaco',role:'Product Owner',short:'Product',desc:'Requisitos de Kick-Off, estórias de usuário e bots Node-RED.',character:'char_04',direction:'down',x:850,y:335,status:'Ocioso',skills:['User Stories','Forms Kick-Off','Node-RED Bot','Priorizar Backlog'],history:[{sender:'agent',text:'Oi! Maycaco na área. Pronta para mapear o Kick-off e alinhar requisitos de produto.'}]},
-{id:'cx',name:'Amandacaco',role:'CX & Product Analytics',short:'CX',desc:'Retenção, relatórios de SLA, CSAT e métricas do cliente.',character:'char_02',direction:'down',x:1325,y:670,status:'Ocioso',skills:['Relatório NPS','Análise de Churn','Métricas SLA','Logs de Atendimento'],history:[{sender:'agent',text:'Olá! Amandacaco por aqui. Monitorando os indicadores de atendimento da WeON.'}]},
-{id:'arch',name:'Phemonkey',role:'Arquitetos & Estratégia',short:'Strategy',desc:'Arquitetura de soluções, Business Plan e formulários estratégicos.',character:'char_04',direction:'down',x:355,y:650,status:'Ocioso',skills:['Business Plan','Kick-Off Inicial','Desenho de BD','Plano Cloud'],history:[{sender:'agent',text:'Fala mestre! Phemonkey no comando da estratégia e arquitetura de negócios.'}]}
+  {id:'dev',name:'Rafacaco',role:'Tech Lead / Dev',short:'Tech Lead',desc:'Análise de código, Pull Requests, WeAction API e integrações.',character:'char_01',direction:'down',x:680,y:335,status:'Ocioso',skills:['Review de PR','Consultar WeAction API','Setup Gupshup/COEX','Debug Endpoint'],history:[{sender:'agent',text:'E aí! Sou o Rafacaco, seu Tech Lead. Bora revisar código ou olhar as APIs da WeON?'}]},
+  {id:'pm',name:'Maycaco',role:'Product Owner',short:'Product',desc:'Requisitos de Kick-Off, estórias de usuário e bots Node-RED.',character:'char_04',direction:'down',x:850,y:335,status:'Ocioso',skills:['User Stories','Forms Kick-Off','Node-RED Bot','Priorizar Backlog'],history:[{sender:'agent',text:'Oi! Maycaco na área. Pronta para mapear o Kick-off e alinhar requisitos de produto.'}]},
+  {id:'cx',name:'Amandacaco',role:'CX & Product Analytics',short:'CX',desc:'Retenção, relatórios de SLA, CSAT e métricas do cliente.',character:'char_02',direction:'down',x:1325,y:670,status:'Ocioso',skills:['Relatório NPS','Análise de Churn','Métricas SLA','Logs de Atendimento'],history:[{sender:'agent',text:'Olá! Amandacaco por aqui. Monitorando os indicadores de atendimento da WeON.'}]},
+  {id:'arch',name:'Phemonkey',role:'Arquitetos & Estratégia',short:'Strategy',desc:'Arquitetura de soluções, Business Plan e formulários estratégicos.',character:'char_04',direction:'down',x:355,y:650,status:'Ocioso',skills:['Business Plan','Kick-Off Inicial','Desenho de BD','Plano Cloud'],history:[{sender:'agent',text:'Fala mestre! Phemonkey no comando da estratégia e arquitetura de negócios.'}]}
 ];
 
 let agents=JSON.parse(localStorage.getItem('startup_hq_agents')||'null')||DEFAULT;
@@ -27,7 +27,7 @@ for(const d of DEFAULT){
   if(a){ a.character=d.character; a.direction=a.direction||'down'; a.name=d.name; a.role=d.role; }
 }
 
-// 👑 O CEO AGORA É O MACACO MESTRE
+// 👑 MACACO MESTRE (PLAYER)
 let player={x:700,y:560,targetX:700,targetY:560,speed:220,direction:'down',moving:false,character:'char_02'};
 
 const doors=[
@@ -38,14 +38,16 @@ const doors=[
 ];
 
 async function loadJSON(){
- const r=await fetch('sprite_manifest.json?v=3');const m=await r.json();
- atlasAssets=m.assets||{};characterAssets=m.characters||{};
+ const r=await fetch('sprite_manifest.json?v=3');
+ const m=await r.json();
+ atlasAssets=m.assets||{};
+ characterAssets=m.characters||{};
 }
 
 const imageCache=new Map();
 function img(path){
  if(!imageCache.has(path)){const im=new Image();im.decoding='async';im.src=path;imageCache.set(path,im)}
- return imageCache.get(path)
+ return imageCache.get(path);
 }
 
 function preload(){
@@ -54,14 +56,18 @@ function preload(){
 }
 
 function resize(){
+ if(!canvas) return;
  const r=canvas.getBoundingClientRect();
  const d=Math.min(devicePixelRatio||1,2);
  canvas.width=Math.floor(r.width*d);
  canvas.height=Math.floor(r.height*d);
- ctx.setTransform(d,0,0,d,0,0);
- ctx.imageSmoothingEnabled=false;
+ if(ctx){
+   ctx.setTransform(d,0,0,d,0,0);
+   ctx.imageSmoothingEnabled=false;
+ }
 }
-addEventListener('resize',resize);resize();
+addEventListener('resize',resize);
+resize();
 
 function drawAsset(id,x,y,scale=1,anchor=.5){
  const a=atlasAssets[id];if(!a)return;
@@ -80,7 +86,15 @@ function addObject(id,x,y,scale=1,anchor=.5,interactive=null){
  }
 }
 
-function shadow(x,y,w=28){ctx.save();ctx.globalAlpha=.22;ctx.fillStyle='#101722';ctx.beginPath();ctx.ellipse(x,y,w,Math.max(3,w*.22),0,0,Math.PI*2);ctx.fill();ctx.restore()}
+function shadow(x,y,w=28){
+ ctx.save();
+ ctx.globalAlpha=.22;
+ ctx.fillStyle='#101722';
+ ctx.beginPath();
+ ctx.ellipse(x,y,w,Math.max(3,w*.22),0,0,Math.PI*2);
+ ctx.fill();
+ ctx.restore();
+}
 
 function characterFrame(a,moving){
  const c=characterAssets[a.character]||characterAssets.char_01;
@@ -110,18 +124,55 @@ function drawCharacter(a,x,y,moving){
  ctx.restore();
 }
 
-function label(t,x,y){ctx.save();ctx.fillStyle='#fff';ctx.beginPath();ctx.roundRect(x-55,y-12,110,24,12);ctx.fill();ctx.fillStyle='#7b8495';ctx.font='800 9px Arial';ctx.textAlign='center';ctx.fillText(t,x,y+3);ctx.restore()}
+function label(t,x,y){
+ ctx.save();
+ ctx.fillStyle='#fff';
+ ctx.beginPath();
+ ctx.roundRect(x-55,y-12,110,24,12);
+ ctx.fill();
+ ctx.fillStyle='#7b8495';
+ ctx.font='800 9px Arial';
+ ctx.textAlign='center';
+ ctx.fillText(t,x,y+3);
+ ctx.restore();
+}
 
-function nameBadge(a,x,y){ctx.save();ctx.font='700 10px Arial';const txt=`${a.name} · ${a.short||a.role}`;const tw=ctx.measureText(txt).width+25;ctx.fillStyle='#101827f5';ctx.beginPath();ctx.roundRect(x-tw/2,y-18,tw,19,9);ctx.fill();ctx.fillStyle=a.status==='Executando...'?'#ffb13b':'#35d486';ctx.beginPath();ctx.arc(x-tw/2+9,y-8.5,3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(txt,x-tw/2+16,y-5);ctx.restore()}
+function nameBadge(a,x,y){
+ ctx.save();
+ ctx.font='700 10px Arial';
+ const txt=`${a.name} · ${a.short||a.role}`;
+ const tw=ctx.measureText(txt).width+25;
+ ctx.fillStyle='#101827f5';
+ ctx.beginPath();
+ ctx.roundRect(x-tw/2,y-18,tw,19,9);
+ ctx.fill();
+ ctx.fillStyle=a.status==='Executando...'?'#ffb13b':'#35d486';
+ ctx.beginPath();
+ ctx.arc(x-tw/2+9,y-8.5,3,0,Math.PI*2);
+ ctx.fill();
+ ctx.fillStyle='#fff';
+ ctx.textAlign='left';
+ ctx.fillText(txt,x-tw/2+16,y-5);
+ ctx.restore();
+}
 
 function tileFloor(x,y,w,h,tile='floor_beige'){
  const a=atlasAssets[tile];if(!a)return;
  const im=img(a.file),tw=a.w,th=a.h;if(!im.complete||!im.naturalWidth)return;
- for(let yy=y;yy<y+h;yy+=th)for(let xx=x;xx<x+w;xx+=tw)ctx.drawImage(im,xx,yy,Math.min(tw,x+w-xx),Math.min(th,y+h-yy));
+ for(let yy=y;yy<y+h;yy+=th){
+   for(let xx=x;xx<x+w;xx+=tw){
+     ctx.drawImage(im,xx,yy,Math.min(tw,x+w-xx),Math.min(th,y+h-yy));
+   }
+ }
 }
 
 function wallRect(x,y,w,h,draw=true){
- if(draw){ctx.fillStyle='#737a84';ctx.fillRect(x,y,w,h);ctx.fillStyle='#9aa1ac';if(w>h)ctx.fillRect(x,y,w,3);else ctx.fillRect(x,y,3,h)}
+ if(draw){
+   ctx.fillStyle='#737a84';
+   ctx.fillRect(x,y,w,h);
+   ctx.fillStyle='#9aa1ac';
+   if(w>h) ctx.fillRect(x,y,w,3); else ctx.fillRect(x,y,3,h);
+ }
 }
 
 function drawRoom(x,y,w,h,tile='floor_beige'){
@@ -198,7 +249,7 @@ function updateDoors(dt){
    d.target=near?1:0;
    const speed=dt*4.8;
    d.open += Math.sign(d.target-d.open)*Math.min(Math.abs(d.target-d.open),speed);
- })
+ });
 }
 
 function nearestInteractive(){
@@ -220,11 +271,14 @@ function interact(){
 }
 
 function drawWorld(){
+ if(!ctx) return;
  const W=canvas.clientWidth,H=canvas.clientHeight;
  ctx.clearRect(0,0,W,H);
  camera.x=Math.max(0,Math.min(WORLD.w-W,player.x-W/2));camera.y=Math.max(0,Math.min(WORLD.h-H,player.y-H/2));
- ctx.save();ctx.translate(-camera.x,-camera.y);
- ctx.fillStyle='#a8d88d';ctx.fillRect(0,0,WORLD.w,WORLD.h);
+ ctx.save();
+ ctx.translate(-camera.x,-camera.y);
+ ctx.fillStyle='#a8d88d';
+ ctx.fillRect(0,0,WORLD.w,WORLD.h);
  for(let i=0;i<20;i++){const x=(i*173)%1700+35,y=(i*117)%1010+35;drawAsset('plant_small',x,y,.55)}
 
  drawRoom(150,90,1480,900,'floor_beige');
@@ -284,16 +338,16 @@ function animate(now){
      b.style.left=(found.x-camera.x)+'px';
      b.style.top=(found.y-camera.y-70)+'px';
      b.innerHTML=`Conversar com ${found.name} <span class="key">ESPAÇO</span>`;
-     b.onclick=()=>openChat(found)
+     b.onclick=()=>openChat(found);
    }else if(interactObj){
      b.style.display='block';
      b.style.left=(interactObj.x-camera.x)+'px';
      b.style.top=(interactObj.y-camera.y-55)+'px';
      b.innerHTML=`${interactObj.interactive} <span class="key">E</span>`;
-     b.onclick=interact
+     b.onclick=interact;
    }else b.style.display='none';
  }
- requestAnimationFrame(animate)
+ requestAnimationFrame(animate);
 }
 
 addEventListener('keydown',e=>{
@@ -319,8 +373,8 @@ function renderAgents(){
    const c=characterAssets[a.character],srcPath=c?.down?.[0]||'char_01_down_0.png';
    d.innerHTML=`<img class="mini" src="${srcPath}"><div><strong>${a.name}</strong><span>${a.role}</span></div>`;
    d.onclick=()=>{player.targetX=a.x;player.targetY=a.y+72};
-   el.appendChild(d)
- })
+   el.appendChild(d);
+ });
 }
 
 function openChat(a){
@@ -348,10 +402,10 @@ function openChat(a){
      b.onclick=()=>{
        const input = $('chatInput') || $('chat-input');
        if(input) input.value='Executar: '+s;
-       sendMessage()
+       sendMessage();
      };
-     c.appendChild(b)
-   })
+     c.appendChild(b);
+   });
  }
 }
 
@@ -418,4 +472,153 @@ function renderChat(){
    let formattedText = m.text
      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
      .replace(/### (.*?)\n/g, '<h4 style="font-weight:bold; color:#818cf8; margin-top:8px;">$1</h4>')
-     .replace(/```([\s\S]*?)
+     .replace(/```([\s\S]*?)```/g, '<pre style="background:#0f172a; padding:10px; border-radius:8px; overflow-x:auto; font-family:monospace; color:#38bdf8; margin:8px 0;"><code>$1</code></pre>');
+
+   bubble.innerHTML = formattedText;
+   msgDiv.appendChild(bubble);
+
+   if(m.sender === 'agent' && idx > 0){
+     const btnExport = document.createElement('button');
+     btnExport.innerHTML = '📥 Baixar como PDF';
+     btnExport.style.fontSize = '11px';
+     btnExport.style.color = '#a5b4fc';
+     btnExport.style.marginTop = '4px';
+     btnExport.style.background = 'transparent';
+     btnExport.style.border = 'none';
+     btnExport.style.cursor = 'pointer';
+     btnExport.onclick = () => window.downloadPDF(idx);
+     msgDiv.appendChild(btnExport);
+   }
+
+   el.appendChild(msgDiv);
+ });
+
+ el.scrollTop=el.scrollHeight;
+}
+
+const fileInput = $('fileInput');
+if(fileInput) {
+  fileInput.onchange = function(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const textContent = evt.target.result;
+      const chatInp = $('chatInput') || $('chat-input');
+      if(chatInp) {
+        chatInp.value = `[ARQUIVO ANEXADO: ${file.name}]\n${textContent.slice(0, 1500)}`;
+      }
+    };
+    reader.readAsText(file);
+  };
+}
+
+async function queryAI(a, p) {
+  if (settings.aiMode === 'custom-webhook' && settings.webhookUrl) {
+    try {
+      const r = await fetch(settings.webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agentId: a.id || 'dev',
+          agentName: a.name,
+          agentRole: a.role || 'Assistente',
+          prompt: p
+        })
+      });
+      
+      const data = await r.json();
+      
+      if (data && data.reply) return data.reply;
+      if (typeof data === 'string') return data;
+      return data.response || data.message || 'Resposta recebida sem texto.';
+      
+    } catch (e) {
+      console.error("Erro no Webhook do Render:", e);
+      return '[WEBHOOK] Não foi possível conectar ao backend do Render.';
+    }
+  }
+
+  await new Promise(r => setTimeout(r, 700));
+  return `[AGENTE ${a.name.toUpperCase()}]\n\nRecebi: "${p}".`;
+}
+
+async function sendMessage(){
+ const input=$('chatInput') || $('chat-input');
+ if(!input) return;
+ const p=input.value.trim();
+ if(!p||!activeAgent)return;
+
+ activeAgent.history.push({sender:'user',text:p});
+ activeAgent.status='Executando...';
+ input.value='';
+ renderChat();
+ renderAgents();
+
+ const log = $('globalLog');
+ if(log) log.textContent=`[AGENTE ${activeAgent.name.toUpperCase()}] Processando ordem "${p}"...`;
+
+ const reply=await queryAI(activeAgent,p);
+ activeAgent.status='Ocioso';
+ activeAgent.history.push({sender:'agent',text:reply});
+ localStorage.setItem('startup_hq_agents',JSON.stringify(agents));
+ renderChat();
+ renderAgents();
+
+ if(log) log.textContent=`[AGENTE ${activeAgent.name.toUpperCase()}] Tarefa concluída.`;
+}
+
+const sendBtn = $('send') || $('btn-send-message');
+if(sendBtn) sendBtn.onclick=sendMessage;
+
+const chatInp = $('chatInput') || $('chat-input');
+if(chatInp) chatInp.addEventListener('keydown',e=>{if(e.key==='Enter')sendMessage()});
+
+const closeBtn = $('closeChat') || $('btn-close-modal');
+if(closeBtn) closeBtn.onclick=()=> {
+ const modal = $('chatModal') || $('chat-modal');
+ if(modal) modal.classList.remove('open'), modal.classList.add('hidden');
+};
+
+const setBtn = $('settingsBtn') || $('btn-settings');
+if(setBtn) setBtn.onclick=()=>{
+ const modal = $('settingsModal') || $('settings-modal');
+ if(modal) modal.classList.remove('hidden'), modal.classList.add('open');
+};
+
+const closeSetBtn = $('closeSettings') || $('btn-close-settings');
+if(closeSetBtn) closeSetBtn.onclick=()=>{
+ const modal = $('settingsModal') || $('settings-modal');
+ if(modal) modal.classList.add('hidden'), modal.classList.remove('open');
+};
+
+const saveSetBtn = $('saveSettings') || $('btn-save-settings');
+if(saveSetBtn) saveSetBtn.onclick=()=>{
+ const modeEl = $('aiMode') || $('setting-ai-mode');
+ const webEl = $('webhook') || $('setting-webhook-url');
+ const apiEl = $('apiKey') || $('setting-apiKey');
+
+ settings={
+   aiMode: modeEl ? modeEl.value : 'custom-webhook',
+   webhookUrl: webEl ? webEl.value : 'https://workspaceia.onrender.com/agent-chat',
+   apiKey: apiEl ? apiEl.value : ''
+ };
+ localStorage.setItem('startup_hq_settings',JSON.stringify(settings));
+ const modal = $('settingsModal') || $('settings-modal');
+ if(modal) modal.classList.add('hidden'), modal.classList.remove('open');
+};
+
+(async()=>{
+ try{
+   await loadJSON();
+   preload();
+   buildScene();
+   renderAgents();
+   requestAnimationFrame(animate);
+ }catch(err){
+   console.error(err);
+   const log = $('globalLog');
+   if(log) log.textContent='[ERRO] Não foi possível carregar sprite_manifest.json.';
+ }
+})();
