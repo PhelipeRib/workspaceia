@@ -11,7 +11,7 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- html2pdf.js para Exportação Automática de PDFs Reais -->
+    <!-- html2pdf.js para Exportação Automática de PDFs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
@@ -20,16 +20,17 @@
         .font-pixel { font-family: 'Press Start 2P', cursive; }
         .font-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #2b1704; }
+        ::-webkit-scrollbar-thumb { background: #8b5a2b; border: 2px solid #3a1e05; }
 
+        /* Canvas e Renderização Pixelated */
         #game-container {
             position: relative;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #0f172a;
+            background-color: #1a1c23;
         }
 
         #officeCanvas {
@@ -41,17 +42,61 @@
             image-rendering: crisp-edges;
         }
 
+        /* UI Estilo Stardew Valley / RPG Retrô */
+        .pixel-panel {
+            background-color: #f7e2b7;
+            border: 4px solid #3a1e05;
+            box-shadow: inset -4px -4px 0px 0px #cda26f, inset 4px 4px 0px 0px #fff1d6, 0 8px 0 0 rgba(0,0,0,0.4);
+            color: #2b1704;
+            image-rendering: pixelated;
+        }
+
+        .pixel-header {
+            background-color: #5a3921;
+            border-bottom: 4px solid #3a1e05;
+            color: #f7e2b7;
+        }
+
+        .pixel-button {
+            background: #8b5a2b;
+            border: 3px solid #3a1e05;
+            color: #fff1d6;
+            box-shadow: inset -2px -2px 0px #5a3921, inset 2px 2px 0px #cda26f;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: transform 0.05s, background 0.1s;
+        }
+
+        .pixel-button:hover {
+            background: #9c6733;
+        }
+
+        .pixel-button:active {
+            transform: translateY(2px);
+            box-shadow: inset 2px 2px 0px #3a1e05;
+        }
+
+        .pixel-input {
+            background: #fff1d6;
+            border: 3px solid #3a1e05;
+            color: #2b1704;
+            box-shadow: inset 2px 2px 0px #cda26f;
+            outline: none;
+        }
+
+        /* Indicador de Proximidade (Floating Key Prompt) */
         #proximity {
             position: absolute;
             display: none;
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid #475569;
-            color: #f8fafc;
-            padding: 8px 16px;
-            border-radius: 9999px;
-            font-size: 12px;
-            font-weight: 600;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            background: #f7e2b7;
+            border: 3px solid #3a1e05;
+            color: #2b1704;
+            padding: 6px 12px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 9px;
+            box-shadow: inset -2px -2px 0px 0px #cda26f, 0 4px 0 0 rgba(0,0,0,0.5);
             pointer-events: auto;
             cursor: pointer;
             z-index: 30;
@@ -60,68 +105,80 @@
         }
 
         #proximity .key {
-            background: #1e293b;
-            border: 1px solid #64748b;
-            color: #818cf8;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-weight: bold;
+            background: #3a1e05;
+            color: #fff1d6;
+            padding: 2px 5px;
             margin-left: 6px;
         }
 
         .agentCard {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(51, 65, 85, 0.6);
-            padding: 10px;
-            border-radius: 12px;
+            background: #f7e2b7;
+            border: 3px solid #3a1e05;
+            padding: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 8px;
-            transition: all 0.2s ease;
+            color: #2b1704;
+            box-shadow: inset -2px -2px 0px 0px #cda26f;
+            transition: transform 0.1s;
         }
 
         .agentCard:hover {
-            background: rgba(30, 41, 59, 0.95);
-            border-color: #6366f1;
+            transform: scale(1.02);
+            background: #fff1d6;
         }
 
         .agentCard img.mini {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             object-fit: contain;
-            border-radius: 8px;
-            background: rgba(15, 23, 42, 0.5);
+            background: #3a1e05;
+            border: 2px solid #5a3921;
+            image-rendering: pixelated;
+        }
+
+        .chip {
+            background: #8b5a2b;
+            border: 2px solid #3a1e05;
+            color: #fff1d6;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .chip:hover {
+            background: #9c6733;
         }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans h-screen overflow-hidden flex flex-col select-none">
 
     <!-- Top Bar Navigation -->
-    <header class="bg-slate-900 border-b border-slate-800 px-4 py-2 flex items-center justify-between z-20 shrink-0">
+    <header class="bg-[#3a1e05] border-b-4 border-[#2b1704] px-4 py-2 flex items-center justify-between z-20 shrink-0">
         <div class="flex items-center gap-3">
-            <div class="bg-indigo-600/20 border border-indigo-500/40 p-2 rounded-lg text-indigo-400">
+            <div class="bg-[#5a3921] border-2 border-[#8b5a2b] p-2 rounded text-[#fff1d6]">
                 <i data-lucide="bot" class="w-5 h-5"></i>
             </div>
             <div>
-                <h1 id="modeLabel" class="font-pixel text-[11px] text-indigo-400 tracking-wide">WEON OMNICHANNEL // VIRTUAL HQ</h1>
-                <p id="globalLog" class="text-[11px] text-slate-400">Aproxime-se dos agentes de IA para comandar operações.</p>
+                <h1 id="modeLabel" class="font-pixel text-[11px] text-[#f7e2b7] tracking-wide">WEON OMNICHANNEL // VIRTUAL HQ</h1>
+                <p id="globalLog" class="text-[11px] text-[#cda26f]">Aproxime-se dos agentes de IA para comandar operações.</p>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
-            <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 flex items-center gap-2 text-xs">
+            <div class="bg-[#5a3921] px-3 py-1.5 border-2 border-[#8b5a2b] flex items-center gap-2 text-xs text-[#fff1d6]">
                 <span id="connection-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="connection-status-text" class="text-slate-300 font-medium">Motor: Custom Webhook (Render/Groq)</span>
+                <span id="connection-status-text" class="font-medium">Motor: Custom Webhook (Render/Groq)</span>
             </div>
 
-            <button id="settingsBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 text-xs font-medium flex items-center gap-1.5 transition">
-                <i data-lucide="settings" class="w-4 h-4"></i> Configurar Chaves/APIs
+            <button id="settingsBtn" class="pixel-button flex items-center gap-1.5">
+                <i data-lucide="settings" class="w-4 h-4"></i> Configuração
             </button>
 
-            <button id="btn-reset-cache" onclick="localStorage.clear(); location.reload();" class="bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/50 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition">
+            <button id="btn-reset-cache" onclick="localStorage.clear(); location.reload();" class="pixel-button !bg-rose-900 !border-rose-950 text-rose-100 flex items-center gap-1.5">
                 <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Resetar
             </button>
         </div>
@@ -134,80 +191,78 @@
             <canvas id="officeCanvas"></canvas>
             <div id="proximity"></div>
 
-            <div class="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur border border-slate-800 px-3.5 py-2 rounded-xl text-xs text-slate-300 flex items-center gap-3 shadow-2xl pointer-events-none z-10">
-                <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">WASD / Setas</span>
+            <div class="absolute bottom-4 left-4 pixel-panel px-3.5 py-2 text-xs flex items-center gap-3 shadow-2xl pointer-events-none z-10 font-pixel text-[9px]">
+                <span class="px-2 py-0.5 bg-[#3a1e05] text-[#fff1d6]">WASD / Setas</span>
                 <span>Caminhar</span>
-                <span class="text-slate-600">•</span>
-                <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">Clique</span>
+                <span class="text-[#8b5a2b]">•</span>
+                <span class="px-2 py-0.5 bg-[#3a1e05] text-[#fff1d6]">Clique</span>
                 <span>Mover</span>
-                <span class="text-slate-600">•</span>
-                <span class="px-2 py-0.5 bg-slate-800 border border-slate-700 rounded text-indigo-400 font-mono font-bold">Espaço</span>
+                <span class="text-[#8b5a2b]">•</span>
+                <span class="px-2 py-0.5 bg-[#3a1e05] text-[#fff1d6]">Espaço</span>
                 <span>Conversar</span>
             </div>
         </div>
 
-        <aside class="w-80 bg-slate-900/95 border-l border-slate-800 flex flex-col z-10 shrink-0">
-            <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i> COLABORADORES WEON
+        <aside class="w-80 bg-[#5a3921] border-l-4 border-[#3a1e05] flex flex-col z-10 shrink-0">
+            <div class="p-3.5 border-b-4 border-[#3a1e05] flex items-center justify-between bg-[#3a1e05]">
+                <h2 class="text-xs font-pixel text-[#f7e2b7] flex items-center gap-2">
+                    <i data-lucide="users" class="w-4 h-4 text-[#cda26f]"></i> COLABORADORES
                 </h2>
-                <span id="agentCount" class="bg-slate-800 text-indigo-400 text-xs px-2 py-0.5 rounded-full font-mono">4</span>
+                <span id="agentCount" class="bg-[#8b5a2b] text-[#fff1d6] text-xs px-2 py-0.5 font-pixel">4</span>
             </div>
 
-            <div id="agents" class="flex-1 overflow-y-auto p-3"></div>
+            <div id="agents" class="flex-1 overflow-y-auto p-3 bg-[#5a3921]"></div>
         </aside>
     </div>
 
-    <!-- Modal de Chat -->
-    <div id="chatModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[580px]">
-            <div class="bg-slate-800/80 px-5 py-3.5 border-b border-slate-700 flex items-center justify-between">
+    <!-- Modal de Chat Estilo RPG / Stardew Valley -->
+    <div id="chatModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="pixel-panel w-full max-w-2xl overflow-hidden flex flex-col h-[520px] relative">
+            
+            <!-- Header do Diálogo -->
+            <div class="pixel-header px-4 py-3 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <img id="modalAvatar" class="w-10 h-10 rounded-xl bg-slate-950 p-1 border border-slate-700 object-contain" src="">
+                    <img id="modalAvatar" class="w-10 h-10 border-2 border-[#3a1e05] bg-[#3a1e05] object-contain" src="">
                     <div>
-                        <h3 id="modalName" class="font-bold text-slate-100 text-base">Agente</h3>
-                        <p id="modalRole" class="text-xs text-indigo-400 font-medium">Função</p>
+                        <h3 id="modalName" class="font-pixel text-xs text-[#fff1d6]">Agente</h3>
+                        <p id="modalRole" class="text-[10px] text-[#cda26f] font-semibold">Função</p>
                     </div>
                 </div>
-                <button id="closeChat" class="p-2 rounded-lg bg-slate-700/50 hover:bg-rose-900/60 text-slate-400 hover:text-rose-200 border border-slate-600 transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+                <button id="closeChat" onclick="document.getElementById('chatModal').classList.add('hidden')" class="pixel-button px-2 py-1 text-rose-300">X</button>
             </div>
 
-            <p id="modalDesc" class="px-5 py-2 text-xs text-slate-400 bg-slate-950/50 border-b border-slate-800/80"></p>
-            <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-950/30"></div>
-            <div id="chips" class="px-4 py-2 bg-slate-900 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto"></div>
+            <p id="modalDesc" class="px-4 py-1.5 text-[11px] bg-[#e3ca9a] border-b-2 border-[#3a1e05] text-[#3a1e05] font-semibold"></p>
+            
+            <!-- Área de Mensagens -->
+            <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[#eed2a3]"></div>
+            
+            <!-- Chips de Ação -->
+            <div id="chips" class="px-3 py-2 bg-[#e3ca9a] border-t-2 border-[#3a1e05] flex items-center gap-2 overflow-x-auto"></div>
 
-            <div class="p-4 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
+            <!-- Input de Texto -->
+            <div class="p-3 bg-[#f7e2b7] border-t-4 border-[#3a1e05] flex items-center gap-2">
                 <input type="file" id="fileInput" accept=".pdf,.txt,.json,.md" class="hidden">
-                <button id="btnFile" onclick="document.getElementById('fileInput').click()" class="p-3 bg-slate-800 hover:bg-slate-700 text-indigo-400 rounded-xl border border-slate-700 transition shrink-0" title="Anexar arquivo/PDF">
-                    📎
-                </button>
-                <input id="chatInput" type="text" placeholder="Escreva uma mensagem ou anexe um documento..." class="flex-1 bg-slate-950 border border-slate-700 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 outline-none">
-                <button id="send" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-3 rounded-xl transition flex items-center gap-2 shrink-0">
-                    <span>Enviar</span>
-                    <i data-lucide="send" class="w-4 h-4"></i>
-                </button>
+                <button id="btnFile" onclick="document.getElementById('fileInput').click()" class="pixel-button" title="Anexar arquivo">📎</button>
+                <input id="chatInput" type="text" placeholder="Digite seu comando..." class="flex-1 pixel-input px-3 py-2 text-xs">
+                <button id="send" onclick="sendMessage()" class="pixel-button">Enviar</button>
             </div>
         </div>
     </div>
 
     <!-- Modal de Configurações -->
-    <div id="settingsModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-5">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-slate-100 text-lg flex items-center gap-2">
-                    <i data-lucide="sliders" class="w-5 h-5 text-indigo-400"></i> Configurações de Conexão
+    <div id="settingsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="pixel-panel w-full max-w-lg p-6 space-y-5">
+            <div class="flex justify-between items-center border-b-2 border-[#3a1e05] pb-3">
+                <h3 class="font-pixel text-xs text-[#2b1704] flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-5 h-5 text-[#8b5a2b]"></i> CONFIGURAÇÕES DE CONEXÃO
                 </h3>
-                <button id="closeSettings" class="text-slate-400 hover:text-white">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+                <button id="closeSettings" onclick="document.getElementById('settingsModal').classList.add('hidden')" class="pixel-button !px-2 !py-1">X</button>
             </div>
 
-            <div class="space-y-4 text-xs">
+            <div class="space-y-4 text-xs font-semibold">
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Modo de Operação:</label>
-                    <select id="aiMode" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                    <label class="block mb-1 text-[#3a1e05]">Modo de Operação:</label>
+                    <select id="aiMode" class="w-full pixel-input p-2 text-xs">
                         <option value="custom-webhook" selected>Custom Webhook / MCP Server (Render/Groq)</option>
                         <option value="simulated">Modo Simulado (Offline)</option>
                         <option value="claude-api">Claude API Direct</option>
@@ -215,24 +270,25 @@
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">URL do Webhook (Render):</label>
-                    <input id="webhook" type="text" value="https://workspaceia.onrender.com/agent-chat" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                    <label class="block mb-1 text-[#3a1e05]">URL do Webhook (Render):</label>
+                    <input id="webhook" type="text" value="https://workspaceia.onrender.com/agent-chat" class="w-full pixel-input p-2 text-xs">
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Chave de API (Opcional):</label>
-                    <input id="apiKey" type="password" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 outline-none">
+                    <label class="block mb-1 text-[#3a1e05]">Chave de API (Opcional):</label>
+                    <input id="apiKey" type="password" class="w-full pixel-input p-2 text-xs">
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 pt-3 border-t border-slate-800">
-                <button id="saveSettings" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2 rounded-lg text-xs transition">
-                    Salvar Alterações
-                </button>
+            <div class="flex justify-end gap-3 pt-3 border-t-2 border-[#3a1e05]">
+                <button id="saveSettings" class="pixel-button">Salvar Alterações</button>
             </div>
         </div>
     </div>
 
     <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
