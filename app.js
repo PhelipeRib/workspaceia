@@ -109,20 +109,41 @@ function characterFrame(a, moving) {
   return img(frames[idx]);
 }
 
+// RENDERIZAÇÃO CORRIGIDA DOS PERSONAGENS (SEM CORTE DE SPRITE)
 function drawCharacter(a, x, y, moving) {
-  const im = characterFrame(a, moving); if (!im || !im.complete || !im.naturalWidth) return;
-  const dir = a.direction || 'down', s = 1.08;
+  const im = characterFrame(a, moving); 
+  if (!im || !im.complete || !im.naturalWidth) return;
+  
+  const dir = a.direction || 'down';
+  const s = 1.08;
+  
   const idleBob = moving ? 0 : Math.sin(idleClock / 650 * Math.PI * 2) * .8;
   const walkBob = moving ? Math.abs(Math.sin(walkClock / 125 * Math.PI)) * .8 : 0;
   const bob = idleBob - walkBob;
+  
   shadow(x, y + 3, 16);
+  
   ctx.save();
   if (dir === 'left' || dir === 'right') {
     ctx.translate(Math.round(x), Math.round(y + bob));
     if (dir === 'left') ctx.scale(-1, 1);
-    ctx.drawImage(im, Math.round(-im.width * s / 2), Math.round(-im.height * s), Math.round(im.width * s), Math.round(im.height * s));
+    ctx.drawImage(
+      im, 
+      0, 0, im.naturalWidth, im.naturalHeight,
+      Math.round(-im.naturalWidth * s / 2), 
+      Math.round(-im.naturalHeight * s), 
+      Math.round(im.naturalWidth * s), 
+      Math.round(im.naturalHeight * s)
+    );
   } else {
-    ctx.drawImage(im, Math.round(x - im.width * s / 2), Math.round(y - im.height * s + bob), Math.round(im.width * s), Math.round(im.height * s));
+    ctx.drawImage(
+      im, 
+      0, 0, im.naturalWidth, im.naturalHeight,
+      Math.round(x - im.naturalWidth * s / 2), 
+      Math.round(y - im.naturalHeight * s + bob), 
+      Math.round(im.naturalWidth * s), 
+      Math.round(im.naturalHeight * s)
+    );
   }
   ctx.restore();
 }
@@ -290,7 +311,7 @@ function drawWorld() {
   ctx.save();
   ctx.translate(-camera.x, -camera.y);
 
-  // 1. Fundo Terroso / Grama Estilo RPG
+  // Fundo Terroso / Grama Estilo RPG
   ctx.fillStyle = '#5c8b43';
   ctx.fillRect(0, 0, WORLD.w, WORLD.h);
 
@@ -299,7 +320,7 @@ function drawWorld() {
     drawAsset('plant_small', x, y, .5);
   }
 
-  // 2. Chão das Salas
+  // Chão das Salas
   drawRoom(150, 90, 1480, 900, 'floor_beige');
   drawRoom(175, 115, 335, 360, 'floor_purple');
   drawRoom(175, 505, 335, 460, 'floor_gray');
@@ -317,7 +338,7 @@ function drawWorld() {
   label('DEV / OPS', 822, 530);
   label('CX TEAM', 1360, 530);
 
-  // 3. Y-Sorting
+  // Y-Sorting (Profundidade Dinâmica)
   const drawables = [
     ...sceneObjects.map(o => ({
       y: o.y,
@@ -353,7 +374,7 @@ function drawWorld() {
   drawables.forEach(d => d.fn());
   doors.forEach(drawDoor);
 
-  // 4. Overlay de Iluminação Ambient Quente
+  // Overlay de Iluminação Quente
   ctx.save();
   ctx.globalCompositeOperation = 'multiply';
   ctx.fillStyle = 'rgba(240, 230, 210, 0.15)';
