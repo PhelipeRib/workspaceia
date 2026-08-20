@@ -1,302 +1,105 @@
 {
-  "version": "3.0",
-  "renderer": "canvas-pixel-art",
-  "pixelPerfect": true,
-  "assetBase": "./",
-  "assets": {
-    "desk_single": {
-      "file": "desk_single.png",
-      "w": 111,
-      "h": 80,
-      "category": "furniture",
-      "collision": {
-        "x": 8,
-        "y": 47,
-        "w": 95,
-        "h": 30
-      }
-    },
-    "sofa_blue": {
-      "file": "sofa_blue.png",
-      "w": 70,
-      "h": 65,
-      "category": "furniture",
-      "collision": {
-        "x": 6,
-        "y": 33,
-        "w": 58,
-        "h": 28
-      }
-    },
-    "sofa_orange": {
-      "file": "sofa_orange.png",
-      "w": 143,
-      "h": 53,
-      "category": "furniture",
-      "collision": {
-        "x": 7,
-        "y": 27,
-        "w": 129,
-        "h": 22
-      }
-    },
-    "sofa_orange_2": {
-      "file": "sofa_orange_2.png",
-      "w": 145,
-      "h": 61,
-      "category": "furniture",
-      "collision": {
-        "x": 7,
-        "y": 31,
-        "w": 131,
-        "h": 26
-      }
-    },
-    "coffee_table_round": {
-      "file": "coffee_table_round.png",
-      "w": 74,
-      "h": 60,
-      "category": "furniture",
-      "collision": {
-        "x": 9,
-        "y": 28,
-        "w": 56,
-        "h": 27
-      }
-    },
-    "round_meeting_table": {
-      "file": "round_meeting_table.png",
-      "w": 155,
-      "h": 123,
-      "category": "furniture",
-      "collision": {
-        "x": 14,
-        "y": 52,
-        "w": 127,
-        "h": 58
-      }
-    },
-    "plant_large": {
-      "file": "plant_large.png",
-      "w": 30,
-      "h": 49,
-      "category": "nature",
-      "collision": {
-        "x": 8,
-        "y": 34,
-        "w": 14,
-        "h": 13
-      }
-    },
-    "plant_small": {
-      "file": "plant_small.png",
-      "w": 60,
-      "h": 75,
-      "category": "nature",
-      "collision": {
-        "x": 18,
-        "y": 56,
-        "w": 24,
-        "h": 16
-      }
-    },
-    "pool_table": {
-      "file": "pool_table.png",
-      "w": 121,
-      "h": 92,
-      "category": "furniture",
-      "collision": {
-        "x": 4,
-        "y": 38,
-        "w": 113,
-        "h": 48
-      }
-    },
-    "foosball": {
-      "file": "foosball.png",
-      "w": 73,
-      "h": 66,
-      "category": "furniture",
-      "collision": {
-        "x": 5,
-        "y": 34,
-        "w": 63,
-        "h": 27
-      }
-    },
-    "whiteboard": {
-      "file": "whiteboard.png",
-      "w": 91,
-      "h": 48,
-      "category": "office"
-    },
-    "wall_tv": {
-      "file": "wall_tv.png",
-      "w": 87,
-      "h": 63,
-      "category": "office"
-    },
-    "bookshelf": {
-      "file": "bookshelf.png",
-      "w": 67,
-      "h": 70,
-      "category": "office",
-      "collision": {
-        "x": 6,
-        "y": 47,
-        "w": 55,
-        "h": 19
-      }
-    },
-    "water_cooler": {
-      "file": "water_cooler.png",
-      "w": 23,
-      "h": 16,
-      "category": "office",
-      "collision": {
-        "x": 3,
-        "y": 8,
-        "w": 17,
-        "h": 7
-      }
-    },
-    "floor_beige": {
-      "file": "floor_beige.png",
-      "w": 65,
-      "h": 65,
-      "category": "tiles"
-    },
-    "floor_gray": {
-      "file": "floor_gray.png",
-      "w": 65,
-      "h": 65,
-      "category": "tiles"
-    },
-    "floor_purple": {
-      "file": "floor_purple.png",
-      "w": 65,
-      "h": 65,
-      "category": "tiles"
-    },
-    "grass": {
-      "file": "grass.png",
-      "w": 65,
-      "h": 65,
-      "category": "tiles"
-    }
-  },
   "characters": {
     "char_01": {
       "down": [
         "char_01_down_0.png",
-        "char_01_down_1.png",
-        "char_01_down_2.png",
-        "char_01_down_3.png"
+        "char_01_down_1.png"
       ],
       "up": [
-        "char_01_up_0.png",
-        "char_01_up_1.png",
-        "char_01_up_2.png",
-        "char_01_up_3.png"
+        "char_01_up_0.png"
       ]
     },
     "char_02": {
       "down": [
         "char_02_down_0.png",
-        "char_02_down_1.png",
-        "char_02_down_2.png",
-        "char_02_down_3.png"
+        "char_02_down_1.png"
       ],
       "up": [
-        "char_02_up_0.png",
-        "char_02_up_1.png",
-        "char_02_up_2.png",
-        "char_02_up_3.png"
-      ]
-    },
-    "char_03": {
-      "down": [
-        "char_03_down_0.png",
-        "char_03_down_1.png",
-        "char_03_down_2.png",
-        "char_03_down_3.png"
-      ],
-      "up": [
-        "char_03_up_0.png",
-        "char_03_up_1.png",
-        "char_03_up_2.png",
-        "char_03_up_3.png"
+        "char_02_up_0.png"
       ]
     },
     "char_04": {
       "down": [
         "char_04_down_0.png",
-        "char_04_down_1.png",
-        "char_04_down_2.png",
-        "char_04_down_3.png"
+        "char_04_down_1.png"
       ],
       "up": [
-        "char_04_up_0.png",
-        "char_04_up_1.png",
-        "char_04_up_2.png",
-        "char_04_up_3.png"
+        "char_04_up_0.png"
       ]
+    }
+  },
+  "assets": {
+    "char_01_down_0": {
+      "file": "sprites/characters.png",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 64,
+      "collision": { "x": 12, "y": 40, "w": 24, "h": 16 }
     },
-    "char_05": {
-      "down": [
-        "char_05_down_0.png",
-        "char_05_down_1.png",
-        "char_05_down_2.png",
-        "char_05_down_3.png"
-      ],
-      "up": [
-        "char_05_up_0.png",
-        "char_05_up_1.png",
-        "char_05_up_2.png",
-        "char_05_up_3.png"
-      ]
+    "char_01_down_1": {
+      "file": "sprites/characters.png",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 64,
+      "collision": { "x": 12, "y": 40, "w": 24, "h": 16 }
     },
-    "char_06": {
-      "down": [
-        "char_06_down_0.png",
-        "char_06_down_1.png",
-        "char_06_down_2.png",
-        "char_06_down_3.png"
-      ],
-      "up": [
-        "char_06_up_0.png",
-        "char_06_up_1.png",
-        "char_06_up_2.png",
-        "char_06_up_3.png"
-      ]
+    "char_01_up_0": {
+      "file": "sprites/characters.png",
+      "x": 96,
+      "y": 0,
+      "w": 48,
+      "h": 64,
+      "collision": { "x": 12, "y": 40, "w": 24, "h": 16 }
     },
-    "char_07": {
-      "down": [
-        "char_07_down_0.png",
-        "char_07_down_1.png",
-        "char_07_down_2.png",
-        "char_07_down_3.png"
-      ],
-      "up": [
-        "char_07_up_0.png",
-        "char_07_up_1.png",
-        "char_07_up_2.png",
-        "char_07_up_3.png"
-      ]
+    "char_02_down_0": {
+      "file": "sprites/characters.png",
+      "x": 0,
+      "y": 64,
+      "w": 48,
+      "h": 64,
+      "collision": { "x": 12, "y": 40, "w": 24, "h": 16 }
     },
-    "char_08": {
-      "down": [
-        "char_08_down_0.png",
-        "char_08_down_1.png",
-        "char_08_down_2.png",
-        "char_08_down_3.png"
-      ],
-      "up": [
-        "char_08_up_0.png",
-        "char_08_up_1.png",
-        "char_08_up_2.png",
-        "char_08_up_3.png"
-      ]
+    "char_02_down_1": {
+      "file": "sprites/characters.png",
+      "x": 48,
+      "y": 64,
+      "w": 48,
+      "h": 64,
+      "collision": { "x": 12, "y": 40, "w": 24, "h": 16 }
+    },
+    "char_02_up_0": {
+      "file": "sprites/characters.png",
+      "x": 96,
+      "y": 64,
+      "w": 48,
+      "h": 64,
+      "collision": { "x": 12, "y": 40, "w": 24, "h": 16 }
+    },
+    "char_04_down_0": {
+      "file": "sprites/characters.png",
+      "x": 0,
+      "y": 128,
+      "w": 48,
+      "h": 64,
+      "collision": { "x": 12, "y": 40, "w": 24, "h": 16 }
+    },
+    "char_04_down_1": {
+      "file": "sprites/characters.png",
+      "x": 48,
+      "y": 128,
+      "w": 48,
+      "h": 64,
+      "collision": { "x": 12, "y": 40, "w": 24, "h": 16 }
+    },
+    "char_04_up_0": {
+      "file": "sprites/characters.png",
+      "x": 96,
+      "y": 128,
+      "w": 48,
+      "h": 64,
+      "collision": { "x": 12, "y": 40, "w": 24, "h": 16 }
     }
   }
 }
