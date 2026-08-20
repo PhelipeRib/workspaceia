@@ -37,7 +37,7 @@ const doors = [
 
 async function loadJSON() {
   try {
-    const r = await fetch('sprite_manifest.json?v=4');
+    const r = await fetch('sprite_manifest.json?v=5');
     const m = await r.json();
     atlasAssets = m.assets || {};
     characterAssets = m.characters || {};
@@ -49,12 +49,13 @@ async function loadJSON() {
 
 const imageCache = new Map();
 function img(path) {
+  if (!path) return null;
   if (!imageCache.has(path)) { const im = new Image(); im.decoding = 'async'; im.src = path; imageCache.set(path, im); }
   return imageCache.get(path);
 }
 
 function preload() {
-  Object.values(atlasAssets).forEach(a => img(a.file));
+  Object.values(atlasAssets).forEach(a => { if (a.file) img(a.file); });
   Object.values(characterAssets).forEach(c => ['down', 'up'].forEach(d => (c[d] || []).forEach(f => img(f))));
 }
 
@@ -73,14 +74,24 @@ addEventListener('resize', resize);
 
 function drawAsset(id, x, y, scale = 1, anchor = .5) {
   const a = atlasAssets[id]; if (!a) return;
-  const im = img(a.file); if (!im.complete || !im.naturalWidth) return;
-  const w = a.w * scale, h = a.h * scale;
-  ctx.drawImage(im, Math.round(x - w * anchor), Math.round(y - h), Math.round(w), Math.round(h));
+  const im = img(a.file); if (!im || !im.complete || !im.naturalWidth) return;
+  
+  if (a.w && a.h && a.x !== undefined && a.y !== undefined) {
+    const w = a.w * scale, h = a.h * scale;
+    ctx.drawImage(im, a.x, a.y, a.w, a.h, Math.round(x - w * anchor), Math.round(y - h), Math.round(w), Math.round(h));
+  } else {
+    const w = im.naturalWidth * scale, h = im.naturalHeight * scale;
+    ctx.drawImage(im, Math.round(x - w * anchor), Math.round(y - h), Math.round(w), Math.round(h));
+  }
 }
 
 function addObject(id, x, y, scale = 1, anchor = .5, interactive = null) {
   const a = atlasAssets[id]; if (!a) return;
-  const w = a.w * scale, h = a.h * scale, left = x - w * anchor, top = y - h;
+  const im = img(a.file);
+  const realW = (a.w || im?.naturalWidth || 32) * scale;
+  const realH = (a.h || im?.naturalHeight || 32) * scale;
+  const left = x - realW * anchor, top = y - realH;
+  
   sceneObjects.push({ id, x, y, scale, anchor, interactive });
   if (a.collision) {
     const c = a.collision;
@@ -109,13 +120,13 @@ function characterFrame(a, moving) {
   return img(frames[idx]);
 }
 
-// RENDERIZAÇÃO CORRIGIDA DOS PERSONAGENS (SEM CORTE DE SPRITE)
+// RENDERIZAÇÃO COMPLETA DA SPRITE (SEM RECORTE DE MAPA)
 function drawCharacter(a, x, y, moving) {
   const im = characterFrame(a, moving); 
   if (!im || !im.complete || !im.naturalWidth) return;
   
   const dir = a.direction || 'down';
-  const s = 1.08;
+  const s = 1.1;
   
   const idleBob = moving ? 0 : Math.sin(idleClock / 650 * Math.PI * 2) * .8;
   const walkBob = moving ? Math.abs(Math.sin(walkClock / 125 * Math.PI)) * .8 : 0;
@@ -124,25 +135,28 @@ function drawCharacter(a, x, y, moving) {
   shadow(x, y + 3, 16);
   
   ctx.save();
+  const nw = im.naturalWidth;
+  const nh = im.naturalHeight;
+
   if (dir === 'left' || dir === 'right') {
     ctx.translate(Math.round(x), Math.round(y + bob));
     if (dir === 'left') ctx.scale(-1, 1);
     ctx.drawImage(
       im, 
-      0, 0, im.naturalWidth, im.naturalHeight,
-      Math.round(-im.naturalWidth * s / 2), 
-      Math.round(-im.naturalHeight * s), 
-      Math.round(im.naturalWidth * s), 
-      Math.round(im.naturalHeight * s)
+      0, 0, nw, nh,
+      Math.round(-nw * s / 2), 
+      Math.round(-nh * s), 
+      Math.round(nw * s), 
+      Math.round(nh * s)
     );
   } else {
     ctx.drawImage(
       im, 
-      0, 0, im.naturalWidth, im.naturalHeight,
-      Math.round(x - im.naturalWidth * s / 2), 
-      Math.round(y - im.naturalHeight * s + bob), 
-      Math.round(im.naturalWidth * s), 
-      Math.round(im.naturalHeight * s)
+      0, 0, nw, nh,
+      Math.round(x - nw * s / 2), 
+      Math.round(y - nh * s + bob), 
+      Math.round(nw * s), 
+      Math.round(nh * s)
     );
   }
   ctx.restore();
@@ -188,10 +202,18 @@ function nameBadge(a, x, y) {
 
 function tileFloor(x, y, w, h, tile = 'floor_beige') {
   const a = atlasAssets[tile]; if (!a) return;
-  const im = img(a.file), tw = a.w, th = a.h; if (!im.complete || !im.naturalWidth) return;
+  const im = img(a.file); if (!im || !im.complete || !im.naturalWidth) return;
+  const tw = a.w || im.naturalWidth || 32, th = a.h || im.naturalHeight || 32;
+  
   for (let yy = y; yy < y + h; yy += th) {
     for (let xx = x; xx < x + w; xx += tw) {
-      ctx.drawImage(im, xx, yy, Math.min(tw, x + w - xx), Math.min(th, y + h - yy));
+      const drawW = Math.min(tw, x + w - xx);
+      const drawH = Math.min(th, y + h - yy);
+      if (a.x !== undefined && a.y !== undefined) {
+        ctx.drawImage(im, a.x, a.y, drawW, drawH, xx, yy, drawW, drawH);
+      } else {
+        ctx.drawImage(im, 0, 0, drawW, drawH, xx, yy, drawW, drawH);
+      }
     }
   }
 }
@@ -311,7 +333,7 @@ function drawWorld() {
   ctx.save();
   ctx.translate(-camera.x, -camera.y);
 
-  // Fundo Terroso / Grama Estilo RPG
+  // Fundo Terroso / Grama
   ctx.fillStyle = '#5c8b43';
   ctx.fillRect(0, 0, WORLD.w, WORLD.h);
 
@@ -338,7 +360,7 @@ function drawWorld() {
   label('DEV / OPS', 822, 530);
   label('CX TEAM', 1360, 530);
 
-  // Y-Sorting (Profundidade Dinâmica)
+  // Y-Sorting (Profundidade)
   const drawables = [
     ...sceneObjects.map(o => ({
       y: o.y,
@@ -374,7 +396,7 @@ function drawWorld() {
   drawables.forEach(d => d.fn());
   doors.forEach(drawDoor);
 
-  // Overlay de Iluminação Quente
+  // Iluminação
   ctx.save();
   ctx.globalCompositeOperation = 'multiply';
   ctx.fillStyle = 'rgba(240, 230, 210, 0.15)';
@@ -533,100 +555,4 @@ function renderChat() {
     let formattedText = m.text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/### (.*?)\n/g, '<h4 style="font-weight:bold; color:#8b5a2b; margin-top:8px;">$1</h4>')
-      .replace(/```([\s\S]*?)```/g, '<pre style="background:#3a1e05; padding:10px; border-radius:4px; overflow-x:auto; font-family:monospace; color:#fff1d6; margin:8px 0;"><code>$1</code></pre>');
-
-    bubble.innerHTML = formattedText;
-    msgDiv.appendChild(bubble);
-
-    if (m.sender === 'agent' && idx > 0) {
-      const pdfBtn = document.createElement('button');
-      pdfBtn.className = 'pixel-button';
-      pdfBtn.style.marginTop = '6px';
-      pdfBtn.style.fontSize = '8px';
-      pdfBtn.innerHTML = '📄 Baixar PDF';
-      pdfBtn.onclick = () => downloadPDF(idx);
-      msgDiv.appendChild(pdfBtn);
-    }
-
-    el.appendChild(msgDiv);
-  });
-
-  el.scrollTop = el.scrollHeight;
-}
-
-function sendMessage() {
-  const input = $('chatInput');
-  if (!input || !input.value.trim() || !activeAgent) return;
-
-  const text = input.value.trim();
-  input.value = '';
-
-  activeAgent.history.push({ sender: 'user', text });
-  renderChat();
-
-  activeAgent.status = 'Executando...';
-
-  setTimeout(() => {
-    activeAgent.history.push({
-      sender: 'agent',
-      text: `[AGENTE ${activeAgent.name.toUpperCase()}]\n\nRecebi o comando: "${text}".\n\nModo demonstração ativo. Configure o webhook para integrar ao backend.`
-    });
-    activeAgent.status = 'Ocioso';
-    renderChat();
-    localStorage.setItem('startup_hq_agents', JSON.stringify(agents));
-  }, 1000);
-}
-
-window.downloadPDF = function (index) {
-  if (!activeAgent || !activeAgent.history[index]) return;
-  const msgText = activeAgent.history[index].text;
-
-  const element = document.createElement('div');
-  element.style.padding = '30px';
-  element.style.fontFamily = 'Arial, sans-serif';
-  element.style.color = '#1e293b';
-  element.innerHTML = `
-    <h1 style="color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">${activeAgent.name} - Documento Oficial WeON</h1>
-    <p style="font-size: 12px; color: #64748b;">Função: ${activeAgent.role} | Gerado via AI Virtual Office 2D</p>
-    <hr style="margin-bottom: 20px; border: 0; border-top: 1px solid #cbd5e1;">
-    <div style="font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${msgText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</div>
-  `;
-
-  const opt = {
-    margin: 10,
-    filename: `Documento_WeON_${activeAgent.name.replace(/\s+/g, '_')}.pdf`,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  if (window.html2pdf) {
-    html2pdf().set(opt).from(element).save();
-  } else {
-    alert('Biblioteca de PDF carregando... Tente em 2 segundos.');
-  }
-};
-
-// Configurações
-$('settingsBtn')?.addEventListener('click', () => {
-  $('settingsModal')?.classList.remove('hidden');
-});
-
-$('saveSettings')?.addEventListener('click', () => {
-  settings.aiMode = $('aiMode').value;
-  settings.webhookUrl = $('webhook').value;
-  settings.apiKey = $('apiKey').value;
-  localStorage.setItem('startup_hq_settings', JSON.stringify(settings));
-  $('settingsModal')?.classList.add('hidden');
-});
-
-// Inicialização
-async function init() {
-  await loadJSON();
-  preload();
-  resize();
-  renderAgents();
-  requestAnimationFrame(animate);
-}
-
-init();
+      .replace(/```([\s\S]*?)
