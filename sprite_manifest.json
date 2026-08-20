@@ -1,16 +1,20 @@
 {
   "characters": {
     "char_01": {
-      "down": ["char_01_down_0.png", "char_01_down_1.png"],
-      "up": ["char_01_up_0.png"]
+      "down": ["char_01_down_1.png", "char_01_down_2.png", "char_01_down_3.png"],
+      "up": ["char_01_up_1.png", "char_01_up_2.png", "char_01_up_3.png"]
     },
     "char_02": {
-      "down": ["char_02_down_0.png", "char_02_down_1.png"],
-      "up": ["char_02_up_0.png"]
+      "down": ["char_02_down_1.png", "char_02_down_2.png", "char_02_down_3.png"],
+      "up": ["char_02_up_1.png", "char_02_up_2.png", "char_02_up_3.png"]
+    },
+    "char_03": {
+      "down": ["char_03_down_1.png", "char_03_down_2.png", "char_03_down_3.png"],
+      "up": ["char_03_up_1.png", "char_03_up_2.png", "char_03_up_3.png"]
     },
     "char_04": {
-      "down": ["char_04_down_0.png", "char_04_down_1.png"],
-      "up": ["char_04_up_0.png"]
+      "down": ["char_04_down_1.png", "char_04_down_2.png", "char_04_down_3.png"],
+      "up": ["char_04_up_1.png", "char_04_up_2.png", "char_04_up_3.png"]
     }
   },
   "assets": {
@@ -20,16 +24,7 @@
     "desk_single": { "file": "desk_single.png" },
     "sofa_blue": { "file": "sofa_blue.png" },
     "sofa_orange": { "file": "sofa_orange.png" },
-    "sofa_orange_2": { "file": "sofa_orange_2.png" },
     "coffee_table_round": { "file": "coffee_table_round.png" },
-    "round_meeting_table": { "file": "round_meeting_table.png" },
-    "pool_table": { "file": "pool_table.png" },
-    "foosball": { "file": "foosball.png" },
-    "plant_large": { "file": "plant_large.png" },
-    "plant_small": { "file": "plant_small.png" },
-    "whiteboard": { "file": "whiteboard.png" },
-    "wall_tv": { "file": "wall_tv.png" },
-    "bookshelf": { "file": "bookshelf.png" },
-    "water_cooler": { "file": "water_cooler.png" }
+    "plant_large": { "file": "plant_large.png" }
   }
 }
