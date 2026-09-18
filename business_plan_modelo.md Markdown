@@ -1,0 +1,15 @@
+# WEON OMNICHANNEL - MODELO DE BUSINESS PLAN & PILARES UAW!
+
+## Metodologia de Maturidade - 4 Pilares WeON (UAW!)
+A evolução de qualquer cliente operando na plataforma WeON segue 4 pilares:
+1. **Omnichannel:** Implantação de WhatsApp Business API Oficial, Voz, Instagram, E-mail com estabilidade e rastreabilidade.
+2. **Dados:** Estruturação de relatórios operacionais (Relatório de Atendimentos, Relatório de Bot, TMA, TME, Transbordo).
+3. **Automação:** Fluxos de Bot em Node-RED, bloqueio de conversas e triagens automatizadas (Zero Toque Humano).
+4. **Inteligência Artificial (IA):** Integração com ERPs, leitura de guias/documentos e automação de notificações ativas.
+
+## Estudo de Caso: Somos Mais Você Saúde
+- **Objetivo Estratégico:** Atendimento receptivo de solicitações de guias médicas via WhatsApp Oficial com envio automático para auditoria sem intervenção humana, reduzindo riscos de multas da ANS (prazo de 2 dias úteis).
+- **Regras de Trava de Segurança no Bot:**
+  - Se o usuário digitar texto em vez de enviar foto/PDF da requisição médica, o Bot bloqueia e repete a instrução por até 3 vezes.
+  - Ao receber a imagem/PDF, o gatilho captura o arquivo, dispara um e-mail com anexo para a equipe de Auditoria e altera o protocolo para "Fechado" imediatamente.
+  - Indicador alcançado: **Zero Toque Humano** no recebimento de guias.
